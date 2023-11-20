@@ -118,7 +118,7 @@ public class Main {
                         System.out.println("Enter new password:");
                         String newPassword = scanner.nextLine();
                         buyer = new Buyer(newUsername, newPassword);
-                        buyer.writeToFile("Users.txt", buyer.getShoppingCart().toString());
+                        buyer.writeToFile("Users.txt");
                         created = true;
                     } else if (buyerOrSeller.equalsIgnoreCase("seller")) {
                         System.out.println("Enter new username:");
@@ -127,7 +127,7 @@ public class Main {
                         String newPassword = scanner.nextLine();
                         seller = new Seller(newUsername, newPassword);
                         System.out.println(seller.getStoreManager().toString());
-                        seller.writeToFile("Users.txt", seller.getStoreManager().toString());
+                        seller.writeToFile("Users.txt");
                         System.out.println("Seller object written");
                         created = true;
                     } else {
@@ -190,7 +190,6 @@ public class Main {
         } while (!setUp);
 
         boolean cont = true;
-        CandyManager.readCandy();
         do {
             if (buyerOrSeller.equalsIgnoreCase("buyer")) {
                 boolean redoBuyer;
@@ -436,8 +435,7 @@ public class Main {
                         case 9:
                             System.out.println("Thank you for using our Candy Marketplace!");
                             buyer.exportHistoryToFile();
-                            buyer.writeToFile("Users.txt", buyer.getShoppingCart().toString());
-                            CandyManager.writeCandy();
+                            buyer.writeToFile("Users.txt");
                             cont = false;
                             break;
                         default:
@@ -462,7 +460,7 @@ public class Main {
                             System.out.println("What is your name of your new store?");
                             String newStoreName = scanner.nextLine();
                             seller.getStoreManager().getStores().add(new Store(newStoreName));
-                            seller.writeToFile("Users.txt", seller.getStoreManager().toString());
+                            seller.writeToFile("Users.txt");
                             System.out.println(newStoreName + " store created!");
                             break;
                         case 2:
@@ -493,7 +491,7 @@ public class Main {
                                         CandyManager.prodCounter, newQuantity, price);
                                 selectedStore.addCandy(newCandy, newQuantity, CandyManager.prodCounter);
                                 System.out.println(newCandy.toString() + " created!");
-                                seller.writeToFile("Users.txt", seller.getStoreManager().toString());
+                                seller.writeToFile("Users.txt");
                                 break;
                             }
 
@@ -527,7 +525,7 @@ public class Main {
                                 Candy newCandy = new Candy(newCandyName, selectedStore, description,
                                         CandyManager.prodCounter, newQuantity, price);
                                 selectedStore.editCandy(CandyManager.prodCounter, newCandy, newQuantity);
-                                seller.writeToFile("Users.txt", seller.getStoreManager().toString());
+                                seller.writeToFile("Users.txt");
                                 System.out.println(newCandy.toString() + " modified!");
                             }
 
@@ -552,7 +550,7 @@ public class Main {
                                 int deleteCandyID = scanner.nextInt();
                                 scanner.nextLine();
                                 selectedStore.deleteCandy(deleteCandyID);
-                                seller.writeToFile("Users.txt", seller.getStoreManager().toString());
+                                seller.writeToFile("Users.txt");
                                 break;
                             }
                         case 5:
@@ -614,8 +612,7 @@ public class Main {
                             } while (sortContinue);
                         case 10:
                             System.out.println("Thank you for using our Candy Marketplace!");
-                            seller.writeToFile("Users.txt", seller.getStoreManager().toString());
-                            CandyManager.writeCandy();
+                            seller.writeToFile("Users.txt");
                             cont = false;
                             break;
                         default:
