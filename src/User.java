@@ -36,74 +36,49 @@ public class User {
         this.password = password;
     }
 
-    /* Change all of this
     public void writeToFile(String filename) {
-        // credentials format: username,password&any relevant info like ShoppingCart for buyers or stores for sellers
-        // I think there should only be one file writing operation happening at the end of a User session.
         try {
-            File f = new File(filename);
-            PrintWriter pw = new PrintWriter(new FileOutputStream(f, true));
-            pw.println(this.username + "," + this.password);
-            pw.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void writeToFile(String fileName, String additional) {
-        try {
-            File f = new File(fileName);
-            ArrayList<String> lines = new ArrayList<>();
-            BufferedReader br = new BufferedReader(new FileReader(f));
-            String toWrite = this.username + "," + this.password;
-            String line = br.readLine();
-            boolean added = false;
-            while (line != null) {
-                if (line.split("&", 2)[0].equals(toWrite)) {
-                    lines.add(toWrite + "&" + additional);
-                    added = true;
-                } else {
-                    lines.add(line);
+            File f = new File("Users.txt");
+            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(f));
+            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(f));
+            ArrayList<User> users = (ArrayList<User>) ois.readObject();
+            ois.close();
+            boolean present = false;
+            for (int i = 0; i < users.size(); i++) {
+                User currUser = users.get(i);
+                if (currUser.getUsername().equals(this.getUsername()) && currUser.getPassword().equals(this.getPassword())) {
+                    currUser = this;
+                    present = true;
                 }
-                line = br.readLine();
             }
-            br.close();
-            if (!added) {
-                lines.add(toWrite);
+            if (!present) {
+                users.add(this);
             }
-            PrintWriter pw = new PrintWriter(new FileOutputStream(f));
-            for (int i = 0; i < lines.size(); i++) {
-                pw.println(lines.get(i));
-            }
-            pw.close();
-        }catch(IOException e){
+            oos.writeObject(users);
+            oos.close();
+        }catch(Exception e){
             e.printStackTrace();
         }
     }
 
     public boolean checkAccount(String filename) {
         try {
-            BufferedReader br = new BufferedReader(new FileReader(filename));
-            String line = br.readLine();
+            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filename));
             boolean found = false;
-            while (line != null) {
-                String[] roughInfo = line.split("&", 2);
-                String[] userInfo = roughInfo[0].split(",", 2);
-                String accountUser = userInfo[0];
-                String accountPass = userInfo[1];
-                line = br.readLine();
-                if (accountUser.equals(username) && accountPass.equals(password)) {
-                    found =true;
+            ArrayList<User> users = (ArrayList<User>) ois.readObject();
+            ois.close();
+            for (int i = 0; i < users.size(); i++) {
+                User currUser = users.get(i);
+                if (currUser.getUsername().equals(this.getUsername()) && currUser.getPassword().equals(this.getPassword())) {
+                    found = true;
                 }
             }
-            br.close();
             return found;
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
     }
-    */
     // Maybe not necessary in Project 5
     public String toString() {
         return username + ", " + password;

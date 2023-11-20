@@ -154,9 +154,9 @@ public class Seller extends User {
         PrintWriter pw = new PrintWriter(new FileOutputStream(f));
         for (int i = 0; i < storeManager.getStores().size(); i++) {
             Store currStore = storeManager.getStores().get(i);
-            for (int j = 0; j < currStore.getIndexes().size(); j++) {
-                int index = currStore.getIndexes().get(j);
-                pw.println(CandyManager.candies.get(index).toCSV());
+            for (int j = 0; j < currStore.getCandies().size(); j++) {
+                Candy currCandy = currStore.getCandies().get(j);
+                pw.println(currCandy.toCSV());
             }
         }
         pw.close();

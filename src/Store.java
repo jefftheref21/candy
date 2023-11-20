@@ -1,4 +1,4 @@
-import java.util.ArrayList;
+import java.util.*;
 
 /**
  * Store method to handle candy
@@ -8,21 +8,21 @@ import java.util.ArrayList;
  */
 public class Store {
     private String name;
-    private ArrayList<Integer> indexes;
+    private ArrayList<Candy> candies;
     private ArrayList<Sale> sales;
     public Store() {
         name = "";
-        indexes = new ArrayList<>();
+        candies = new ArrayList<>();
         sales = new ArrayList<>();
     }
     public Store(String name) {
         this.name = name;
-        indexes = new ArrayList<>();
+        candies = new ArrayList<>();
         sales = new ArrayList<>();
     }
-    public Store(String name, ArrayList<Integer> indexes, ArrayList<Sale> sales) {
+    public Store(String name, ArrayList<Candy> candies, ArrayList<Sale> sales) {
         this.name = name;
-        this.indexes = indexes;
+        this.candies = candies;
         this.sales = sales;
     }
 
@@ -30,20 +30,19 @@ public class Store {
         return name;
     }
 
-
     public ArrayList<Sale> getSales() {
         return sales;
     }
-    public ArrayList<Integer> getIndexes() {
-        return indexes;
+    public ArrayList<Candy> getCandies() {
+        return candies;
     }
 
     public void setName(String name) {
         this.name = name;
     }
 
-    public void setIndexes(ArrayList<Integer> indexes) {
-        this.indexes = indexes;
+    public void setIndexes(ArrayList<Candy> candies) {
+        this.candies = candies;
     }
 
     public void setSales(ArrayList<Sale> sales) {
@@ -57,8 +56,8 @@ public class Store {
         int length = sales.size();
         double total = 0;
 
-        for (int i = 0; i < indexes.size(); i++) {
-            total = sales.get(i).getQuantityBought() * CandyManager.candies.get(indexes.get(i)).getPrice();
+        for (int i = 0; i < candies.size(); i++) {
+            total = sales.get(i).getQuantityBought() * candies.get(i).getPrice();
         }
 
         return total;
@@ -69,6 +68,7 @@ public class Store {
             CandyManager.candies.remove(index);
             CandyManager.candyIDs.remove(index);
             CandyManager.quantities.remove(index);
+            candies.remove(candies.indexOf(CandyManager.candies.get(index)));
         } else {
             System.out.println("Candy not found in the candies array.");
         }
@@ -78,13 +78,14 @@ public class Store {
         CandyManager.quantities.add(newQuantity);
         CandyManager.candyIDs.add(newID);
         CandyManager.prodCounter++;
-        indexes.add(CandyManager.getIndex(newID));
+        candies.add(newCandy);
     }
     public void editCandy(int candyID, Candy updatedCandy, int newQuantity) {
         int index = CandyManager.candyIDs.indexOf(candyID);
         if (index != -1) {
             CandyManager.candies.set(index, updatedCandy);
             CandyManager.quantities.set(index, newQuantity);
+            candies.set(candies.indexOf(CandyManager.candies.get(index)), updatedCandy);
         } else {
             System.out.println("Old candy not found in the candies array.");
         }

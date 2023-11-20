@@ -631,81 +631,35 @@ public class Main {
     }
     
 
-    public static ArrayList<User> readFile(String fileName) throws IOException {
-        // ShoppingCart<Purchase<popsicle$1243$3>;Purchase<ice cream$3241$2>>
-        ArrayList<User> users = new ArrayList<>();
-        File f = new File(fileName);
-        BufferedReader br = new BufferedReader(new FileReader(f));
-        String line = br.readLine();
-        while (line != null) {
-            line = line.replace('&', ',');
-            String[] data = line.split(",", 3);
-            User user = new User(data[0], data[1]);
-            if (data[2].contains("ShoppingCart<")) {
-                int index = data[2].indexOf("ShoppingCart<");
-                String curr = data[2].substring(index, data[2].length() - 1);
-                curr = curr.replace("Purchase", "");
-                curr = curr.replace("<", "");
-                curr = curr.replace(">", "");
-                String[] curData = curr.split(";", -5);
-                ShoppingCart shoppingCart = new ShoppingCart();
-                for (int i = 0; i < curData.length; i++) {
-                    curData[i] = curData[i].replace('$', ',');
-                    String[] currentData = curData[i].split(",", 3);
-                    int candyIndex = CandyManager.getIndex(Integer.parseInt(currentData[1]));
-                    if (candyIndex != -1) {
-                        Candy currCandy = CandyManager.candies.get(candyIndex);
-                        Purchase currPurchase = new Purchase(currCandy, Integer.parseInt(currentData[1]));
-                        shoppingCart.addItem(currPurchase);
-                    }
-                }
-                user = new Buyer(data[0], data[1], shoppingCart);
-            } else if (data[2].contains("Stores<")) {
-                int index = data[2].indexOf("Stores<");
-                String curr = data[2].substring(index, data[2].length() - 1);
-                curr = curr.replace("Stores", "");
-                curr = curr.replace("<", "");
-                curr = curr.replace(">", "");
-                String[] currStores = curr.split("#", -5);
-                ArrayList<Store> stores = new ArrayList<>();
-                // looping through all the stores
-                for (int i = 0; i < currStores.length; i++) {
-                    // splitting store name and index+sales info
-                    String[] nameCandyData = currStores[i].split(",", 2);
-                    String storeName = nameCandyData[0];
-                    // splitting index and sales info
-                    String[] indSales = nameCandyData[1].split("-", 2);
-                    String[] candyIDs = indSales[0].split("}", -5);
-                    String[] sales = indSales[1].split(";", -5);
-                    Store currStore = new Store(storeName);
-                    for (int j = 0; j < candyIDs.length; j++) {
-                        if (!candyIDs[j].equals("") && CandyManager.getIndex(Integer.parseInt(candyIDs[j])) != -1) {
-                            Candy currCandy = CandyManager.candies.get(CandyManager.getIndex(Integer.parseInt(candyIDs[j])));
-                            currStore.addCandy(currCandy, currCandy.getTotalQuantity(), currCandy.getCandyID());
+    public static ArrayList<User> readFile(String fileName) {
+        try {
+            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(fileName));
+            ArrayList<User> users = (ArrayList<User>) ois.readObject();
+            ois.close();
+            // populating CandyManager.candies and subsequent dependent fields
+            ArrayList<Candy> candies = new ArrayList<>();
+            ArrayList<Integer> quantities = new ArrayList<>();
+            for (User user : users) {
+                if (user instanceof Seller) {
+                    Seller seller = (Seller) user;
+                    for (int i = 0; i < seller.getStoreManager().getStores().size(); i++) {
+                        Store currStore = seller.getStoreManager().getStores().get(i);
+                        for (int j = 0; j < currStore.getCandies().size(); j++) {
+                            candies.add(currStore.getCandies().get(j));
+                            quantities.add(currStore.getCandies().get(j).getTotalQuantity());
                         }
                     }
-                    for (int j = 0; j < sales.length; j++) {
-                        if (!sales[0].equals("Sale$")) {
-                            sales[j].replace('$', '_');
-                            String currSale = sales[j].substring(sales[j].indexOf("Sale<"), sales[j].length());
-                            String[] saleData = currSale.split("_", 4);
-                            if (CandyManager.getIndex(Integer.parseInt(saleData[0])) != -1) {
-                                Candy currCandy = CandyManager.candies.get(CandyManager.getIndex(Integer.parseInt(saleData[0])));
-                                Sale sale = new Sale(currCandy, Integer.parseInt(saleData[1]), (Buyer) user);
-                                currStore.addSale(sale);
-                            }
-                        }
-                    }
-                    stores.add(currStore);
                 }
-                user = new Seller(data[0], data[1], new StoreManager(stores));
             }
-            users.add(user);
-            line = br.readLine();
-        }
-        return users;
+            // need to call constructor just to populate fields, but instance is useless
+            CandyManager cm = new CandyManager(candies, quantities);
+            return users;
+        } catch (Exception e) {
+            e.printStackTrace();
+            }
+        return new ArrayList<>();
     }
-    public static User getUser(String username, String password) throws IOException {
+    public static User getUser(String username, String password) {
         ArrayList<User> users = readFile("Users.txt");
         for (int i = 0; i < users.size(); i++) {
             if (username.equals(users.get(i).getUsername()) && password.equals(users.get(i).getPassword())) {

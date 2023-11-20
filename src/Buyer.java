@@ -208,7 +208,6 @@ public class Buyer extends User {
         for (int i = 1; i < stores.size(); i++) {
             int temp = i;
             int j = i - 1;
-
             switch (choice) {
                 case 1 -> { // Least to greatest by number of products sold
                     while (j >= 0 && stores.get(temp).getNumberOfProductsSold() <
@@ -258,34 +257,6 @@ public class Buyer extends User {
         }
     }
 
-
-    public ArrayList<Purchase> readHistory() {
-        // Purchase format: Purchase<candyName$quantity>
-        // File f = new File(getUsername().substring(0, 3) + getPassword().substring(0,3) + ".txt");
-
-        ArrayList<Purchase> purchases = new ArrayList<>();
-        try {
-            String filename = getUsername().substring(0, 3) + getPassword().substring(0,3) + ".txt";
-            BufferedReader br = new BufferedReader(new FileReader(filename));
-            String line = br.readLine();
-            while (line != null) {
-                line.replace('$', ',');
-                String[] data = line.substring(line.indexOf('<') + 1, line.indexOf('>')).split(",", 4);
-                for (int i = 0; i < CandyManager.candies.size(); i++) {
-                    if (CandyManager.candies.get(i).getName().equals(data[0])) {
-                        purchases.add(new Purchase(CandyManager.candies.get(i), Integer.parseInt(data[1])));
-                    }
-                }
-                line = br.readLine();
-            }
-
-            return purchases;
-        } catch (IOException e) {
-            System.out.println("User history not found");
-        }
-        return purchases;
-    }
-
     public String viewProductPage(int productID) {
         String productPage = "";
         String productName = "";
@@ -303,7 +274,7 @@ public class Buyer extends User {
         productPage += "Product Description: " + productDescription + "\n";
         return productPage;
     }
-    /* A lot of things to be changed around here
+
     public void buyInstantly(int id, int quantity, Buyer buyer) throws IOException {
         int index = CandyManager.candyIDs.indexOf(id);
         int totalQuantity = CandyManager.quantities.get(index);
@@ -314,18 +285,17 @@ public class Buyer extends User {
             System.out.println("Thank you for purchasing! Your total was $" + quantity *
                     CandyManager.candies.get(index).getPrice() );
             Sale sale = new Sale(CandyManager.candies.get(index), quantity, buyer);
-            history.add(sale);
+            purchaseHistory.addPurchase(sale);
         } else if (totalQuantity == quantity) {
             CandyManager.quantities.remove(index);
             CandyManager.quantities.add(index, 0);
             System.out.println("Thank you for purchasing! Your total was $" + quantity *
                     CandyManager.candies.get(index).getPrice() );
             Sale sale = new Sale(CandyManager.candies.get(index), quantity, buyer);
-            history.add(sale);
+            purchaseHistory.addPurchase(sale);
         } else {
             System.out.println("Error! Too much candy asked!");
         }
-        CandyManager.writeCandy();
     }
 
     public void buyShoppingCart(Buyer buyer) {
@@ -357,18 +327,17 @@ public class Buyer extends User {
         return Objects.equals(getUsername(), buyer.getUsername()) &&
                 Objects.equals(getPassword(), buyer.getPassword()) &&
                 Objects.equals(shoppingCart, buyer.shoppingCart) &&
-                Objects.equals(history, buyer.history);
+                Objects.equals(purchaseHistory, buyer.purchaseHistory);
     }
     public int getTotalPurchaseQuantity(Store store){
         int purchaseQuantity = 0;
-        for(int k = 0; k < getHistory().size(); k++) {
-            if (store.getSales().contains(getHistory().get(k))) {
-                purchaseQuantity +=  getHistory().get(k).getQuantityBought();
+        for(int k = 0; k < purchaseHistory.getPurchases().size(); k++) {
+            if (store.getSales().contains(purchaseHistory.getPurchases().get(k))) {
+                purchaseQuantity +=  purchaseHistory.getPurchases().get(k).getQuantityBought();
             }
         }
         return purchaseQuantity;
     }
-    */
     @Override
     public String toString() {
         return String.format("%s, %s", super.toString(),this.shoppingCart.toString());
