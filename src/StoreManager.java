@@ -1,3 +1,4 @@
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
@@ -6,7 +7,7 @@ import java.util.ArrayList;
  * @version Nov 13, 2023
  * @authors Pablo Garces, Nathan Park, Aadiv Reki, Jeffrey Wu, Jaden Ye
  */
-public class StoreManager {
+public class StoreManager implements Serializable {
     private ArrayList<Store> stores;
     public StoreManager() {
         this.stores = new ArrayList<>();

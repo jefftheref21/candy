@@ -8,7 +8,7 @@ import java.util.ArrayList;
  * @version Nov 13, 2023
  */
 
-public class User {
+public class User implements Serializable {
     private String username;
     private String password;
     public User() {
@@ -36,13 +36,15 @@ public class User {
         this.password = password;
     }
 
-    public void writeToFile(String filename) {
+    public void writeToFile() {
         try {
             File f = new File("Users.txt");
-            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(f));
-            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(f));
-            ArrayList<User> users = (ArrayList<User>) ois.readObject();
-            ois.close();
+            ArrayList<User> users = new ArrayList<>();
+            if (f.exists() && f.length() > 0) {
+                ObjectInputStream ois = new ObjectInputStream(new FileInputStream(f));
+                users = (ArrayList<User>) ois.readObject();
+                ois.close();
+            }
             boolean present = false;
             for (int i = 0; i < users.size(); i++) {
                 User currUser = users.get(i);
@@ -54,7 +56,9 @@ public class User {
             if (!present) {
                 users.add(this);
             }
+            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(f));
             oos.writeObject(users);
+            oos.flush();
             oos.close();
         }catch(Exception e){
             e.printStackTrace();

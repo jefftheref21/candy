@@ -1,10 +1,7 @@
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.ArrayList;
 
-public class PurchaseHistory {
+public class PurchaseHistory implements Serializable {
     private ArrayList<Purchase> purchases;
     public PurchaseHistory() {
         purchases = new ArrayList<>();
@@ -15,6 +12,10 @@ public class PurchaseHistory {
 
     public ArrayList<Purchase> getPurchases() {
         return purchases;
+    }
+
+    public void setPurchases(ArrayList<Purchase> purchases) {
+        this.purchases = purchases;
     }
 
     public int getNumOfProductsBoughtAt(Store store) {
@@ -54,8 +55,8 @@ public class PurchaseHistory {
      * Write to new file that shows their entire purchase history
      * Use the viewHistory function
      */
-    public void exportHistoryToFile() {
-        File f = new File("purchaseHistory.txt");
+    public void exportHistoryToFile(String username) {
+        File f = new File(username + "PurchaseHistory.txt");
         try {
             PrintWriter pw = new PrintWriter(new FileOutputStream(f));
             for (int i = 0; i < purchases.size(); i++) {
@@ -63,6 +64,17 @@ public class PurchaseHistory {
             }
             pw.close();
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void exportHistory() {
+        File f = new File("purchaseHistory.txt");
+        try {
+            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(f));
+            oos.writeObject(purchases);
+            oos.close();
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

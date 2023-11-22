@@ -1,3 +1,4 @@
+import java.io.Serializable;
 import java.util.*;
 
 /**
@@ -6,7 +7,7 @@ import java.util.*;
  * @version Nov 13, 2023
  * @authors Pablo Garces, Nathan Park, Aadiv Reki, Jeffrey Wu, Jaden Ye
  */
-public class Store {
+public class Store implements Serializable {
     private String name;
     private ArrayList<Candy> candies;
     private ArrayList<Sale> sales;

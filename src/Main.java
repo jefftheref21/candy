@@ -58,41 +58,7 @@ public class Main {
 
         ArrayList<Store> allStores;
 
-
-        // ALL OF THIS FOR DEBUGGING
-        /**
-         Store store = new Store();
-         Candy candy = new Candy("Kitkat", store, "tasty", 3.5);
-         Candy candy2 = new Candy("Starbursts", store, "tasty", 3.5);
-         Candy candy3 = new Candy("Swedish Fish", store, "tasty", 3.5);
-         ArrayList<Candy> candies = new ArrayList<>();
-         candies.add(candy);
-         candies.add(candy2);
-         candies.add(candy3);
-         store.setCandies(candies);
-         Purchase purchase = new Purchase(candy, 10);
-         Purchase purchase2 = new Purchase(candy2, 100);
-         Purchase purchase3 = new Purchase(candy3, 5);
-         ArrayList<Purchase> purchases = new ArrayList<>();
-         purchases.add(purchase);
-         purchases.add(purchase2);
-         purchases.add(purchase3);
-         Sale sale = new Sale(candy, 10, buyer);
-         Sale sale2 = new Sale(candy2, 100, buyer);
-         Sale sale3 = new Sale(candy3, 5, buyer);
-         ShoppingCart shoppingCart = new ShoppingCart(purchases);
-         ArrayList<Sale> history = new ArrayList<>();
-         history.add(sale);
-         history.add(sale2);
-         history.add(sale3);
-         ArrayList<Store> stores = new ArrayList<>();
-         stores.add(store);
-         StoreManager storeManager = new StoreManager();
-         storeManager.setStores(stores);
-         // ALL OF THIS FOR DEBUGGING
-         **/
-
-        //Welcome page to Candy MarketPlace
+        // Welcome page to Candy MarketPlace
 
         System.out.println("Welcome to Candy Marketplace!");
 
@@ -118,7 +84,7 @@ public class Main {
                         System.out.println("Enter new password:");
                         String newPassword = scanner.nextLine();
                         buyer = new Buyer(newUsername, newPassword);
-                        buyer.writeToFile("Users.txt");
+                        buyer.writeToFile(); // Writes to Users.txt
                         created = true;
                     } else if (buyerOrSeller.equalsIgnoreCase("seller")) {
                         System.out.println("Enter new username:");
@@ -127,7 +93,7 @@ public class Main {
                         String newPassword = scanner.nextLine();
                         seller = new Seller(newUsername, newPassword);
                         System.out.println(seller.getStoreManager().toString());
-                        seller.writeToFile("Users.txt");
+                        seller.writeToFile(); // Writes to Users.txt
                         System.out.println("Seller object written");
                         created = true;
                     } else {
@@ -150,8 +116,7 @@ public class Main {
                         System.out.println("Enter password:");
                         String password = scanner.nextLine();
 
-                        buyer =(Buyer) getUser(username, password);
-                        buyer.readHistory();
+                        buyer = (Buyer) getUser(username, password);
                         if (buyer.checkAccount("Users.txt")) {
                             System.out.println("Success! Welcome " + username + "!");
                             login = true;
@@ -164,7 +129,7 @@ public class Main {
                         String username = scanner.nextLine();
                         System.out.println("Enter password:");
                         String password = scanner.nextLine();
-                        seller =(Seller) getUser(username, password);
+                        seller = (Seller) getUser(username, password);
                         // seller.setStoreManager(storeManager);
                         if (seller.checkAccount("Users.txt")) {
                             System.out.println("Success! Welcome " + username + "!");
@@ -395,7 +360,7 @@ public class Main {
                             // @Nathan TODO: calling statistics method, then perform sorting selection or exiting it
                             allStores = StoreManager.getAllStores();
 
-                            System.out.println(buyer.viewStoreStatistics(allStores, readFile("Users.txt")));
+                            System.out.println(buyer.viewStoreStatistics(allStores, readUsers()));
                             break;
                         case 5:
                             allStores = StoreManager.getAllStores();
@@ -414,7 +379,7 @@ public class Main {
                             do {
                                 if (storeStatisticChoice >= 1 && storeStatisticChoice <= 4) {
                                     buyer.sortStoreStatistics(allStores, storeStatisticChoice);
-                                    buyer.viewStoreStatistics(allStores, readFile("Users.txt"));
+                                    buyer.viewStoreStatistics(allStores, readUsers());
                                     doneWithStatistics = true;
                                 } else if (storeStatisticChoice == 5) {
                                     break;
@@ -424,18 +389,17 @@ public class Main {
                                 }
                             } while (!doneWithStatistics);
                         case 6:
-                            System.out.println(buyer.viewShoppingCart());
+                            System.out.println(buyer.getShoppingCart().viewShoppingCart());
                             break;
                         case 7:
-                            System.out.println(buyer.viewHistory());
+                            System.out.println(buyer.getPurchaseHistory().viewHistory());
                             break;
                         case 8:
-                            buyer.exportHistoryToFile();
+                            buyer.getPurchaseHistory().exportHistoryToFile(buyer.getUsername());
                             break;
                         case 9:
                             System.out.println("Thank you for using our Candy Marketplace!");
-                            buyer.exportHistoryToFile();
-                            buyer.writeToFile("Users.txt");
+                            buyer.writeToFile(); // Writes to Users.txt
                             cont = false;
                             break;
                         default:
@@ -460,7 +424,7 @@ public class Main {
                             System.out.println("What is your name of your new store?");
                             String newStoreName = scanner.nextLine();
                             seller.getStoreManager().getStores().add(new Store(newStoreName));
-                            seller.writeToFile("Users.txt");
+                            seller.writeToFile(); // Writes to Users.txt
                             System.out.println(newStoreName + " store created!");
                             break;
                         case 2:
@@ -491,7 +455,7 @@ public class Main {
                                         CandyManager.prodCounter, newQuantity, price);
                                 selectedStore.addCandy(newCandy, newQuantity, CandyManager.prodCounter);
                                 System.out.println(newCandy.toString() + " created!");
-                                seller.writeToFile("Users.txt");
+                                seller.writeToFile(); // Writes to Users.txt
                                 break;
                             }
 
@@ -525,7 +489,7 @@ public class Main {
                                 Candy newCandy = new Candy(newCandyName, selectedStore, description,
                                         CandyManager.prodCounter, newQuantity, price);
                                 selectedStore.editCandy(CandyManager.prodCounter, newCandy, newQuantity);
-                                seller.writeToFile("Users.txt");
+                                seller.writeToFile(); // Writes to Users.txt
                                 System.out.println(newCandy.toString() + " modified!");
                             }
 
@@ -550,7 +514,7 @@ public class Main {
                                 int deleteCandyID = scanner.nextInt();
                                 scanner.nextLine();
                                 selectedStore.deleteCandy(deleteCandyID);
-                                seller.writeToFile("Users.txt");
+                                seller.writeToFile(); // Writes to Users.txt
                                 break;
                             }
                         case 5:
@@ -612,7 +576,7 @@ public class Main {
                             } while (sortContinue);
                         case 10:
                             System.out.println("Thank you for using our Candy Marketplace!");
-                            seller.writeToFile("Users.txt");
+                            seller.writeToFile(); // Writes to Users.txt
                             cont = false;
                             break;
                         default:
@@ -628,9 +592,9 @@ public class Main {
     }
     
 
-    public static ArrayList<User> readFile(String fileName) {
+    public static ArrayList<User> readUsers() {
         try {
-            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(fileName));
+            ObjectInputStream ois = new ObjectInputStream(new FileInputStream("Users.txt"));
             ArrayList<User> users = (ArrayList<User>) ois.readObject();
             ois.close();
             // populating CandyManager.candies and subsequent dependent fields
@@ -653,11 +617,12 @@ public class Main {
             return users;
         } catch (Exception e) {
             e.printStackTrace();
-            }
+        }
         return new ArrayList<>();
     }
+
     public static User getUser(String username, String password) {
-        ArrayList<User> users = readFile("Users.txt");
+        ArrayList<User> users = readUsers();
         for (int i = 0; i < users.size(); i++) {
             if (username.equals(users.get(i).getUsername()) && password.equals(users.get(i).getPassword())) {
                 return users.get(i);
