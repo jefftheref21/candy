@@ -1,3 +1,4 @@
+import java.io.Serializable;
 import java.util.ArrayList;
 // no read or write. Goes into the user files.
 
@@ -8,7 +9,7 @@ import java.util.ArrayList;
  * @authors Pablo Garces, Nathan Park, Aadiv Reki, Jeffrey Wu, Jaden Ye
  */
 // toString method done
-public class ShoppingCart {
+public class ShoppingCart implements Serializable {
     private ArrayList<Purchase> purchases;
 
     public ShoppingCart(ArrayList<Purchase> purchases) {

@@ -8,7 +8,7 @@ import java.util.*;
  */
 // no read or write
 // toString method done
-public class Candy {
+public class Candy implements Serializable {
     private String name; // Same thing as name in this case
     private int candyID;
     private Store store;

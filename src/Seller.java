@@ -10,7 +10,7 @@ import java.util.Comparator;
  * @authors Pablo Garces, Nathan Park, Aadiv Reki, Jeffrey Wu, Jaden Ye
  */
 
-public class Seller extends User {
+public class Seller extends User implements Serializable {
     // Might merge StoreManager and Seller, but it isn't necessary
     private StoreManager storeManager = new StoreManager();
     public Seller() {
@@ -105,7 +105,6 @@ public class Seller extends User {
         }
         return salesInfo.toString();
     }
-    /* Let test this before we start using it
     public void sortSellerStatistics(int choice) {
         if (choice == 1) { // Sorts Candies by least to greatest Sales
             Collections.sort(CandyManager.candies, new CandyQuantityComparator(true));
@@ -128,7 +127,6 @@ public class Seller extends User {
         }
     }
 
-     */
 
     public void importCSV(String filename) throws IOException {
         File f = new File(filename);

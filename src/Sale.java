@@ -1,3 +1,4 @@
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
@@ -8,7 +9,7 @@ import java.util.Objects;
  */
 //no read or write files
 // needs toString method
-public class Sale extends Purchase {
+public class Sale extends Purchase implements Serializable {
     private Buyer buyerAccount;
     private double totalRevenue;
     public Sale(Candy candyBought, int quantityBought, Buyer buyerAccount) {
