@@ -49,7 +49,7 @@ public class User implements Serializable {
             for (int i = 0; i < users.size(); i++) {
                 User currUser = users.get(i);
                 if (currUser.getUsername().equals(this.getUsername()) && currUser.getPassword().equals(this.getPassword())) {
-                    currUser = this;
+                    users.set(i, this);
                     present = true;
                 }
             }

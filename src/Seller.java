@@ -10,7 +10,7 @@ import java.util.Comparator;
  * @authors Pablo Garces, Nathan Park, Aadiv Reki, Jeffrey Wu, Jaden Ye
  */
 
-public class Seller extends User implements Serializable {
+public class Seller extends User {
     // Might merge StoreManager and Seller, but it isn't necessary
     private StoreManager storeManager = new StoreManager();
     public Seller() {

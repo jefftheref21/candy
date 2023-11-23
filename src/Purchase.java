@@ -1,10 +1,12 @@
+import java.io.Serializable;
+
 /**
  * Purchases of candy
  *
  * @version Nov 13, 2023
  * @authors Pablo Garces, Nathan Park, Aadiv Reki, Jeffrey Wu, Jaden Ye
  */
-public class Purchase {
+public class Purchase implements Serializable {
     private Candy candyBought;
     private int quantityBought;
     public Purchase(Candy candyBought, int quantityBought) {

@@ -13,7 +13,7 @@ import java.util.Objects;
  */
 // class with read and write to files
 // needs toString method
-public class Buyer extends User implements Serializable {
+public class Buyer extends User {
     private ShoppingCart shoppingCart;
     private PurchaseHistory purchaseHistory;
     public Buyer() {

@@ -115,12 +115,12 @@ public class Main {
                         String username = scanner.nextLine();
                         System.out.println("Enter password:");
                         String password = scanner.nextLine();
-
-                        buyer = (Buyer) getUser(username, password);
-                        if (buyer.checkAccount("Users.txt")) {
+                        try{
+                            buyer = (Buyer) getUser(username, password);
+                            buyer.checkAccount("Users.txt");
                             System.out.println("Success! Welcome " + username + "!");
                             login = true;
-                        } else {
+                        } catch (ClassCastException ce) {
                             System.out.println("Invalid username or password! Try Again!");
                             attempts++;
                         }
