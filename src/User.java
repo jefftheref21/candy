@@ -56,7 +56,7 @@ public class User implements Serializable {
             if (!present) {
                 users.add(this);
             }
-            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(f));
+            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(f, false));
             oos.writeObject(users);
             oos.flush();
             oos.close();

@@ -101,7 +101,6 @@ public class Main {
                     }
                 } while (!created);
                 setUp = true;
-                // populates CandyManager and can be used to get an ArrayList of all the users.
             } else if (welcomeDecision == 2) { // login
                 int attempts = 0;
                 boolean login = false;
@@ -154,9 +153,8 @@ public class Main {
                 System.out.println("Invalid entry! Please try again");
             }
         } while (!setUp);
-
+        populateCandyManager(readUsers());
         boolean cont = true;
-        readUsers();
         do {
             if (buyerOrSeller.equalsIgnoreCase("buyer")) {
                 boolean redoBuyer;
@@ -427,7 +425,7 @@ public class Main {
                             System.out.println("What is your name of your new store?");
                             String newStoreName = scanner.nextLine();
                             seller.getStoreManager().getStores().add(new Store(newStoreName));
-                            seller.writeToFile(); // Writes to Users.txt
+                            //seller.writeToFile(); // Writes to Users.txt
                             System.out.println(newStoreName + " store created!");
                             break;
                         case 2:
@@ -458,7 +456,7 @@ public class Main {
                                         CandyManager.prodCounter, newQuantity, price);
                                 selectedStore.addCandy(newCandy, newQuantity, CandyManager.prodCounter);
                                 System.out.println(newCandy.toString() + " created!");
-                                seller.writeToFile(); // Writes to Users.txt
+                                //seller.writeToFile(); // Writes to Users.txt
                                 break;
                             }
 
@@ -492,7 +490,7 @@ public class Main {
                                 Candy newCandy = new Candy(newCandyName, selectedStore, description,
                                         CandyManager.prodCounter, newQuantity, price);
                                 selectedStore.editCandy(CandyManager.prodCounter, newCandy, newQuantity);
-                                seller.writeToFile(); // Writes to Users.txt
+                                //seller.writeToFile(); // Writes to Users.txt
                                 System.out.println(newCandy.toString() + " modified!");
                             }
 
@@ -517,7 +515,7 @@ public class Main {
                                 int deleteCandyID = scanner.nextInt();
                                 scanner.nextLine();
                                 selectedStore.deleteCandy(deleteCandyID);
-                                seller.writeToFile(); // Writes to Users.txt
+                                //seller.writeToFile(); // Writes to Users.txt
                                 break;
                             }
                         case 5:
@@ -600,31 +598,32 @@ public class Main {
             ObjectInputStream ois = new ObjectInputStream(new FileInputStream("Users.txt"));
             ArrayList<User> users = (ArrayList<User>) ois.readObject();
             ois.close();
-            // populating CandyManager.candies and subsequent dependent fields
-            int prodCounter = 0;
-            for (User user : users) {
-                if (user instanceof Seller) {
-                    Seller seller = (Seller) user;
-                    for (int i = 0; i < seller.getStoreManager().getStores().size(); i++) {
-                        Store currStore = seller.getStoreManager().getStores().get(i);
-                        for (int j = 0; j < currStore.getCandies().size(); j++) {
-                            CandyManager.candies.add(currStore.getCandies().get(j));
-                            CandyManager.candyIDs.add(currStore.getCandies().get(j).getCandyID());
-                            CandyManager.quantities.add(currStore.getCandies().get(j).getQuantity());
-                            if (currStore.getCandies().get(j).getCandyID() > prodCounter) {
-                                prodCounter = currStore.getCandies().get(j).getCandyID();
-                            }
-                        }
-                    }
-                }
-            }
-            CandyManager.prodCounter = prodCounter + 1;
-            // need to call constructor just to populate fields, but instance is useless
             return users;
         } catch (Exception e) {
             e.printStackTrace();
         }
         return new ArrayList<>();
+    }
+    public static void populateCandyManager(ArrayList<User> users) {
+        // populating CandyManager.candies and subsequent dependent fields
+        int prodCounter = 0;
+        for (User user : users) {
+            if (user instanceof Seller) {
+                Seller seller = (Seller) user;
+                for (int i = 0; i < seller.getStoreManager().getStores().size(); i++) {
+                    Store currStore = seller.getStoreManager().getStores().get(i);
+                    for (int j = 0; j < currStore.getCandies().size(); j++) {
+                        CandyManager.candies.add(currStore.getCandies().get(j));
+                        CandyManager.candyIDs.add(currStore.getCandies().get(j).getCandyID());
+                        CandyManager.quantities.add(currStore.getCandies().get(j).getQuantity());
+                        if (currStore.getCandies().get(j).getCandyID() > prodCounter) {
+                            prodCounter = currStore.getCandies().get(j).getCandyID();
+                        }
+                    }
+                }
+            }
+        }
+        CandyManager.prodCounter = prodCounter + 1;
     }
 
     public static User getUser(String username, String password) {

@@ -9,7 +9,7 @@ import java.util.Objects;
  */
 //no read or write files
 // needs toString method
-public class Sale extends Purchase implements Serializable {
+public class Sale extends Purchase {
     private Buyer buyerAccount;
     private double totalRevenue;
     public Sale(Candy candyBought, int quantityBought, Buyer buyerAccount) {

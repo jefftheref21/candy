@@ -285,6 +285,7 @@ public class Buyer extends User {
             System.out.println("Thank you for purchasing! Your total was $" + quantity *
                     CandyManager.candies.get(index).getPrice() );
             Sale sale = new Sale(CandyManager.candies.get(index), quantity, buyer);
+
             purchaseHistory.addPurchase(sale);
         } else if (totalQuantity == quantity) {
             CandyManager.quantities.remove(index);
