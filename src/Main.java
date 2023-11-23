@@ -101,6 +101,7 @@ public class Main {
                     }
                 } while (!created);
                 setUp = true;
+                // populates CandyManager and can be used to get an ArrayList of all the users.
             } else if (welcomeDecision == 2) { // login
                 int attempts = 0;
                 boolean login = false;
@@ -155,6 +156,7 @@ public class Main {
         } while (!setUp);
 
         boolean cont = true;
+        readUsers();
         do {
             if (buyerOrSeller.equalsIgnoreCase("buyer")) {
                 boolean redoBuyer;
@@ -176,6 +178,7 @@ public class Main {
                             int candyID;
 
                             do {
+
                                 System.out.println("Enter the CandyID for which candy you would like to purchase.");
                                 candyID = scanner.nextInt();
                                 scanner.nextLine();
@@ -598,22 +601,25 @@ public class Main {
             ArrayList<User> users = (ArrayList<User>) ois.readObject();
             ois.close();
             // populating CandyManager.candies and subsequent dependent fields
-            ArrayList<Candy> candies = new ArrayList<>();
-            ArrayList<Integer> quantities = new ArrayList<>();
+            int prodCounter = 0;
             for (User user : users) {
                 if (user instanceof Seller) {
                     Seller seller = (Seller) user;
                     for (int i = 0; i < seller.getStoreManager().getStores().size(); i++) {
                         Store currStore = seller.getStoreManager().getStores().get(i);
                         for (int j = 0; j < currStore.getCandies().size(); j++) {
-                            candies.add(currStore.getCandies().get(j));
-                            quantities.add(currStore.getCandies().get(j).getTotalQuantity());
+                            CandyManager.candies.add(currStore.getCandies().get(j));
+                            CandyManager.candyIDs.add(currStore.getCandies().get(j).getCandyID());
+                            CandyManager.quantities.add(currStore.getCandies().get(j).getQuantity());
+                            if (currStore.getCandies().get(j).getCandyID() > prodCounter) {
+                                prodCounter = currStore.getCandies().get(j).getCandyID();
+                            }
                         }
                     }
                 }
             }
+            CandyManager.prodCounter = prodCounter + 1;
             // need to call constructor just to populate fields, but instance is useless
-            CandyManager cm = new CandyManager(candies, quantities);
             return users;
         } catch (Exception e) {
             e.printStackTrace();

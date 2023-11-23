@@ -14,18 +14,6 @@ public class CandyManager {
     public static ArrayList<Integer> quantities = new ArrayList<>();
     public static int prodCounter = 0;
 
-    public CandyManager(ArrayList<Candy> candies, ArrayList<Integer> quantities) {
-        this.candies = candies;
-        int high = 0;
-        for (int i = 0; i < candies.size(); i++) {
-            this.candyIDs.add(candies.get(i).getCandyID());
-            if (candies.get(i).getCandyID() > high) {
-                high = candies.get(i).getCandyID();
-            }
-        }
-        this.quantities = quantities;
-        this.prodCounter = high + 1;
-    }
     public static int getIndex(int id) {
         for (int i = 0; i < candyIDs.size(); i++) {
             if (candyIDs.get(i) == id) {

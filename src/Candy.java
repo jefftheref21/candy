@@ -66,6 +66,9 @@ public class Candy implements Serializable {
     public double getPrice() {
         return price;
     }
+    public int getQuantity() {
+        return quantity;
+    }
 
     /**
      * setName
