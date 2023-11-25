@@ -15,7 +15,7 @@ public class Sale extends Purchase {
     public Sale(Candy candyBought, int quantityBought, Buyer buyerAccount) {
         super(candyBought, quantityBought);
         this.buyerAccount = buyerAccount;
-        totalRevenue = candyBought.getPrice() * quantityBought;
+        this.totalRevenue = candyBought.getPrice() * quantityBought;
     }
 
     public Buyer getBuyerAccount() {

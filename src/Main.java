@@ -277,7 +277,6 @@ public class Main {
                                         System.out.println("How much candy would you like to buy?");
                                         int quantityBought = scanner.nextInt();
                                         scanner.nextLine();
-
                                         buyer.buyInstantly(candyIDSort, quantityBought, buyer);
                                         break;
                                     case 2:
@@ -491,7 +490,7 @@ public class Main {
                                 Candy newCandy = new Candy(newCandyName, selectedStore, description,
                                         CandyManager.prodCounter, newQuantity, price);
                                 selectedStore.editCandy(CandyManager.prodCounter, newCandy, newQuantity);
-                                //seller.writeToFile(); // Writes to Users.txt
+                                seller.writeToFile(); // Writes to Users.txt
                                 System.out.println(newCandy.toString() + " modified!");
                             }
 
@@ -500,7 +499,7 @@ public class Main {
                         case 4:
                             selectedStore = new Store();
                             storeNotExist = true;
-                            System.out.println("In which store are you adding the new candy?");
+                            System.out.println("From which store do you want to delete candy from?");
                             storeName = scanner.nextLine();
                             for (int i = 0; i < seller.getStoreManager().getStores().size(); i++) {
                                 if (seller.getStoreManager().getStores().get(i).getName().equalsIgnoreCase(storeName)) {
@@ -516,7 +515,7 @@ public class Main {
                                 int deleteCandyID = scanner.nextInt();
                                 scanner.nextLine();
                                 selectedStore.deleteCandy(deleteCandyID);
-                                //seller.writeToFile(); // Writes to Users.txt
+                                seller.writeToFile(); // Writes to Users.txt
                                 break;
                             }
                         case 5:

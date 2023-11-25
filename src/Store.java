@@ -69,7 +69,7 @@ public class Store implements Serializable {
             CandyManager.candies.remove(index);
             CandyManager.candyIDs.remove(index);
             CandyManager.quantities.remove(index);
-            candies.remove(candies.indexOf(CandyManager.candies.get(index)));
+            candies.remove(CandyManager.candies.get(index));
         } else {
             System.out.println("Candy not found in the candies array.");
         }

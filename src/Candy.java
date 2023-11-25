@@ -97,6 +97,10 @@ public class Candy implements Serializable {
         this.candyID = candyID;
     }
 
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
     /**
      * setPrice
      * @param price - inputted price

@@ -278,18 +278,16 @@ public class Buyer extends User {
     public void buyInstantly(int id, int quantity, Buyer buyer) throws IOException {
         int index = CandyManager.candyIDs.indexOf(id);
         int totalQuantity = CandyManager.quantities.get(index);
-
         if (totalQuantity > quantity) {
-            CandyManager.quantities.remove(index);
-            CandyManager.quantities.add(index, totalQuantity - quantity);
+            CandyManager.quantities.set(index, totalQuantity - quantity);
+            CandyManager.candies.get(index).setQuantity(CandyManager.candies.get(index).getQuantity() - quantity);
             System.out.println("Thank you for purchasing! Your total was $" + quantity *
                     CandyManager.candies.get(index).getPrice() );
             Sale sale = new Sale(CandyManager.candies.get(index), quantity, buyer);
-
             purchaseHistory.addPurchase(sale);
         } else if (totalQuantity == quantity) {
-            CandyManager.quantities.remove(index);
-            CandyManager.quantities.add(index, 0);
+            CandyManager.quantities.set(index, 0);
+            CandyManager.candies.get(index).setQuantity(0);
             System.out.println("Thank you for purchasing! Your total was $" + quantity *
                     CandyManager.candies.get(index).getPrice() );
             Sale sale = new Sale(CandyManager.candies.get(index), quantity, buyer);
