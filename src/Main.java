@@ -57,7 +57,6 @@ public class Main {
         Seller seller = new Seller();
 
         ArrayList<Store> allStores;
-
         // Welcome page to Candy MarketPlace
 
         System.out.println("Welcome to Candy Marketplace!");
@@ -92,7 +91,6 @@ public class Main {
                         System.out.println("Enter new password:");
                         String newPassword = scanner.nextLine();
                         seller = new Seller(newUsername, newPassword);
-                        System.out.println(seller.getStoreManager().toString());
                         seller.writeToFile(); // Writes to Users.txt
                         System.out.println("Seller object written");
                         created = true;
@@ -400,8 +398,22 @@ public class Main {
                             break;
                         case 9:
                             System.out.println("Thank you for using our Candy Marketplace!");
-                            buyer.toString();
+                            System.out.println(buyer.toString());
                             buyer.writeToFile(); // Writes to Users.txt
+                            ArrayList<User> users = readUsers();
+                            Store debuggingStore = buyer.getPurchaseHistory().getPurchases().get(0).getCandyBought().getStore();
+                            Seller debuggingSeller = new Seller();
+                            for (User user : users) {
+                                if (user instanceof Seller) {
+                                    Seller currSeller = (Seller) user;
+                                    for (Store store : currSeller.getStoreManager().getStores()) {
+                                        if (debuggingStore.getName().equals(store.getName())) {
+                                            debuggingSeller = currSeller;
+                                        }
+                                    }
+                                }
+                            }
+                            System.out.println(debuggingSeller.toString());
                             cont = false;
                             break;
                         default:
@@ -593,7 +605,7 @@ public class Main {
             }
         } while (cont);
     }
-    
+
 
     public static ArrayList<User> readUsers() {
         try {
