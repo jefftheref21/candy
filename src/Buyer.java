@@ -280,20 +280,23 @@ public class Buyer extends User {
         int totalQuantity = CandyManager.quantities.get(index);
         Candy currCandy = CandyManager.candies.get(index);
         if (totalQuantity > quantity) {
+            currCandy.setQuantity(totalQuantity - quantity);
             currCandy.getStore().editCandy(id, currCandy, totalQuantity - quantity);
             System.out.println("Thank you for purchasing! Your total was $" + quantity *
                     CandyManager.candies.get(index).getPrice() );
             Sale sale = new Sale(CandyManager.candies.get(index), quantity, buyer);
             purchaseHistory.addPurchase(sale);
+            currCandy.getStore().addSale(sale);
         } else if (totalQuantity == quantity) {
             currCandy.setQuantity(0);
             currCandy.getStore().editCandy(id, currCandy, 0);
             System.out.println("Thank you for purchasing! Your total was $" + quantity *
-                    CandyManager.candies.get(index).getPrice() );
+                    CandyManager.candies.get(index).getPrice());
             Sale sale = new Sale(CandyManager.candies.get(index), quantity, buyer);
             purchaseHistory.addPurchase(sale);
+            currCandy.getStore().addSale(sale);
         } else {
-            System.out.println("Error! Too much candy asked!");
+            System.out.println("Error! Not enough candy on stock!");
         }
     }
 

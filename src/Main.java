@@ -400,6 +400,7 @@ public class Main {
                             break;
                         case 9:
                             System.out.println("Thank you for using our Candy Marketplace!");
+                            buyer.toString();
                             buyer.writeToFile(); // Writes to Users.txt
                             cont = false;
                             break;
@@ -577,6 +578,7 @@ public class Main {
                             } while (sortContinue);
                         case 10:
                             System.out.println("Thank you for using our Candy Marketplace!");
+                            System.out.println(seller.toString());
                             seller.writeToFile(); // Writes to Users.txt
                             cont = false;
                             break;
