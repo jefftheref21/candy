@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+//sample comment
 public class Application implements Runnable {
     /*
     ActionListener actionListener = new ActionListener() {
