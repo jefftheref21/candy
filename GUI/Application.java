@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 //sample comment
+//sample comment nathan park
 public class Application implements Runnable {
     /*
     ActionListener actionListener = new ActionListener() {
@@ -34,10 +35,13 @@ public class Application implements Runnable {
         candies[4] = candy5;
         candies[5] = candy6;
         // showWelcomeMessageDialog();
-        // showStartingDialog();
+        showStartingDialog();
         // Marketplace.
         Marketplace marketplace = new Marketplace(candies);
         marketplace.run();
+
+        ControlCenter controlCenter = new ControlCenter();
+
     }
 
     /**
