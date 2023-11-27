@@ -84,9 +84,9 @@ public class Store implements Serializable {
     public void editCandy(int candyID, Candy updatedCandy, int newQuantity) {
         int index = CandyManager.candyIDs.indexOf(candyID);
         if (index != -1) {
+            candies.set(candies.indexOf(CandyManager.candies.get(index)), updatedCandy);
             CandyManager.candies.set(index, updatedCandy);
             CandyManager.quantities.set(index, newQuantity);
-            candies.set(candies.indexOf(CandyManager.candies.get(index)), updatedCandy);
         } else {
             System.out.println("Old candy not found in the candies array.");
         }
@@ -97,5 +97,19 @@ public class Store implements Serializable {
             totalNum += sales.get(i).getQuantityBought();
         }
         return totalNum;
+    }
+    // just for debugging purposes
+    @Override
+    public String toString() {
+        StringBuilder str = new StringBuilder();
+        if (candies.size() > 0) {
+            str.append(Integer.toString(candies.get(0).getQuantity()));
+            for (int i = 1; i < candies.size(); i++) {
+                str.append("," + Integer.toString(candies.get(i).getQuantity()));
+            }
+        } else {
+            str.append("NC");
+        }
+        return str.toString();
     }
 }
