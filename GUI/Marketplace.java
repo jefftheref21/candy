@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 
 public class Marketplace {
     public Candy[] candies;
+    public static final Color buttonColor = new Color(235, 158, 52);
     public static final Color outerColor = new Color(245, 130, 75);
     public Marketplace(Candy[] candies) {
         this.candies = candies;
@@ -63,6 +64,8 @@ public class Marketplace {
                 // displayCandyButtons(candies, content);
             }
         });
+
+        searchButton.setBackground(buttonColor);
         searchButton.setText("Search");
 
         topPanel.add(searchTextField, new GridBagConstraints(100, 0, 1, 1, 0, 0,
@@ -111,6 +114,8 @@ public class Marketplace {
                 // showPurchaseHistory();
             }
         });
+
+        historyButton.setBackground(buttonColor);
         historyButton.setIcon(historyIcon);
         historyButton.setMargin(new Insets(0,0,0,0));
 
@@ -142,6 +147,8 @@ public class Marketplace {
                 // exportHistory();
             }
         });
+
+        exportHistoryButton.setBackground(buttonColor);
         exportHistoryButton.setText("Export Purchase History");
         bottomPanel.add(exportHistoryButton, gbc);
 
@@ -151,6 +158,7 @@ public class Marketplace {
                 // viewStatistics();
             }
         });
+        viewStatisticsButton.setBackground(buttonColor);
         viewStatisticsButton.setText("View Store Statistics");
         gbc.gridx = 50;
         bottomPanel.add(viewStatisticsButton, gbc);
@@ -179,7 +187,6 @@ public class Marketplace {
                     showCandyPageDialog(currCandy);
                 }
             });
-            Color buttonColor = new Color(235, 158, 52);
             currButton.setBackground(buttonColor);
             currButton.setPreferredSize(new Dimension(100, 100));
             currButton.setHorizontalAlignment(SwingConstants.CENTER);
@@ -205,27 +212,21 @@ public class Marketplace {
         GridBagConstraints gbc = new GridBagConstraints(0, 0, 1, 1, 0, 0,
                 GridBagConstraints.LINE_START, GridBagConstraints.NONE,
                 new Insets(10, 10, 10, 10), 0, 0);
+
         JPanel panel = new JPanel();
         panel.setLayout(new GridBagLayout());
 
-        JLabel storeLabel = new JLabel(currCandy.getStore().getName());
-        panel.add(storeLabel, gbc);
-
         JLabel nameLabel = new JLabel(currCandy.getName());
-        gbc.gridy = 1;
         panel.add(nameLabel, gbc);
 
-        JLabel priceLabel = new JLabel("" + currCandy.getPrice());
-        gbc.gridy = 2;
-        panel.add(priceLabel, gbc);
-
-        JLabel descriptionLabel = new JLabel(currCandy.getDescription());
-        gbc.gridy = 3;
+        JLabel descriptionLabel = new JLabel("Product Description: " + currCandy.getDescription());
+        gbc.gridy = 1;
         panel.add(descriptionLabel, gbc);
 
-        JLabel quantityLabel = new JLabel("" + currCandy.getQuantity());
-        gbc.gridy = 4;
+        JLabel quantityLabel = new JLabel("Product Quantity: " + currCandy.getQuantity());
+        gbc.gridy = 2;
         panel.add(quantityLabel, gbc);
+
         JButton buyButton = new JButton(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -233,9 +234,31 @@ public class Marketplace {
             }
         });
         buyButton.setText("Buy");
-        gbc.gridy = 5;
-        jf.add(buyButton, gbc);
+        gbc.gridy = 3;
+        panel.add(buyButton, gbc);
 
+        JButton addToCartButton = new JButton(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Implement logic for adding to shopping cart
+                // You can add the necessary functionality here
+            }
+        });
+        addToCartButton.setText("Add to Shopping Cart");
+        gbc.gridy = 4;
+        panel.add(addToCartButton, gbc);
+
+        JButton exitButton = new JButton(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                jf.dispose();
+            }
+        });
+        exitButton.setText("Exit");
+        gbc.gridy = 5;
+        panel.add(exitButton, gbc);
+
+        jf.add(panel);
         jf.pack();
         jf.setLocationRelativeTo(null);
         jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
