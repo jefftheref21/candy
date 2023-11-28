@@ -272,51 +272,67 @@ public class Marketplace {
      */
     public static void showBuyDialog(Candy currCandy) {
         JFrame jf = new JFrame("Buy Candy");
+        GridBagConstraints gbc = new GridBagConstraints(0, 0, 1, 1, 0, 0,
+                GridBagConstraints.LINE_START, GridBagConstraints.NONE,
+                new Insets(10, 10, 10, 10), 0, 0);
 
         JPanel panel = new JPanel();
         panel.setLayout(new GridBagLayout());
 
         JLabel nameLabel = new JLabel(currCandy.getName());
-        panel.add(nameLabel, new GridBagConstraints(0, 0, 1, 1, 0, 0,
-                GridBagConstraints.LINE_START, GridBagConstraints.NONE,
-                new Insets(10, 10, 10, 5), 5, 5));
+        panel.add(nameLabel, gbc);
 
-        JLabel priceLabel = new JLabel("" + currCandy.getPrice());
-        panel.add(priceLabel, new GridBagConstraints(0, 1, 1, 1, 0, 0,
-                GridBagConstraints.LINE_START, GridBagConstraints.NONE,
-                new Insets(5, 10, 5, 5), 5, 5));
+        JLabel priceLabel = new JLabel("Price: $" + currCandy.getPrice());
+        gbc.gridy = 1;
+        panel.add(priceLabel, gbc);
 
-        JLabel quantityLabel = new JLabel("" + currCandy.getQuantity());
-        panel.add(quantityLabel, new GridBagConstraints(0, 2, 1, 1, 0, 0,
-                GridBagConstraints.LINE_START, GridBagConstraints.NONE,
-                new Insets(5, 10, 10, 5), 5, 5));
+        JLabel quantityLabel = new JLabel("Available Quantity: " + currCandy.getQuantity());
+        gbc.gridy = 2;
+        panel.add(quantityLabel, gbc);
 
         JLabel quantityToBuyLabel = new JLabel("Quantity to buy: ");
-        panel.add(quantityToBuyLabel, new GridBagConstraints(0, 3, 1, 1, 0, 0,
-                GridBagConstraints.LINE_START, GridBagConstraints.NONE,
-                new Insets(10, 10, 10, 5), 5, 5));
+        gbc.gridy = 3;
+        panel.add(quantityToBuyLabel, gbc);
+
         JTextField quantityToBuyTextField = new JTextField(8);
-        panel.add(quantityToBuyTextField, new GridBagConstraints(1, 3, 1, 1, 0, 0,
-                GridBagConstraints.LINE_START, GridBagConstraints.NONE,
-                new Insets(10, 5, 10, 5), 5, 5));
-        /*
+        gbc.gridy = 4;
+        panel.add(quantityToBuyTextField, gbc);
+
         JButton buyButton = new JButton(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                int quantityToBuy = Integer.parseInt(quantityToBuyTextField.getText());
-                if (quantityToBuy > currCandy.getQuantity()) {
-                    JOptionPane.showMessageDialog(null, "Not enough candy in stock",
+                try {
+                    int quantityToBuy = Integer.parseInt(quantityToBuyTextField.getText());
+                    if (quantityToBuy <= 0) {
+                        JOptionPane.showMessageDialog(null, "Please enter a valid number",
+                                "Error", JOptionPane.ERROR_MESSAGE);
+                    } else if (quantityToBuy > currCandy.getQuantity()) {
+                        JOptionPane.showMessageDialog(null,
+                                "The quantity entered exceeds the current quantity. " +
+                                        "Please enter a valid quantity.",
+                                "Error", JOptionPane.ERROR_MESSAGE);
+                    } else {
+                        //We're going to change this later, make this all client server side stuff
+                        currCandy.setQuantity(currCandy.getQuantity() - quantityToBuy);
+                        JOptionPane.showMessageDialog(null, "Thank you for your purchase",
+                                "Success", JOptionPane.INFORMATION_MESSAGE);
+                        jf.dispose(); // Close the Buy Candy dialog
+                    }
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(null, "Please enter a valid number",
                             "Error", JOptionPane.ERROR_MESSAGE);
-                } else {
-                    currCandy.setQuantity(currCandy.getQuantity() - quantityToBuy);
-                    JOptionPane.showMessageDialog(null, "Purchase successful",
-                            "Success", JOptionPane.INFORMATION_MESSAGE);
                 }
             }
         });
         buyButton.setText("Buy");
-        panel.add
+        gbc.gridy = 5;
+        panel.add(buyButton, gbc);
 
-         */
+        jf.add(panel);
+        jf.pack();
+        jf.setLocationRelativeTo(null);
+        jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        jf.setVisible(true);
     }
+
 }
