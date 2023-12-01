@@ -48,7 +48,7 @@ public class Main {
             4.Exit""";
 
 
-    public static void main(String[] args) throws TooManyAttemptsException, IOException {
+    public static void main(String[] args) throws TooManyAttemptsException, IOException, ClassNotFoundException {
         Scanner scanner = new Scanner(System.in);
 
         String buyerOrSeller = "";
@@ -73,29 +73,36 @@ public class Main {
             if (welcomeDecision == 1) {
 
                 do {
-                    //TODO create new object of user with information
-                    System.out.println("Are you a buyer or seller?");
-                    buyerOrSeller = scanner.nextLine();
+                    try {
+                        System.out.println("Are you a buyer or seller?");
+                        buyerOrSeller = scanner.nextLine();
 
-                    if (buyerOrSeller.equalsIgnoreCase("buyer")) {
-                        System.out.println("Enter new username:");
-                        String newUsername = scanner.nextLine();
-                        System.out.println("Enter new password:");
-                        String newPassword = scanner.nextLine();
-                        buyer = new Buyer(newUsername, newPassword);
-                        buyer.writeToFile(); // Writes to Users.txt
-                        created = true;
-                    } else if (buyerOrSeller.equalsIgnoreCase("seller")) {
-                        System.out.println("Enter new username:");
-                        String newUsername = scanner.nextLine();
-                        System.out.println("Enter new password:");
-                        String newPassword = scanner.nextLine();
-                        seller = new Seller(newUsername, newPassword);
-                        seller.writeToFile(); // Writes to Users.txt
-                        System.out.println("Seller object written");
-                        created = true;
-                    } else {
-                        System.out.println("Invalid entry! Please try again");
+                        if (buyerOrSeller.equalsIgnoreCase("buyer")) {
+                            System.out.println("Enter new username:");
+                            String newUsername = scanner.nextLine();
+                            System.out.println("Enter new password:");
+                            String newPassword = scanner.nextLine();
+                            buyer = new Buyer(newUsername, newPassword);
+                            buyer.writeToFile(); // Writes to Users.txt
+                            created = true;
+                        } else if (buyerOrSeller.equalsIgnoreCase("seller")) {
+                            System.out.println("Enter new username:");
+                            String newUsername = scanner.nextLine();
+                            System.out.println("Enter new password:");
+                            String newPassword = scanner.nextLine();
+                            seller = new Seller(newUsername, newPassword);
+                            seller.writeToFile(); // Writes to Users.txt
+                            System.out.println("Seller object written");
+                            created = true;
+                        } else {
+                            System.out.println("Invalid entry! Please try again");
+                        }
+                    } catch (EOFException e) {
+                        System.out.println("User file is empty");
+                    } catch (IOException ie) {
+                        System.out.println("File not found or is a directory");
+                    } catch (ClassNotFoundException ce) {
+                        System.out.println("Can't read objects in file");
                     }
                 } while (!created);
                 setUp = true;
@@ -607,16 +614,11 @@ public class Main {
     }
 
 
-    public static ArrayList<User> readUsers() {
-        try {
+    public static ArrayList<User> readUsers() throws IOException, ClassNotFoundException {
             ObjectInputStream ois = new ObjectInputStream(new FileInputStream("Users.txt"));
             ArrayList<User> users = (ArrayList<User>) ois.readObject();
             ois.close();
             return users;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return new ArrayList<>();
     }
     public static void populateCandyManager(ArrayList<User> users) {
         // populating CandyManager.candies and subsequent dependent fields
@@ -640,7 +642,7 @@ public class Main {
         CandyManager.prodCounter = prodCounter + 1;
     }
 
-    public static User getUser(String username, String password) {
+    public static User getUser(String username, String password) throws IOException, ClassNotFoundException {
         ArrayList<User> users = readUsers();
         for (int i = 0; i < users.size(); i++) {
             if (username.equals(users.get(i).getUsername()) && password.equals(users.get(i).getPassword())) {

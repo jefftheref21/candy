@@ -42,7 +42,7 @@ public class Store implements Serializable {
         this.name = name;
     }
 
-    public void setIndexes(ArrayList<Candy> candies) {
+    public void setCandies(ArrayList<Candy> candies) {
         this.candies = candies;
     }
 
@@ -62,6 +62,22 @@ public class Store implements Serializable {
         }
 
         return total;
+    }
+    public ArrayList<Buyer> getBuyers() {
+        ArrayList<Buyer> buyers = new ArrayList<>();
+        for (int i = 0; i < sales.size(); i++) {
+            buyers.add(sales.get(i).getBuyerAccount());
+        }
+        return buyers;
+    }
+    public ArrayList<Sale> getSalesByBuyer(Buyer buyer) {
+        ArrayList<Sale> sales = new ArrayList<>();
+        for (Sale sale: this.sales) {
+            if (sale.getBuyerAccount().equals(buyer)) {
+                sales.add(sale);
+            }
+        }
+        return sales;
     }
     public void deleteCandy(int candyID) {
         int index = CandyManager.candyIDs.indexOf(candyID);
