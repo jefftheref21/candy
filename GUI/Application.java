@@ -1,23 +1,42 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
+
 //sample comment
 //sample comment nathan park
 public class Application implements Runnable {
-    /*
+    UserClient client;
+    JButton signUpButton;
+    JButton loginButton;
+    JButton buyerButton;
+    JButton sellerButton;
+
+
     ActionListener actionListener = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (e.getSource() == ) {
-
+            if (e.getSource() == signUpButton) {
+                // client.sendSignUp();
+            }
+            if (e.getSource() == loginButton) {
+                // client.sendLogin();
+            }
+            if (e.getSource() == buyerButton) {
+                // client.sendBuyer();
+            }
+            if (e.getSource() == sellerButton) {
+                // client.sendSeller();
             }
         }
-    }; */
-    public Application() {
+    };
+
+    public Application() throws IOException {
+        client = new UserClient(this);
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Application());
+    public static void main(String[] args) throws IOException {
+        // SwingUtilities.invokeLater(new Application());
     }
 
     public void run() {
@@ -34,7 +53,8 @@ public class Application implements Runnable {
         candies[3] = candy4;
         candies[4] = candy5;
         candies[5] = candy6;
-        // showWelcomeMessageDialog();
+
+        showWelcomeMessageDialog();
         showStartingDialog();
         // Marketplace.
         Marketplace marketplace = new Marketplace(candies);
@@ -89,32 +109,33 @@ public class Application implements Runnable {
      */
     public static String showSignUpDialog(String type) {
         JFrame jf = new JFrame("Sign Up");
+        GridBagConstraints gbc = new GridBagConstraints(0,0, 2, 1, 0.5, 0,
+                GridBagConstraints.LINE_START, GridBagConstraints.NONE,
+                new Insets(10, 10, 10, 10), 0, 0);
 
         Container content = jf.getContentPane();
         content.setLayout(new GridBagLayout());
 
         JLabel signUpLabel = new JLabel("Candy Marketplace Sign Up");
-        content.add(signUpLabel, new GridBagConstraints(0,0, 2, 1, 0.5, 0,
-                GridBagConstraints.LINE_START, GridBagConstraints.NONE,
-                new Insets(10, 10, 10, 5), 5, 5));
+        content.add(signUpLabel, gbc);
 
         JLabel usernameLabel = new JLabel("Username: ");
-        content.add(usernameLabel, new GridBagConstraints(0, 1, 1, 1, 0, 0,
-                GridBagConstraints.LINE_START, GridBagConstraints.NONE,
-                new Insets(5, 10, 5, 5), 5, 5));
+        gbc.gridy = 1;
+        gbc.gridwidth = 1;
+        content.add(usernameLabel, gbc);
+
         JTextField usernameTextField = new JTextField(8);
-        content.add(usernameTextField, new GridBagConstraints(1, 1, 1, 1, 0, 0,
-                GridBagConstraints.LINE_START, GridBagConstraints.NONE,
-                new Insets(5, 5, 5, 5), 5, 5));
+        gbc.gridx = 1;
+        content.add(usernameTextField, gbc);
 
         JLabel passwordLabel = new JLabel("Password: ");
-        content.add(passwordLabel, new GridBagConstraints(0, 2, 1, 1, 0, 0,
-                GridBagConstraints.LINE_START, GridBagConstraints.NONE,
-                new Insets(5, 10, 5, 5), 5, 5));
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        content.add(passwordLabel, gbc);
+
         JTextField passwordTextField = new JTextField(8);
-        content.add(passwordTextField, new GridBagConstraints(1, 2, 1, 1, 0, 0,
-                GridBagConstraints.LINE_START, GridBagConstraints.NONE,
-                new Insets(5, 5, 5, 10), 5, 5));
+        gbc.gridx = 1;
+        content.add(passwordTextField, gbc);
 
         // Let's make it so that you can't repeat usernames
         JButton signUpButton = new JButton(new AbstractAction() {
@@ -133,9 +154,9 @@ public class Application implements Runnable {
             }
         });
         signUpButton.setText("Sign Up");
-        content.add(signUpButton, new GridBagConstraints(0, 3, 2, 1, 0, 0,
-                GridBagConstraints.LAST_LINE_END, GridBagConstraints.NONE,
-                new Insets(5, 5, 5, 10), 5, 5));
+        gbc.gridy = 3;
+        gbc.gridwidth = 2;
+        content.add(signUpButton, gbc);
 
         jf.pack();
         jf.setLocationRelativeTo(null);
@@ -152,34 +173,32 @@ public class Application implements Runnable {
      */
     public static boolean showLoginDialog(String type) {
         JFrame jf = new JFrame("Login");
-
+        GridBagConstraints gbc = new GridBagConstraints(0,0, 2, 1, 0.5, 0,
+                GridBagConstraints.LINE_START, GridBagConstraints.NONE,
+                new Insets(10, 10, 10, 10), 0, 0);
         Container content = jf.getContentPane();
         content.setLayout(new GridBagLayout());
 
         JLabel loginLabel = new JLabel("Candy Marketplace Login");
-        content.add(loginLabel, new GridBagConstraints(0,0, 2, 1, 0.5, 0,
-                GridBagConstraints.LINE_START, GridBagConstraints.NONE,
-                new Insets(10, 10, 10, 5), 5, 5));
+        content.add(loginLabel, gbc);
 
         JLabel usernameLabel = new JLabel("Username: ");
-        content.add(usernameLabel, new GridBagConstraints(0, 1, 1, 1, 0, 0,
-                GridBagConstraints.LINE_START, GridBagConstraints.NONE,
-                new Insets(5, 10, 5, 5), 5, 5));
+        gbc.gridy = 1;
+        gbc.gridwidth = 1;
+        content.add(usernameLabel, gbc);
+
         JTextField usernameTextField = new JTextField(8);
-        content.add(usernameTextField, new GridBagConstraints(1, 1, 1, 1, 0, 0,
-                GridBagConstraints.LINE_START, GridBagConstraints.NONE,
-                new Insets(5, 5, 5, 5), 5, 5));
+        gbc.gridx = 1;
+        content.add(usernameTextField, gbc);
 
         JLabel passwordLabel = new JLabel("Password: ");
-        content.add(passwordLabel, new GridBagConstraints(0, 2, 1, 1, 0, 0,
-                GridBagConstraints.LINE_START, GridBagConstraints.NONE,
-                new Insets(5, 10, 5, 5), 5, 5));
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        content.add(passwordLabel, gbc);
 
         JTextField passwordTextField = new JTextField(8);
-        content.add(passwordTextField, new GridBagConstraints(1, 2, 1, 1, 0, 0,
-                GridBagConstraints.LINE_START, GridBagConstraints.NONE,
-                new Insets(5, 5, 5, 10), 5, 5));
-
+        gbc.gridx = 1;
+        content.add(passwordTextField, gbc);
 
         JButton loginButton = new JButton(new AbstractAction() {
             int attempts = 0;
