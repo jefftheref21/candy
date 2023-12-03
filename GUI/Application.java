@@ -54,6 +54,11 @@ public class Application implements Runnable {
         candies[4] = candy5;
         candies[5] = candy6;
 
+        signUpButton.addActionListener(actionListener);
+        loginButton.addActionListener(actionListener);
+        buyerButton.addActionListener(actionListener);
+        sellerButton.addActionListener(actionListener);
+
         showWelcomeMessageDialog();
         showStartingDialog();
         // Marketplace.
