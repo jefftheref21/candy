@@ -16,10 +16,10 @@ public class MainServer {
     }
 
     public static void main(String[] args) throws IOException, ClassNotFoundException {
-        CandyManager candyManager = readFile("filename.txt");
+        // CandyManager candyManager = readFile("filename.txt");
         MainServer server = new MainServer(new CandyManager());
         server.startServer(); // start the server
-        writeFile("filename.txt", candyManager);
+        // writeFile("filename.txt", candyManager);
     }
 
     public void startServer() {

@@ -1,4 +1,3 @@
-import javax.swing.*;
 import java.net.*;
 import java.io.*;
 
@@ -22,9 +21,9 @@ public class SellerThread extends Seller implements Runnable {
 
     public void run() {
         switch(action) {
-            case LOGIN:
+            case STORE_STATS:
                 break;
-            case SIGNUP:
+            case SORT_STORE_STATS:
                 break;
         }
     }
