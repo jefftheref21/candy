@@ -12,7 +12,6 @@ public class Application implements Runnable {
     JButton buyerButton;
     JButton sellerButton;
 
-
     ActionListener actionListener = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
