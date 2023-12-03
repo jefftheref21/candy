@@ -12,7 +12,6 @@ public class Application implements Runnable {
     JButton buyerButton;
     JButton sellerButton;
 
-
     ActionListener actionListener = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -36,7 +35,7 @@ public class Application implements Runnable {
     }
 
     public static void main(String[] args) throws IOException {
-        // SwingUtilities.invokeLater(new Application());
+        SwingUtilities.invokeLater(new Application());
     }
 
     public void run() {

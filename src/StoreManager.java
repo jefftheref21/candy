@@ -30,11 +30,11 @@ public class StoreManager implements Serializable {
         stores.remove(store);
     }
 
-    public static ArrayList<Store> getAllStores() {
+    public static ArrayList<Store> getAllStores(CandyManager cm) {
         ArrayList<Store> allStores = new ArrayList<>();
-        for (int i = 0; i < CandyManager.candies.size(); i++) {
-            if (!allStores.contains(CandyManager.candies.get(i).getStore())) {
-                allStores.add(CandyManager.candies.get(i).getStore());
+        for (int i = 0; i < cm.candies.size(); i++) {
+            if (!allStores.contains(cm.candies.get(i).getStore())) {
+                allStores.add(cm.candies.get(i).getStore());
             }
         }
         return allStores;

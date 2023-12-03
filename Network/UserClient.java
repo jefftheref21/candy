@@ -20,11 +20,11 @@ public class UserClient {
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         out = new PrintWriter(socket.getOutputStream(), true);
 
-        runClient();
+        // runClient();
     }
 
     public void initConnection() {
-        String hostname = "10.186.142.229";
+        String hostname = "10.186.142.72";
         int portNo = 1234;
         try {
             socket = new Socket(hostname, portNo);
@@ -38,7 +38,6 @@ public class UserClient {
     }
 
     public void runClient() {
-        application.run();
         try {
             String str = in.readLine();
             action = Action.valueOf(str);

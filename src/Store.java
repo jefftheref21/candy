@@ -79,30 +79,25 @@ public class Store implements Serializable {
         }
         return sales;
     }
-    public void deleteCandy(int candyID) {
-        int index = CandyManager.candyIDs.indexOf(candyID);
+    public void deleteCandy(int candyID, CandyManager cm) {
+        int index = cm.getIndex(candyID);
         if (index != -1) {
-            CandyManager.candies.remove(index);
-            CandyManager.candyIDs.remove(index);
-            CandyManager.quantities.remove(index);
-            candies.remove(CandyManager.candies.get(index));
+            cm.candies.remove(index);
+            candies.remove(cm.candies.get(index));
         } else {
             System.out.println("Candy not found in the candies array.");
         }
     }
-    public void addCandy(Candy newCandy, int newQuantity , int newID) {
-        CandyManager.candies.add(newCandy);
-        CandyManager.quantities.add(newQuantity);
-        CandyManager.candyIDs.add(newID);
-        CandyManager.prodCounter++;
+    public void addCandy(Candy newCandy, CandyManager cm) {
+        cm.candies.add(newCandy);
+        cm.prodCounter++;
         candies.add(newCandy);
     }
-    public void editCandy(int candyID, Candy updatedCandy, int newQuantity) {
-        int index = CandyManager.candyIDs.indexOf(candyID);
+    public void editCandy(int candyID, Candy updatedCandy, CandyManager cm) {
+        int index = cm.getIndex(candyID);
         if (index != -1) {
-            candies.set(candies.indexOf(CandyManager.candies.get(index)), updatedCandy);
-            CandyManager.candies.set(index, updatedCandy);
-            CandyManager.quantities.set(index, newQuantity);
+            candies.set(candies.indexOf(cm.candies.get(index)), updatedCandy);
+            cm.candies.set(index, updatedCandy);
         } else {
             System.out.println("Old candy not found in the candies array.");
         }
