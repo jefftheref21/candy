@@ -171,12 +171,12 @@ public class CandyManager {
 
         return output.toString();
     }
-    public void buyInstantly(int id, int quantity, Buyer buyer) throws IOException {
+    public void buyInstantly(int id, int quantity, Buyer buyer)  {
         int index = getIndex(id);
         int totalQuantity = candies.get(index).getTotalQuantity();
         if (totalQuantity >= quantity) {
             candies.get(index).setQuantity(totalQuantity - quantity);
-            candies.get(index).getStore().editCandy(id, candies.get(index), totalQuantity - quantity);
+            candies.get(index).getStore().editCandy(id, candies.get(index), this);
             System.out.println("Thank you for purchasing! Your total was $" + quantity *
                     candies.get(index).getPrice() );
             Sale sale = new Sale(candies.get(index), quantity, buyer);
@@ -189,15 +189,8 @@ public class CandyManager {
     public void buyShoppingCart(Buyer buyer) {
         boolean boughtTooMuch;
         for (int i = 0; i < buyer.getShoppingCart().getPurchases().size(); i++) {
-            int candyID = buyer.getShoppingCart().getPurchases().get(i).getCandyBought().getCandyID();
-            int index = getIndex(candyID);
-            int quantityPurchased = buyer.getShoppingCart().getPurchases().get(i).getQuantityBought();
-            int totalQuantity = candies.get(index).getQuantity();
-            if (totalQuantity >= quantityPurchased) {
-                Sale sale = new Sale(candies.get(index), totalQuantity, buyer);
-                buyer.getPurchaseHistory().addPurchase(sale);
-                candies.get(index).setQuantity(totalQuantity - quantityPurchased);
-            }
+            Purchase currPurchase = buyer.getShoppingCart().getPurchases().get(i);
+            buyInstantly(currPurchase.getCandyBought().getCandyID(), currPurchase.getQuantityBought(), buyer);
         }
     }
     public String search(String keyWord) {
@@ -224,7 +217,171 @@ public class CandyManager {
             return result;
         }
     }
+    // Seller methods
+    public String listSellerStatistics(Seller seller) {
+        StringBuilder statisticsInfo = new StringBuilder();
+        double totalStoreRevenue = 0.0;
 
+        if (seller.getStoreManager().getStores().isEmpty()) {
+            statisticsInfo.append("You do not own any stores.\n");
+        } else {
+            for (int i = 0; i < seller.getStoreManager().getStores().size(); i++) {
+                Store store = seller.getStoreManager().getStores().get(i);
+                ArrayList<Sale> sales = store.getSales();
+                statisticsInfo.append(seller.getStoreManager().getStores().get(i).getName()+"\n");
+                if (sales.isEmpty()) {
+                    statisticsInfo.append("This store currently does not have any sales.\n");
+                } else {
+                    statisticsInfo.append("Customers:");
+                    for (int j = 0; j < sales.size(); j++) {
+                        Sale sale = sales.get(j);
+                        statisticsInfo.append(sale.getBuyerAccount()+",");
+                        totalStoreRevenue += sale.getTotalRevenue();
+                    }
+                    statisticsInfo.append(store.getName());
+                    statisticsInfo.append(" made total revenue of $");
+                    statisticsInfo.append(totalStoreRevenue);
+                }
+            }
+        }
+        return statisticsInfo.toString();
+    }
+    public String listSales(Seller seller) {
+        StringBuilder salesInfo = new StringBuilder();
+        ArrayList<Buyer> accountedBuyers = new ArrayList<>();
+        if (seller.getStoreManager().getStores().isEmpty()) {
+            salesInfo.append("You do not own any stores.\n");
+        } else {
+            for (int i = 0; i < seller.getStoreManager().getStores().size(); i++) {
+                Store store = seller.getStoreManager().getStores().get(i);
+                ArrayList<Sale> sales = store.getSales();
+                salesInfo.append(seller.getStoreManager().getStores().get(i).getName()+"\n");
+                if (sales.isEmpty()) {
+                    salesInfo.append("This store currently does not have any sales.\n");
+                } else {
+                    salesInfo.append("Customers\n");
+                    for (int j = 0; j < sales.size(); j++) {
+                        int purchaseQuantity = 0;
+                        Sale sale = sales.get(j);
+                        if(accountedBuyers.contains(sale.getBuyerAccount())) {
+                            salesInfo.append("");
+                        } else {
+                            for(int k = 0; k < sale.getBuyerAccount().getPurchaseHistory().getPurchases().size(); k++) {
+                                if (sales.contains(sale.getBuyerAccount().getPurchaseHistory().getPurchases().get(k))) {
+                                    purchaseQuantity +=  sale.getBuyerAccount().getPurchaseHistory().getPurchases().get(k).getQuantityBought();
+                                }
+                            }
+                            salesInfo.append(sale.getBuyerAccount() + " bought " + purchaseQuantity + "products.\n");
+                            accountedBuyers.add(sale.getBuyerAccount());
+                        }
+                    }
+                    salesInfo.append("Candies\n");
+                    for (int l =0; l < this.candies.size(); l++){
+                        int candyQuantity = 0;
+                        for (int m = 0; m < sales.size(); m++) {
+                            Sale sale = sales.get(m);
+                            if(sale.getCandyBought().getCandyID() == this.candies.get(l).getCandyID()) {
+                                candyQuantity += sale.getQuantityBought();
+                            }
+                        }
+                        salesInfo.append(this.candies.get(l).getName()+" has a total of " +
+                                candyQuantity + " sales.\n");
+                    }
+                }
+            }
+        }
+        return salesInfo.toString();
+    }
+    public void sortSellerStatistics(int choice, Seller seller) {
+        if (choice == 1) { // Sorts Candies by least to greatest Sales
+            Collections.sort(this.candies, new CandyQuantityComparator(true));
+        } else if (choice == 2) { //Sorts Candies by greatest to least Sales
+            Collections.sort(this.candies, new CandyQuantityComparator(false));
+        } else if (choice == 3) { //Sorts Customers by least to greatest # of purchases
+            for (int i = 0; i < seller.getStoreManager().getStores().size(); i++) {
+                Store store = seller.getStoreManager().getStores().get(i);
+                PurchaseQuantityComparator comparator = new PurchaseQuantityComparator(store, true);
+                Collections.sort(store.getSales(), comparator);
+            }
+        } else if (choice == 4) { //Sorts Customers by greatest to least # of purchases
+            for (int i = 0; i < seller.getStoreManager().getStores().size(); i++) {
+                Store store = seller.getStoreManager().getStores().get(i);
+                PurchaseQuantityComparator comparator = new PurchaseQuantityComparator(store, false);
+                Collections.sort(store.getSales(), comparator);
+            }
+        } else {
+            System.out.println("Invalid choice. Please choose option #1-4.");
+        }
+    }
+    public void importCSV(String filename, Seller seller) throws IOException {
+        File f = new File(filename);
+        BufferedReader br = new BufferedReader(new FileReader(f));
+        String line = br.readLine();
+        while (line != null) {
+            String[] data = line.split(",", 5);
+            ArrayList<Store> stores = seller.getStoreManager().getStores();
+            for (int i = 0; i < stores.size(); i++) {
+                if (stores.get(i).getName().equals(data[1])) {
+                    Candy currCandy = new Candy(data[0], stores.get(i), data[1], this.prodCounter,
+                            Integer.parseInt(data[3]), Integer.parseInt(data[4]));
+                    stores.get(i).addCandy(currCandy, this);
+                    this.prodCounter++;
+                }
+            }
+            line = br.readLine();
+        }
+        br.close();
+    }
+    public void exportToCSV(String filename, Seller seller) throws IOException {
+        File f = new File(filename);
+        PrintWriter pw = new PrintWriter(new FileOutputStream(f));
+        for (int i = 0; i < seller.getStoreManager().getStores().size(); i++) {
+            Store currStore = seller.getStoreManager().getStores().get(i);
+            for (int j = 0; j < currStore.getCandies().size(); j++) {
+                Candy currCandy = currStore.getCandies().get(j);
+                pw.println(currCandy.toCSV());
+            }
+        }
+        pw.close();
+    }
+    // User methods
+    public void writeToFile(User user) throws IOException, ClassNotFoundException {
+        File f = new File("Users.txt");
+        ArrayList<User> users = new ArrayList<>();
+        if (f.exists() && f.length() > 0) {
+            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(f));
+            users = (ArrayList<User>) ois.readObject();
+            ois.close();
+        }
+        boolean present = false;
+        for (int i = 0; i < users.size(); i++) {
+            User currUser = users.get(i);
+            if (currUser instanceof Seller) {
+                Seller currSeller = (Seller) currUser;
+                for (int k = 0; k < currSeller.getStoreManager().getStores().size(); k++) {
+                    Store currStore = currSeller.getStoreManager().getStores().get(k);
+                    ArrayList<Candy> currCandies = new ArrayList<>();
+                    for (int j = 0; j < this.candies.size(); j++) {
+                        if (this.candies.get(j).getStore().getName().equals(currStore.getName())) {
+                            currCandies.add(this.candies.get(j));
+                        }
+                    }
+                    currSeller.getStoreManager().getStores().get(k).setCandies(currCandies);
+                }
+            }
+            if (currUser.getUsername().equals(user.getUsername()) && currUser.getPassword().equals(user.getPassword())) {
+                users.set(i, user);
+                present = true;
+            }
+        }
+        if (!present) {
+            users.add(user);
+        }
+        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(f, false));
+        oos.writeObject(users);
+        oos.flush();
+        oos.close();
+    }
 
     public int getIndex(int id) {
         for (int i = 0; i < candies.size(); i++) {
