@@ -7,25 +7,31 @@ import java.io.IOException;
 //sample comment nathan park
 public class Application implements Runnable {
     UserClient client;
+
+    JLabel userTypeLabel;
+
     JButton signUpButton;
     JButton loginButton;
-    JButton buyerButton;
-    JButton sellerButton;
+
+    JTextField usernameTextField;
+    JTextField passwordTextField;
 
     ActionListener actionListener = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (e.getSource() == signUpButton) {
-                // client.sendSignUp();
+                client.sendSignUp("SIGNUP", usernameTextField.getText(), passwordTextField.getText());
+                if (client.receiveAction() == Action.VALID_CREDENTIALS) {
+                    JOptionPane.showMessageDialog(null, "Sign up successful!",
+                            "Sign Up Confirmation", JOptionPane.PLAIN_MESSAGE);
+                } else if (client.receiveAction() == Action.INVALID_CREDENTIALS) {
+                    JOptionPane.showMessageDialog(null, "Sign up failed!",
+                            "Sign Up Failed", JOptionPane.ERROR_MESSAGE);
+                    showSignUpDialog(userTypeLabel.getText());
+                }
             }
             if (e.getSource() == loginButton) {
-                // client.sendLogin();
-            }
-            if (e.getSource() == buyerButton) {
-                // client.sendBuyer();
-            }
-            if (e.getSource() == sellerButton) {
-                // client.sendSeller();
+                client.sendLogin("LOGIN", usernameTextField.getText(), passwordTextField.getText());
             }
         }
     };
@@ -53,25 +59,17 @@ public class Application implements Runnable {
         candies[4] = candy5;
         candies[5] = candy6;
 
-        signUpButton.addActionListener(actionListener);
-        loginButton.addActionListener(actionListener);
-        buyerButton.addActionListener(actionListener);
-        sellerButton.addActionListener(actionListener);
-
         showWelcomeMessageDialog();
         showStartingDialog();
-        // Marketplace.
+
         Marketplace marketplace = new Marketplace(candies);
         marketplace.run();
-
-        ControlCenter controlCenter = new ControlCenter();
-
     }
 
     /**
      * Displays Welcome Message
      */
-    public static void showWelcomeMessageDialog() {
+    public void showWelcomeMessageDialog() {
         JOptionPane.showMessageDialog(null, "Welcome to the Candy Marketplace",
                 "Welcome", JOptionPane.INFORMATION_MESSAGE);
     }
@@ -79,7 +77,7 @@ public class Application implements Runnable {
     /**
      * Dialog that makes user choose whether to sign up or login
      */
-    public static void showStartingDialog() {
+    public void showStartingDialog() {
         String[] options = {"Sign Up", "Login"};
         int signUpOrLogin = JOptionPane.showOptionDialog(null, "Select an option:",
                 "Sign Up or Login", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
@@ -89,8 +87,7 @@ public class Application implements Runnable {
             type = showUserTypeDialog();
             showSignUpDialog(type);
         } else {
-            type = showUserTypeDialog();
-            showLoginDialog(type);
+            showLoginDialog();
         }
     }
 
@@ -98,11 +95,12 @@ public class Application implements Runnable {
      * Dialog that makes user choose their user type
      * @return the type of user
      */
-    public static String showUserTypeDialog() {
+    public String showUserTypeDialog() {
         String[] options = {"Buyer", "Seller"};
         int userType = JOptionPane.showOptionDialog(null, "Select your user type:",
                 "User Type", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
                 null, options, options[0]);
+        userTypeLabel = new JLabel(options[userType]);
         return options[userType];
     }
 
@@ -111,7 +109,7 @@ public class Application implements Runnable {
      * @param type - based on type of user
      * @return might get rid of return --> void
      */
-    public static String showSignUpDialog(String type) {
+    public void showSignUpDialog(String type) {
         JFrame jf = new JFrame("Sign Up");
         GridBagConstraints gbc = new GridBagConstraints(0,0, 2, 1, 0.5, 0,
                 GridBagConstraints.LINE_START, GridBagConstraints.NONE,
@@ -123,59 +121,46 @@ public class Application implements Runnable {
         JLabel signUpLabel = new JLabel("Candy Marketplace Sign Up");
         content.add(signUpLabel, gbc);
 
-        JLabel usernameLabel = new JLabel("Username: ");
         gbc.gridy = 1;
+        content.add(userTypeLabel, gbc);
+
+        JLabel usernameLabel = new JLabel("Username: ");
+        gbc.gridy = 2;
         gbc.gridwidth = 1;
         content.add(usernameLabel, gbc);
 
-        JTextField usernameTextField = new JTextField(8);
+        usernameTextField = new JTextField(8);
         gbc.gridx = 1;
         content.add(usernameTextField, gbc);
 
         JLabel passwordLabel = new JLabel("Password: ");
         gbc.gridx = 0;
-        gbc.gridy = 2;
+        gbc.gridy = 3;
         content.add(passwordLabel, gbc);
 
-        JTextField passwordTextField = new JTextField(8);
+        passwordTextField = new JTextField(8);
         gbc.gridx = 1;
         content.add(passwordTextField, gbc);
 
         // Let's make it so that you can't repeat usernames
-        JButton signUpButton = new JButton(new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String username = usernameTextField.getText();
-                String password = passwordTextField.getText();
-                User user = new User(username, password); // Change this later
-                if (user.checkAccount("Users.txt")) { // Changes this later
-                    System.out.println("Change this later.");
-                    // showMarketplaceDialog(new Candy[0]); // Change this later
-                } else {
-                    JOptionPane.showMessageDialog(null, "Username already taken",
-                            "Sign Up Error", JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        });
-        signUpButton.setText("Sign Up");
-        gbc.gridy = 3;
+        JButton signUpButton = new JButton("Sign Up");
+        signUpButton.addActionListener(actionListener);
+
         gbc.gridwidth = 2;
+        gbc.gridy = 4;
         content.add(signUpButton, gbc);
 
         jf.pack();
         jf.setLocationRelativeTo(null);
         jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         jf.setVisible(true);
-
-        return "";
     }
 
     /**
      * For logging in
-     * @param type - for type of user
      * @return might get rid of this return --> void
      */
-    public static boolean showLoginDialog(String type) {
+    public void showLoginDialog() {
         JFrame jf = new JFrame("Login");
         GridBagConstraints gbc = new GridBagConstraints(0,0, 2, 1, 0.5, 0,
                 GridBagConstraints.LINE_START, GridBagConstraints.NONE,
@@ -191,7 +176,7 @@ public class Application implements Runnable {
         gbc.gridwidth = 1;
         content.add(usernameLabel, gbc);
 
-        JTextField usernameTextField = new JTextField(8);
+        usernameTextField = new JTextField(8);
         gbc.gridx = 1;
         content.add(usernameTextField, gbc);
 
@@ -200,33 +185,12 @@ public class Application implements Runnable {
         gbc.gridy = 2;
         content.add(passwordLabel, gbc);
 
-        JTextField passwordTextField = new JTextField(8);
+        passwordTextField = new JTextField(8);
         gbc.gridx = 1;
         content.add(passwordTextField, gbc);
 
-        JButton loginButton = new JButton(new AbstractAction() {
-            int attempts = 0;
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String username = usernameTextField.getText();
-                String password = passwordTextField.getText();
-                boolean userIsThere = true;
-                User user = new User(username, password); // Change this later
-                if (user.checkAccount("Users.txt") || true) { // Change this later obviously
-                    System.out.println("Change this later.");
-                    // showMarketplaceDialog();
-                } else {
-                    attempts++;
-                }
-                if (attempts >= 3) {
-                    System.out.println("Throw error message that resets program");
-                } else {
-                    JOptionPane.showMessageDialog(null, "Invalid username or password",
-                            "Login Error", JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        });
-        loginButton.setText("Login");
+        JButton loginButton = new JButton("Login");
+        loginButton.addActionListener(actionListener);
         content.add(loginButton, new GridBagConstraints(0, 3, 2, 1, 0.5, 0,
                 GridBagConstraints.LAST_LINE_END, GridBagConstraints.NONE,
                 new Insets(5, 0, 10, 10), 0, 0));
@@ -235,7 +199,5 @@ public class Application implements Runnable {
         jf.setLocationRelativeTo(null);
         jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         jf.setVisible(true);
-
-        return true;
     }
 }

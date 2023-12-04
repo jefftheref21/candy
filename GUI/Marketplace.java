@@ -2,7 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 
-public class Marketplace {
+public class Marketplace extends JFrame {
     public Candy[] candies;
     public static final Color buttonColor = new Color(235, 158, 52);
     public static final Color outerColor = new Color(245, 130, 75);
@@ -11,9 +11,9 @@ public class Marketplace {
     }
 
     public void run() {
-        JFrame jf = new JFrame("Marketplace");
+        setTitle("Marketplace");
 
-        Container content = jf.getContentPane();
+        Container content = getContentPane();
 
         content.setLayout(new BorderLayout());
 
@@ -25,10 +25,10 @@ public class Marketplace {
 
         displayBottomPanel(content);
 
-        jf.setSize(650, 450); // This can be toggled with, but toggle with relating factors as well
-        jf.setLocationRelativeTo(null);
-        jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        jf.setVisible(true);
+        setSize(650, 450); // This can be toggled with, but toggle with relating factors as well
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setVisible(true);
     }
 
     /**
