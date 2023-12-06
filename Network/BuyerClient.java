@@ -20,7 +20,7 @@ public class BuyerClient extends Buyer {
 
     //Sends the button in which the user clicks within marketplace.
     //ie sort, shopping cart, ect.
-    public void sendDecision(String type) {
+    public void sendBuyerDecision(String type) {
         try {
             out.writeUTF(type);
             out.flush();
