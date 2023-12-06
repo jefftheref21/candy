@@ -62,6 +62,9 @@ public class Application implements Runnable {
         showWelcomeMessageDialog();
         showStartingDialog();
 
+        ControlCenter controlCenter = new ControlCenter();
+        controlCenter.run();
+
         Marketplace marketplace = new Marketplace(candies);
         marketplace.run();
     }
