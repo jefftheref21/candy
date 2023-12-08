@@ -22,7 +22,8 @@ public class UserClient extends User {
     }
 
     public void initConnection() {
-        String hostname = "10.186.142.72";
+        String hostname = getHostname();
+        // String hostname = "10.186.142.72";
         int portNo = 1234;
         try {
             socket = new Socket(hostname, portNo);
@@ -32,7 +33,21 @@ public class UserClient extends User {
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null, "Server connection failed!",
                     "Connection Failed", JOptionPane.ERROR_MESSAGE);
+            initConnection();
         }
+    }
+
+    /**
+     * Get the hostname of the server.
+     * @return the hostname of the server
+     */
+    public String getHostname() {
+        String hostname = JOptionPane.showInputDialog(null, "Enter Server IP Address or Name:",
+                "Server IP Address or Name", JOptionPane.PLAIN_MESSAGE);
+        if (hostname == null) {
+            hostname = getHostname();
+        }
+        return hostname;
     }
 
     public void sendSignUp(String act, String username, String password) {
