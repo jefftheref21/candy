@@ -107,6 +107,11 @@ public class Application implements Runnable {
         return options[userType];
     }
 
+    public void showUnsuccessfulLoginDialog() {
+        JOptionPane.showMessageDialog(null, "Login failed!",
+                "Login Failed", JOptionPane.ERROR_MESSAGE);
+    }
+
     /**
      * For signing up
      * @param type - based on type of user

@@ -6,11 +6,11 @@ import java.util.*;
 
 public class MainServer {
 
-    private LinkedHashMap<String, UserThread> userInfo = new LinkedHashMap<>();
-
     // TCP Components
     private ServerSocket serverSocket;
     private CandyManager candyManager;
+
+    private volatile boolean isRunning = true; // Will do stuff with this later
     public MainServer(CandyManager candyManager) {
         this.candyManager = candyManager;
     }
@@ -40,10 +40,6 @@ public class MainServer {
             System.out.println("IO Exception:" + e);
             System.exit(1);
         }
-    }
-
-    public HashMap<String, UserThread> getUserInfo() {
-        return userInfo;
     }
 
     // TODO: Pablo, you know what to do
