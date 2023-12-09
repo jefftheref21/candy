@@ -38,5 +38,11 @@ public enum Action {
 
     STORE_PAGE,
     STORE_SALES,
+    LIST_SALES,
+    IMPORT_CSV,
+    EXPORT_CSV,
+    VIEW_PRODUCT_PAGE,
+    TOTAL_PURCHASE_QUANTITY,
+    SORT_PRODUCTS,
     ;
 }
