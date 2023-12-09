@@ -29,9 +29,4 @@ public class Purchase implements Serializable {
     public void setQuantityBought(int quantityBought) {
         this.quantityBought = quantityBought;
     }
-    public String toString() {
-        // toString method for file writing. Create method called toMenu if you want different formatting.
-        // delimiting character: $
-        return String.format("Purchase<%s$%s$%s>", candyBought.getName(), candyBought.getCandyID(), quantityBought);
-    }
 }

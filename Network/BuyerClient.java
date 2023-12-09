@@ -6,16 +6,45 @@ import java.util.HashMap;
 
 public class BuyerClient extends Buyer {
     private Socket socket;
-    private final ObjectInputStream in;
-    private final ObjectOutputStream out;
+    private Marketplace marketplace;
+    private ObjectInputStream in;
+    private ObjectOutputStream out;
 
     private Action action;
 
-    public BuyerClient(Socket socket) throws IOException {
-        this.socket = socket;
+    private CandyManager candyManager;
 
-        in = new ObjectInputStream(socket.getInputStream());
-        out = new ObjectOutputStream(socket.getOutputStream());
+    public BuyerClient(Socket socket, Marketplace marketplace) throws IOException {
+        this.socket = socket;
+        this.marketplace = marketplace;Candy candy1 = new Candy("Snickers", new Store("Walmart"), "Chocolate bar", 1, 50, 1.00);
+        Candy candy2 = new Candy("Twix", new Store("Walmart"), "Chocolate bar",2, 25, 2.00);
+        Candy candy3 = new Candy("M&Ms", new Store("Walmart"), "Chocolate bar", 3, 100, 3.00);
+        Candy candy4 = new Candy("Kit Kat", new Store("Walmart"), "Chocolate bar", 4, 75, 4.00);
+        Candy candy5 = new Candy("Sour Patch Kids", new Store("Walmart"), "Sour candy", 5, 50, 1.00);
+        Candy candy6 = new Candy("Sour Skittles", new Store("Walmart"), "Sour candy", 6, 25, 2.00);
+        ArrayList<Candy> candies = new ArrayList<>();
+        candies.add(candy1);
+        candies.add(candy2);
+        candies.add(candy3);
+        candies.add(candy4);
+        candies.add(candy5);
+        candies.add(candy6);
+        candyManager = new CandyManager(candies, 7);
+
+        try {
+            in = new ObjectInputStream(socket.getInputStream());
+            out = new ObjectOutputStream(socket.getOutputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public CandyManager getCandyManager() {
+        return candyManager;
+    }
+
+    public void setCandyManager(CandyManager candyManager) {
+        this.candyManager = candyManager;
     }
 
     //Sends the button in which the user clicks within marketplace.
