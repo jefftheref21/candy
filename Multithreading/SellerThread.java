@@ -1,68 +1,113 @@
 import java.net.*;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 
 public class SellerThread extends Seller implements Runnable {
     private Socket socket;
-    private BufferedReader in;
-    private PrintWriter out;
-    private Action action;
-
+    private ObjectInputStream in;
+    private ObjectOutputStream out;
+    private HashMap<Action, Object> action;
     private CandyManager candyManager;
 
-    public SellerThread(Socket socket) {
+    public SellerThread(Socket socket, CandyManager cm) {
         try {
             this.socket = socket;
-            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            out = new PrintWriter(socket.getOutputStream(), true);
-
-            // Initialize CandyManager
-            this.candyManager = new CandyManager();
+            this.candyManager = cm;
+            in = new ObjectInputStream(socket.getInputStream());
+            out = new ObjectOutputStream(socket.getOutputStream());
         } catch (IOException ie) {
             ie.printStackTrace();
         }
     }
 
     public void run() {
-        switch (action) {
-            case STORE_STATS:
-                String sellerStats = listSellerStatistics(this);
-                out.println(sellerStats);
-                break;
+        for (Map.Entry<Action, Object> entry : action.entrySet()) {
+            switch (entry.getKey()) {
+                case STORE_STATS:
+                    String sellerStats = listSellerStatistics(this);
+                    try {
+                        out.writeObject(sellerStats);
+                        out.flush();
+                    } catch (IOException ie) {
+                        ie.printStackTrace();
+                    }
+                    break;
 
-            case SORT_STORE_STATS:
-                int sortChoice = 1;
-                sortSellerStatistics(sortChoice, this);
-                out.println("Seller statistics sorted.");
-                break;
+                case SORT_STORE_STATS:
+                    int sortChoice = 1;
+                    sortSellerStatistics(sortChoice, this);
+                    try {
+                        out.writeObject(candyManager);
+                        out.flush();
+                    } catch (IOException ie) {
+                        ie.printStackTrace();
+                    }
+                    break;
 
-            case LIST_SALES:
-                String salesInfo = listSales(this);
-                out.println(salesInfo);
-                break;
+                case LIST_SALES:
+                    String salesInfo = listSales(this);
+                    try {
+                        out.writeObject(salesInfo);
+                        out.flush();
+                    } catch (IOException ie) {
+                        ie.printStackTrace();
+                    }
+                    break;
 
-            case IMPORT_CSV:
-                String importFileName = "your_import_file.csv";
-                try {
-                    importCSV(importFileName, this);
-                    out.println("CSV import successful.");
-                } catch (IOException e) {
-                    out.println("Error importing CSV.");
-                    e.printStackTrace();
-                }
-                break;
+                case IMPORT_CSV:
+                    String importFileName = "your_import_file.csv";
+                    try {
+                        importCSV(importFileName, this);
+                        try {
+                            out.writeObject(true);
+                            out.flush();
+                        } catch (IOException ie) {
+                            ie.printStackTrace();
+                        }
+                    } catch (IOException e) {
+                        try {
+                            out.writeObject(false);
+                        } catch (IOException ie) {
+                            ie.printStackTrace();
+                        }
+                        e.printStackTrace();
+                    }
+                    break;
 
-            case EXPORT_CSV:
-                String exportFileName = "your_export_file.csv";
-                try {
-                    exportToCSV(exportFileName, this);
-                    out.println("CSV export successful.");
-                } catch (IOException e) {
-                    out.println("Error exporting CSV.");
-                    e.printStackTrace();
-                }
-                break;
+                case EXPORT_CSV:
+                    String exportFileName = "your_export_file.csv";
+                    try {
+                        exportToCSV(exportFileName, this);
+                        try {
+                            out.writeObject(true);
+                            out.flush();
+                        } catch (IOException ie) {
+                            ie.printStackTrace();
+                        }
+                    } catch (IOException e) {
+                        try {
+                            out.writeObject(false);
+                            out.flush();
+                        } catch (IOException ie) {
+                            ie.printStackTrace();
+                        }
+                    }
+                    break;
+                case TOTAL_PURCHASE_QUANTITIES:
+                    ArrayList<Integer> quantities = candyManager.getTotalPurchaseQuantity(this.getStoreManager().getStores(), (Buyer) entry.getValue());
+                    try {
+                        out.writeObject(quantities);
+                        out.flush();
+                    } catch (IOException ie) {
+                        ie.printStackTrace();
+                    }
+                    break;
+            }
+        }
+        try {
+            action = (HashMap<Action, Object>) in.readObject();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

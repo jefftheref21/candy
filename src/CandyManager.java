@@ -96,12 +96,17 @@ public class CandyManager {
             }
         }
     }
-    public int getTotalPurchaseQuantity(Store store, Buyer buyer){
-        int purchaseQuantity = 0;
-        for (int k = 0; k < buyer.getPurchaseHistory().getPurchases().size(); k++) {
-            purchaseQuantity += store.getSalesByBuyer(buyer).get(k).getQuantityBought();
+    public ArrayList<Integer> getTotalPurchaseQuantity(ArrayList<Store> stores, Buyer buyer){
+        ArrayList<Integer> purchaseQuantities = new ArrayList<>();
+        for (int j = 0; j < stores.size(); j++) {
+            Store store = stores.get(j);
+            int purchaseQuantity = 0;
+            for (int k = 0; k < buyer.getPurchaseHistory().getPurchases().size(); k++) {
+                purchaseQuantity += store.getSalesByBuyer(buyer).get(k).getQuantityBought();
+            }
+            purchaseQuantities.add(purchaseQuantity);
         }
-        return purchaseQuantity;
+        return purchaseQuantities;
     }
     public void sortProducts(int choice) {
         // TODO: Sort for price or quantity

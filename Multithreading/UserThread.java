@@ -15,11 +15,12 @@ public class UserThread extends User implements Runnable {
     private Thread sellerThread;
 
     private Action action;
+    private CandyManager cm;
 
-    public UserThread(Socket socket) {
+    public UserThread(Socket socket, CandyManager cm) {
         try {
             this.socket = socket;
-
+            this.cm = cm;
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             out = new PrintWriter(socket.getOutputStream(), true);
 
@@ -43,11 +44,11 @@ public class UserThread extends User implements Runnable {
                     handleLogin();
                     break;
                 case BUYER:
-                    buyerThread = new Thread(new BuyerThread(socket));
+                    buyerThread = new Thread(new BuyerThread(socket, cm));
                     buyerThread.start();
                     break;
                 case SELLER:
-                    sellerThread = new Thread(new SellerThread(socket));
+                    sellerThread = new Thread(new SellerThread(socket, cm));
                     sellerThread.start();
                     break;
                 default:
