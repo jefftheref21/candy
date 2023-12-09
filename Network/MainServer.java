@@ -6,11 +6,11 @@ import java.util.*;
 
 public class MainServer {
 
+    private LinkedHashMap<String, UserThread> userInfo = new LinkedHashMap<>();
+
     // TCP Components
     private ServerSocket serverSocket;
     private CandyManager candyManager;
-
-    private volatile boolean isRunning = true; // Will do stuff with this later
     public MainServer(CandyManager candyManager) {
         this.candyManager = candyManager;
     }
@@ -22,7 +22,7 @@ public class MainServer {
         // writeFile("filename.txt", candyManager);
     }
 
-    public void startServer() {
+    public void startServer() throws ClassNotFoundException {
         int portNo = 1234;
 
         try {
@@ -34,12 +34,32 @@ public class MainServer {
 
             while (true) {
                 Socket socket = serverSocket.accept();
-                new UserThread(socket);
+                UserThread ut = new UserThread(socket, candyManager);
+                // Implement action reader
+//                ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+//                HashMap<Action, Object> currActions= (HashMap<Action, Object>) ois.readObject();
+//                while (!currActions.containsKey(Action.CLOSE_CONNECTION)) {
+//                    for (Map.Entry<Action, Object> entry : currActions.entrySet()) {
+//                        switch (entry.getKey()) {
+//                            case Action.CANDY_PAGE:
+//                                // Display Marketplace
+//                                break;
+//                            case Action.BUY_ITEM:
+//                                Sale cs = (Sale) entry.getValue();
+//                                candyManager.buyInstantly(cs.getCandyBought().getCandyID(), cs.getQuantityBought(), cs.getBuyerAccount());
+//                                break;
+//                        }
+//                    }
+//                }
             }
         } catch (IOException e) {
             System.out.println("IO Exception:" + e);
             System.exit(1);
         }
+    }
+
+    public HashMap<String, UserThread> getUserInfo() {
+        return userInfo;
     }
 
     // TODO: Pablo, you know what to do
