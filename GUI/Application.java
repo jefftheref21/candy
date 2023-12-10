@@ -39,15 +39,15 @@ public class Application implements Runnable {
                 client.receiveAction();
 
                 if (client.getAction() == Action.VALID_CREDENTIALS_BUYER) {
-                    showSuccessfulSignUpDialog();
+                    Messages.showSuccessfulSignUpDialog();
                     runMarketplace();
                     signUpDialog.dispose();
                 } else if (client.getAction() == Action.VALID_CREDENTIALS_SELLER) {
-                    showSuccessfulSignUpDialog();
+                    Messages.showSuccessfulSignUpDialog();
                     runControlCenter();
                     signUpDialog.dispose();
                 } else if (client.getAction() == Action.INVALID_CREDENTIALS) {
-                    showUnsuccessfulSignUpDialog();
+                    Messages.showUnsuccessfulSignUpDialog();
                     showSignUpDialog();
                 }
             }
@@ -60,17 +60,15 @@ public class Application implements Runnable {
                 client.receiveAction();
 
                 if (client.getAction() == Action.VALID_CREDENTIALS_BUYER) {
-                    showSuccessfulLoginDialog();
+                    Messages.showSuccessfulLoginDialog();
                     runMarketplace();
                     loginDialog.dispose();
                 } else if (client.getAction() == Action.VALID_CREDENTIALS_SELLER) {
-                    showSuccessfulLoginDialog();
+                    Messages.showSuccessfulLoginDialog();
                     runControlCenter();
                     loginDialog.dispose();
                 } else if (client.getAction() == Action.INVALID_CREDENTIALS) {
-                    showUnsuccessfulLoginDialog();
-//                    loginDialog.dispose();
-//                    showLoginDialog();
+                    Messages.showUnsuccessfulLoginDialog();
                 }
             }
         }
@@ -143,26 +141,6 @@ public class Application implements Runnable {
                 "User Type", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
                 null, options, options[0]);
         userTypeLabel = new JLabel(options[userType]);
-    }
-
-    public void showSuccessfulSignUpDialog() {
-        JOptionPane.showMessageDialog(null, "Sign up successful!",
-                "Sign Up Confirmation", JOptionPane.PLAIN_MESSAGE);
-    }
-
-    public void showUnsuccessfulSignUpDialog() {
-        JOptionPane.showMessageDialog(null, "Sign up failed!",
-                "Sign Up Failed", JOptionPane.ERROR_MESSAGE);
-    }
-
-    public void showSuccessfulLoginDialog() {
-        JOptionPane.showMessageDialog(null, "Login successful!",
-                "Login Confirmation", JOptionPane.PLAIN_MESSAGE);
-    }
-
-    public void showUnsuccessfulLoginDialog() {
-        JOptionPane.showMessageDialog(null, "Login failed!",
-                "Login Failed", JOptionPane.ERROR_MESSAGE);
     }
 
     /**

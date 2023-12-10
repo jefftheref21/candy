@@ -55,8 +55,6 @@ public class UserThread extends User implements Runnable {
                     }
                 }
             }
-
-            // closeResources();
         } catch (Exception e) {
             handleException(e);
         }

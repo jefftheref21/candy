@@ -41,37 +41,52 @@ public class Marketplace extends JFrame implements Runnable {
                 try {
                     int quantityToBuy = Integer.parseInt(quantityToBuyTextField.getText());
                     buyerClient.sendCandyProduct(candySelected, "BUY_INSTANTLY", quantityToBuy);
-//                    if (quantityToBuy <= 0) {
-//                        JOptionPane.showMessageDialog(null, "Please enter a valid number",
-//                                "Error", JOptionPane.ERROR_MESSAGE);
-//                    } else if (quantityToBuy > currCandy.getQuantity()) {
-//                        JOptionPane.showMessageDialog(null,
-//                                "The quantity entered exceeds the current quantity. " +
-//                                        "Please enter a valid quantity.",
-//                                "Error", JOptionPane.ERROR_MESSAGE);
-//                    } else {
-//                        //We're going to change this later, make this all client server side stuff
-//                        currCandy.setQuantity(currCandy.getQuantity() - quantityToBuy);
-//                        JOptionPane.showMessageDialog(null, "Thank you for your purchase",
-//                                "Success", JOptionPane.INFORMATION_MESSAGE);
-//                        jf.dispose(); // Close the Buy Candy dialog
-//                    }
                 } catch (NumberFormatException ex) {
-                    showNumberFormatError();
+                    Messages.showNumberFormatError();
                 }
-                // buyerClient();
+                buyerClient.receiveAction();
+
+                switch (buyerClient.getAction()) {
+                    case BUY_SUCCESSFUL:
+                        Messages.showSuccessfulPurchase();
+                        break;
+                    case BUY_QUANTITY_EXCEEDS:
+                        Messages.showQuantityExceededError();
+                        break;
+                    case BUY_QUANTITY_INVALID:
+                        Messages.showNumberFormatError();
+                        break;
+                }
+
             }
             if (e.getSource() == shoppingCartButton) {
                 showShoppingCartDialog();
             }
             if (e.getSource() == buyShoppingCartButton) {
-                // buyerClient.
+                buyerClient.sendBuyShoppingCart();
+                buyerClient.receiveAction();
+
+                switch (buyerClient.getAction()) {
+                    case BUY_SUCCESSFUL:
+                        Messages.showSuccessfulPurchase();
+                        break;
+                    case BUY_QUANTITY_EXCEEDS:
+                        Messages.showQuantityExceededError();
+                        break;
+                }
             }
             if (e.getSource() == historyButton) {
                 showPurchaseHistoryDialog();
             }
             if (e.getSource() == exportHistoryButton) {
-                // buyerClient.exportHistory();
+                // buyerClient.sendExportPurchaseHistory();
+                buyerClient.receiveAction();
+
+                if (buyerClient.getAction() == Action.EXPORT_HISTORY_SUCCESSFUL) {
+                    Messages.showExportHistorySuccessful();
+                } else if (buyerClient.getAction() == Action.EXPORT_HISTORY_UNSUCCESSFUL) {
+                    Messages.showExportHistoryUnsuccessful();
+                }
             }
             if (e.getSource() == viewStatisticsButton) {
                 // viewStatistics();
@@ -103,10 +118,7 @@ public class Marketplace extends JFrame implements Runnable {
         setVisible(true);
     }
 
-    public void showNumberFormatError() {
-        JOptionPane.showMessageDialog(null, "Please enter a valid number",
-                "Error", JOptionPane.ERROR_MESSAGE);
-    }
+
 
     /**
      * Panel that has a drop-down menu for choosing how to sort the marketplace and a search button
