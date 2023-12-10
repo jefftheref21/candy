@@ -1,10 +1,27 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-public class ControlCenter extends JFrame {
+import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.net.Socket;
+
+public class ControlCenter extends JFrame implements Runnable {
     public static final Color buttonColor = new Color(235, 158, 52);
-    public ControlCenter() {
-        super("Control Center");
+    public static final Color outerColor = new Color(245, 130, 75);
+    public static final Color backgroundColor = new Color(235, 83, 52);
+
+    SellerClient sellerClient;
+
+
+
+    ActionListener actionListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+
+        }
+    };
+    public ControlCenter(Socket socket) throws IOException {
+        sellerClient = new SellerClient(socket, this);
     }
 
     public void run() {
