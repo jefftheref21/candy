@@ -17,8 +17,9 @@ public class BuyerThread extends Buyer implements Runnable {
             this.socket = socket;
             this.candyManager = candyManager; // Initialize CandyManager
 
-            in = new ObjectInputStream(socket.getInputStream());
             out = new ObjectOutputStream(socket.getOutputStream());
+            in = new ObjectInputStream(socket.getInputStream());
+
             for (Candy candy : candyManager.candies) {
                 stores.add(candy.getStore());
             }

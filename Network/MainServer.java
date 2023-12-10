@@ -5,9 +5,14 @@ import java.net.Socket;
 import java.util.*;
 
 public class MainServer {
+    private static LinkedHashMap<String, UserThread> userInfo = new LinkedHashMap<String, UserThread>();
+
     // TCP Components
     private ServerSocket serverSocket;
     private CandyManager candyManager;
+
+    private ArrayList<User> users;
+
     public MainServer(CandyManager candyManager) {
         this.candyManager = candyManager;
     }
@@ -15,8 +20,14 @@ public class MainServer {
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         // CandyManager candyManager = readFile("filename.txt");
         MainServer server = new MainServer(new CandyManager());
+        server.initializeUsers();
         server.startServer(); // start the server
         // writeFile("filename.txt", candyManager);
+    }
+
+    public void initializeUsers() {
+        users = new ArrayList<>();
+        users.add(new Seller("jeff", "pass"));
     }
 
     public void startServer() throws ClassNotFoundException {
@@ -31,23 +42,7 @@ public class MainServer {
 
             while (true) {
                 Socket socket = serverSocket.accept();
-                UserThread ut = new UserThread(socket, candyManager);
-                // Implement action reader
-//                ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
-//                HashMap<Action, Object> currActions= (HashMap<Action, Object>) ois.readObject();
-//                while (!currActions.containsKey(Action.CLOSE_CONNECTION)) {
-//                    for (Map.Entry<Action, Object> entry : currActions.entrySet()) {
-//                        switch (entry.getKey()) {
-//                            case Action.CANDY_PAGE:
-//                                // Display Marketplace
-//                                break;
-//                            case Action.BUY_ITEM:
-//                                Sale cs = (Sale) entry.getValue();
-//                                candyManager.buyInstantly(cs.getCandyBought().getCandyID(), cs.getQuantityBought(), cs.getBuyerAccount());
-//                                break;
-//                        }
-//                    }
-//                }
+                new UserThread(socket, candyManager, users);
             }
         } catch (IOException e) {
             System.out.println("IO Exception:" + e);
@@ -62,7 +57,7 @@ public class MainServer {
         FileInputStream fi = new FileInputStream(new File(filename));
         ObjectInputStream ois = new ObjectInputStream(fi);
         candyManager.candies = (ArrayList<Candy>) ois.readObject();
-        ois.close();
+//        ois.close();
         return candyManager;
     }
 
@@ -72,6 +67,6 @@ public class MainServer {
         ObjectOutputStream oos = new ObjectOutputStream(fo);
         oos.writeObject(cm.candies);
         oos.flush();
-        oos.close();
+//        oos.close();
     }
 }

@@ -36,15 +36,17 @@ public class Application implements Runnable {
                         ie.printStackTrace();
                     }
                 }
-                if (client.receiveAction() == Action.VALID_CREDENTIALS_BUYER) {
+                client.receiveAction();
+
+                if (client.getAction() == Action.VALID_CREDENTIALS_BUYER) {
                     showSuccessfulSignUpDialog();
                     runMarketplace();
                     signUpDialog.dispose();
-                } else if (client.receiveAction() == Action.VALID_CREDENTIALS_SELLER) {
+                } else if (client.getAction() == Action.VALID_CREDENTIALS_SELLER) {
                     showSuccessfulSignUpDialog();
                     runControlCenter();
                     signUpDialog.dispose();
-                } else if (client.receiveAction() == Action.INVALID_CREDENTIALS) {
+                } else if (client.getAction() == Action.INVALID_CREDENTIALS) {
                     showUnsuccessfulSignUpDialog();
                     showSignUpDialog();
                 }
@@ -55,19 +57,20 @@ public class Application implements Runnable {
                 } catch (IOException ie) {
                     ie.printStackTrace();
                 }
-                // if (client.receiveAction() == Action.VALID_CREDENTIALS_BUYER) {
-                if (1 == 1) {
+                client.receiveAction();
+
+                if (client.getAction() == Action.VALID_CREDENTIALS_BUYER) {
                     showSuccessfulLoginDialog();
                     runMarketplace();
                     loginDialog.dispose();
-                    //} else if (client.receiveAction() == Action.VALID_CREDENTIALS_SELLER) {
-                } else if (true) {
+                } else if (client.getAction() == Action.VALID_CREDENTIALS_SELLER) {
                     showSuccessfulLoginDialog();
                     runControlCenter();
                     loginDialog.dispose();
-                } else if (client.receiveAction() == Action.INVALID_CREDENTIALS) {
+                } else if (client.getAction() == Action.INVALID_CREDENTIALS) {
                     showUnsuccessfulLoginDialog();
-                    showLoginDialog();
+//                    loginDialog.dispose();
+//                    showLoginDialog();
                 }
             }
         }
