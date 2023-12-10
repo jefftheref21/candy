@@ -80,6 +80,23 @@ public class BuyerThread extends Buyer implements Runnable {
                         } catch (IOException ie) {
                             ie.printStackTrace();
                         }
+                    case SEARCH:
+                        break;
+                    case ADD_TO_CART:
+                        Purchase purchaseAddToCart = (Purchase) entry.getValue();
+                        try {
+                            addToCart(purchaseAddToCart.getCandyBought(), purchaseAddToCart.getQuantityBought());
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    case REMOVE_FROM_CART:
+                        Purchase purchaseRemoveFromCart = (Purchase) entry.getValue();
+                        try {
+                            removeFromCart(purchaseRemoveFromCart.getCandyBought(),
+                                    purchaseRemoveFromCart.getQuantityBought());
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
                 }
             }
             try {
@@ -88,5 +105,33 @@ public class BuyerThread extends Buyer implements Runnable {
                 e.printStackTrace();
             }
         }
+    }
+
+    private void search(String searchWord) {
+
+    }
+    private void addToCart(Candy candy, int quantity) throws IOException {
+        if (quantity > candy.getQuantity()) {
+            out.writeObject(Action.BUY_QUANTITY_EXCEEDS);
+            out.flush();
+            return;
+        }
+
+        Purchase purchase = new Purchase(candy, quantity);
+        this.addToShoppingCart(purchase);
+        out.writeObject(Action.ADD_TO_CART);
+        out.flush();
+    }
+    private void removeFromCart(Candy candy, int quantity) throws IOException {
+        Purchase purchase = new Purchase(candy, quantity);
+        for (int i = 0; i < this.getShoppingCart().getPurchases().size(); i++) {
+            if (purchase.getCandyBought().getCandyID() ==
+                    this.getShoppingCart().getPurchases().get(i).getCandyBought().getCandyID()) {
+                this.getShoppingCart().getPurchases().remove(i);
+                break;
+            }
+        }
+        out.writeObject(Action.REMOVE_FROM_CART);
+        out.flush();
     }
 }

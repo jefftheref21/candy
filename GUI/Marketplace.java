@@ -73,15 +73,34 @@ public class Marketplace extends JFrame implements Runnable {
 
             }
             if (e.getSource() == addToCartButton) {
-                // TODO
+                try {
+                    buyerClient.sendCandyProduct(candySelected, "ADD_TO_CART",
+                            Integer.parseInt(quantityToBuyTextField.getText()));
+                } catch (NumberFormatException ex) {
+                    Messages.showNumberFormatError();
+                }
+                buyerClient.receiveAction();
+
+                if (buyerClient.getAction() == Action.BUY_QUANTITY_EXCEEDS) {
+                    Messages.showQuantityExceededError();
+                } else if (buyerClient.getAction() == Action.ADD_TO_CART) {
+                    Messages.showAddToCartSuccessful();
+                }
             }
             if (e.getSource() == removeFromCartButton) {
-                // TODO
+                buyerClient.sendRemoveShoppingCart(candySelected, Integer.parseInt(quantityToBuyTextField.getText()));
+                buyerClient.receiveAction();
+
+                if (buyerClient.getAction() == Action.REMOVE_FROM_CART) {
+                    Messages.showRemoveToCartSuccessful();
+                }
             }
             if (e.getSource() == shoppingCartButton) {
                 // TODO
                 // send to server that we need shopping cart
                 // servers sends back shopping cart
+
+
                 showShoppingCartDialog();
             }
             if (e.getSource() == buyShoppingCartButton) {
