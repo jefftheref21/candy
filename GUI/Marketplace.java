@@ -18,7 +18,11 @@ public class Marketplace extends JFrame implements Runnable {
     String[] sortOptions = {"Price - Least to Greatest", "Price - Greatest to Least",
             "Quantity - Least to Greatest", "Quantity - Greatest to Least"};
     JButton searchButton;
+
     JButton buyButton;
+    JButton addToCartButton;
+    JButton removeFromCartButton;
+
     JButton shoppingCartButton;
     JButton buyShoppingCartButton;
     JButton historyButton;
@@ -34,6 +38,7 @@ public class Marketplace extends JFrame implements Runnable {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (e.getSource() == sortComboBox) {
+                // TODO
                 // need to figure out how to update marketplace with sorted candy
                 int sort = sortComboBox.getSelectedIndex();
                 buyerClient.sendSortDecision(sort);
@@ -41,6 +46,7 @@ public class Marketplace extends JFrame implements Runnable {
                 run();
             }
             if (e.getSource() == searchButton) {
+                // TODO
                 String searchWord = searchTextField.getText();
                 buyerClient.sendSearchDecision(searchWord);
             }
@@ -66,7 +72,16 @@ public class Marketplace extends JFrame implements Runnable {
                 }
 
             }
+            if (e.getSource() == addToCartButton) {
+                // TODO
+            }
+            if (e.getSource() == removeFromCartButton) {
+                // TODO
+            }
             if (e.getSource() == shoppingCartButton) {
+                // TODO
+                // send to server that we need shopping cart
+                // servers sends back shopping cart
                 showShoppingCartDialog();
             }
             if (e.getSource() == buyShoppingCartButton) {
@@ -83,9 +98,11 @@ public class Marketplace extends JFrame implements Runnable {
                 }
             }
             if (e.getSource() == historyButton) {
+                // TODO Must be updated from server
                 showPurchaseHistoryDialog();
             }
             if (e.getSource() == exportHistoryButton) {
+                // TODO buyerClient.sendExportPurchaseHistory()
                 // buyerClient.sendExportPurchaseHistory();
                 boolean expSuccess = buyerClient.getPurchaseHistory().exportHistoryToFile(buyerClient.getUsername());
                 if (expSuccess) {
@@ -95,6 +112,8 @@ public class Marketplace extends JFrame implements Runnable {
                 }
             }
             if (e.getSource() == viewStatisticsButton) {
+                // TODO Must have data sent from server
+
                 //buyerClient.
             }
 
@@ -297,7 +316,7 @@ public class Marketplace extends JFrame implements Runnable {
         gbc.gridx = 1;
         panel.add(quantityToBuyLabel, gbc);
 
-        JButton addToCartButton = new JButton("Add to Shopping Cart");
+        addToCartButton = new JButton("Add to Shopping Cart");
         addToCartButton.addActionListener(actionListener);
         addToCartButton.setBackground(buttonColor);
 
