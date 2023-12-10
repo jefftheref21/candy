@@ -9,8 +9,11 @@ public class MainServer {
     private LinkedHashMap<String, UserThread> userInfo = new LinkedHashMap<>();
 
     // TCP Components
+    private ObjectInputStream in;
+    private ObjectOutputStream out;
     private ServerSocket serverSocket;
     private CandyManager candyManager;
+    private Action action;
     public MainServer(CandyManager candyManager) {
         this.candyManager = candyManager;
     }
