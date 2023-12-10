@@ -4,21 +4,25 @@ import java.net.Socket;
 
 public class BuyerThread extends Buyer implements Runnable {
     private Socket socket;
+
     private ObjectInputStream in;
     private ObjectOutputStream out;
+
     private HashMap<Action, Object> action;
+
     private CandyManager candyManager;
     private ArrayList<Store> stores;
 
-    // Add this field
+
 
     public BuyerThread(Socket socket, CandyManager candyManager) {
         try {
             this.socket = socket;
             this.candyManager = candyManager; // Initialize CandyManager
 
-            in = new ObjectInputStream(socket.getInputStream());
             out = new ObjectOutputStream(socket.getOutputStream());
+            in = new ObjectInputStream(socket.getInputStream());
+
             for (Candy candy : candyManager.candies) {
                 stores.add(candy.getStore());
             }
@@ -65,7 +69,17 @@ public class BuyerThread extends Buyer implements Runnable {
                         }
                         break;
                     case BUY_SHOPPING_CART:
-                        candyManager.buyShoppingCart(this);
+                        boolean successful = candyManager.buyShoppingCart(this);
+                        try {
+                            if (successful) {
+                                out.writeObject(Action.BUY_SUCCESSFUL);
+                            } else {
+                                out.writeObject(Action.BUY_QUANTITY_EXCEEDS);
+                            }
+                            out.flush();
+                        } catch (IOException ie) {
+                            ie.printStackTrace();
+                        }
                 }
             }
             try {

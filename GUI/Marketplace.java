@@ -15,6 +15,8 @@ public class Marketplace extends JFrame implements Runnable {
     BuyerClient buyerClient;
 
     JComboBox sortComboBox;
+    String[] sortOptions = {"Price - Least to Greatest", "Price - Greatest to Least",
+            "Quantity - Least to Greatest", "Quantity - Greatest to Least"};
     JButton searchButton;
     JButton buyButton;
     JButton shoppingCartButton;
@@ -24,41 +26,83 @@ public class Marketplace extends JFrame implements Runnable {
     JButton viewStatisticsButton;
 
     JTextField searchTextField;
+    JTextField quantityToBuyTextField;
+
+    Candy candySelected;
 
     ActionListener actionListener = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (e.getSource() == sortComboBox) {
-                // sort();
+                // need to figure out how to update marketplace with sorted candy
+                int sort = sortComboBox.getSelectedIndex();
+                buyerClient.sendSortDecision(sort);
+                buyerClient.receiveSortCandies();
+                run();
             }
             if (e.getSource() == searchButton) {
                 String searchWord = searchTextField.getText();
+                buyerClient.sendSearchDecision(searchWord);
             }
             if (e.getSource() == buyButton) {
-                // buy();
+                try {
+                    int quantityToBuy = Integer.parseInt(quantityToBuyTextField.getText());
+                    buyerClient.sendCandyProduct(candySelected, "BUY_INSTANTLY", quantityToBuy);
+                } catch (NumberFormatException ex) {
+                    Messages.showNumberFormatError();
+                }
+                buyerClient.receiveAction();
+
+                switch (buyerClient.getAction()) {
+                    case BUY_SUCCESSFUL:
+                        Messages.showSuccessfulPurchase();
+                        break;
+                    case BUY_QUANTITY_EXCEEDS:
+                        Messages.showQuantityExceededError();
+                        break;
+                    case BUY_QUANTITY_INVALID:
+                        Messages.showNumberFormatError();
+                        break;
+                }
+
             }
             if (e.getSource() == shoppingCartButton) {
                 showShoppingCartDialog();
             }
             if (e.getSource() == buyShoppingCartButton) {
-                // buyerClient.
+                buyerClient.sendBuyShoppingCart();
+                buyerClient.receiveAction();
+
+                switch (buyerClient.getAction()) {
+                    case BUY_SUCCESSFUL:
+                        Messages.showSuccessfulPurchase();
+                        break;
+                    case BUY_QUANTITY_EXCEEDS:
+                        Messages.showQuantityExceededError();
+                        break;
+                }
             }
             if (e.getSource() == historyButton) {
                 showPurchaseHistoryDialog();
             }
             if (e.getSource() == exportHistoryButton) {
-                // buyerClient.exportHistory();
+                // buyerClient.sendExportPurchaseHistory();
+                boolean expSuccess = buyerClient.getPurchaseHistory().exportHistoryToFile(buyerClient.getUsername());
+                if (expSuccess) {
+                    Messages.showExportHistorySuccessful();
+                } else {
+                    Messages.showExportHistoryUnsuccessful();
+                }
             }
             if (e.getSource() == viewStatisticsButton) {
-                // viewStatistics();
+                //buyerClient.
             }
 
         }
     };
 
-    public Marketplace(Socket socket, CandyManager candyManager) throws IOException {
+    public Marketplace(Socket socket) throws IOException {
         buyerClient = new BuyerClient(socket, this);
-        buyerClient.setCandyManager(candyManager);
     }
 
     public void run() {
@@ -80,6 +124,8 @@ public class Marketplace extends JFrame implements Runnable {
         setVisible(true);
     }
 
+
+
     /**
      * Panel that has a drop-down menu for choosing how to sort the marketplace and a search button
      * with a text field to input the word
@@ -97,11 +143,7 @@ public class Marketplace extends JFrame implements Runnable {
         JLabel sortLabel = new JLabel("Sort by: ");
         topPanel.add(sortLabel, gbc);
 
-        String[] sortOptions = {"Price - Least to Greatest", "Price - Greatest to Least",
-                "Quantity - Least to Greatest", "Quantity - Greatest to Least"};
-
         JComboBox sortComboBox = new JComboBox(sortOptions);
-        gbc.gridx = 1;
         topPanel.add(sortComboBox, gbc);
 
         searchTextField = new JTextField(8);
@@ -110,12 +152,12 @@ public class Marketplace extends JFrame implements Runnable {
         searchButton.setBackground(buttonColor);
         searchButton.addActionListener(actionListener);
 
-        topPanel.add(searchTextField, new GridBagConstraints(100, 0, 1, 1, 0, 0,
-                GridBagConstraints.LINE_START, GridBagConstraints.NONE,
-                new Insets(10, 10, 10, 5), 5, 5));
-        topPanel.add(searchButton, new GridBagConstraints(101, 0, 1, 1, 0, 0,
-                GridBagConstraints.LINE_START, GridBagConstraints.NONE,
-                new Insets(10, 5, 10, 10), 5, 5));
+        gbc.gridx = 1;
+        topPanel.add(searchTextField, gbc);
+
+        gbc.gridx = 2;
+        topPanel.add(searchButton, gbc);
+
         content.add(topPanel, BorderLayout.NORTH);
     }
 
@@ -193,9 +235,11 @@ public class Marketplace extends JFrame implements Runnable {
             JButton currButton = new JButton(new AbstractAction() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
+                    candySelected = currCandy;
                     showCandyPageDialog(currCandy);
                 }
             });
+
             currButton.setBackground(buttonColor);
             currButton.setPreferredSize(new Dimension(100, 100));
             currButton.setHorizontalAlignment(SwingConstants.CENTER);
@@ -224,7 +268,7 @@ public class Marketplace extends JFrame implements Runnable {
 
         JPanel panel = new JPanel();
         panel.setLayout(new GridBagLayout());
-        panel.setBackground(backgroundColor);
+        panel.setBackground(outerColor);
 
         JLabel nameLabel = new JLabel(currCandy.getName());
         panel.add(nameLabel, gbc);
@@ -237,27 +281,34 @@ public class Marketplace extends JFrame implements Runnable {
         gbc.gridy = 2;
         panel.add(quantityLabel, gbc);
 
-        JButton buyButton = new JButton(new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showBuyDialog(currCandy);
-            }
-        });
-        buyButton.setText("Buy");
+        JLabel priceLabel = new JLabel("Product Price: " + currCandy.getPrice());
         gbc.gridy = 3;
+        panel.add(priceLabel, gbc);
+
+        buyButton = new JButton("Buy");
+        buyButton.addActionListener(actionListener);
+        buyButton.setBackground(buttonColor);
+
+        gbc.gridy = 4;
         panel.add(buyButton, gbc);
 
-        JButton addToCartButton = new JButton(new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Implement logic for adding to shopping cart
-                // You can add the necessary functionality here
-            }
-        });
-        addToCartButton.setText("Add to Shopping Cart");
+        JLabel quantityToBuyLabel = new JLabel("Quantity to Buy: ");
+
+        gbc.gridx = 1;
+        panel.add(quantityToBuyLabel, gbc);
+
+        JButton addToCartButton = new JButton("Add to Shopping Cart");
+        addToCartButton.addActionListener(actionListener);
         addToCartButton.setBackground(buttonColor);
-        gbc.gridy = 4;
+
+        gbc.gridx = 0;
+        gbc.gridy = 5;
         panel.add(addToCartButton, gbc);
+
+        quantityToBuyTextField = new JTextField(8);
+
+        gbc.gridx = 1;
+        panel.add(quantityToBuyTextField, gbc);
 
         JButton exitButton = new JButton(new AbstractAction() {
             @Override
@@ -266,78 +317,11 @@ public class Marketplace extends JFrame implements Runnable {
             }
         });
         exitButton.setText("Exit");
-        gbc.gridy = 5;
+        exitButton.setBackground(buttonColor);
+
+        gbc.gridx = 0;
+        gbc.gridy = 6;
         panel.add(exitButton, gbc);
-
-        jf.add(panel);
-        jf.pack();
-        jf.setLocationRelativeTo(null);
-        jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        jf.setVisible(true);
-    }
-
-    /**
-     * Dialog that asks for the quantity that the user wants to buy
-     * Makes sure that quantity requested is not above quantity of product sold
-     * @param currCandy - candy selected by user
-     */
-    public void showBuyDialog(Candy currCandy) {
-        JFrame jf = new JFrame("Buy Candy");
-        GridBagConstraints gbc = new GridBagConstraints(0, 0, 1, 1, 0, 0,
-                GridBagConstraints.LINE_START, GridBagConstraints.NONE,
-                new Insets(10, 10, 10, 10), 0, 0);
-
-        JPanel panel = new JPanel();
-        panel.setLayout(new GridBagLayout());
-
-        JLabel nameLabel = new JLabel(currCandy.getName());
-        panel.add(nameLabel, gbc);
-
-        JLabel priceLabel = new JLabel("Price: $" + currCandy.getPrice());
-        gbc.gridy = 1;
-        panel.add(priceLabel, gbc);
-
-        JLabel quantityLabel = new JLabel("Available Quantity: " + currCandy.getQuantity());
-        gbc.gridy = 2;
-        panel.add(quantityLabel, gbc);
-
-        JLabel quantityToBuyLabel = new JLabel("Quantity to buy: ");
-        gbc.gridy = 3;
-        panel.add(quantityToBuyLabel, gbc);
-
-        JTextField quantityToBuyTextField = new JTextField(8);
-        gbc.gridy = 4;
-        panel.add(quantityToBuyTextField, gbc);
-
-        JButton buyButton = new JButton(new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    int quantityToBuy = Integer.parseInt(quantityToBuyTextField.getText());
-                    if (quantityToBuy <= 0) {
-                        JOptionPane.showMessageDialog(null, "Please enter a valid number",
-                                "Error", JOptionPane.ERROR_MESSAGE);
-                    } else if (quantityToBuy > currCandy.getQuantity()) {
-                        JOptionPane.showMessageDialog(null,
-                                "The quantity entered exceeds the current quantity. " +
-                                        "Please enter a valid quantity.",
-                                "Error", JOptionPane.ERROR_MESSAGE);
-                    } else {
-                        //We're going to change this later, make this all client server side stuff
-                        currCandy.setQuantity(currCandy.getQuantity() - quantityToBuy);
-                        JOptionPane.showMessageDialog(null, "Thank you for your purchase",
-                                "Success", JOptionPane.INFORMATION_MESSAGE);
-                        jf.dispose(); // Close the Buy Candy dialog
-                    }
-                } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(null, "Please enter a valid number",
-                            "Error", JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        });
-        buyButton.setText("Buy");
-        gbc.gridy = 5;
-        panel.add(buyButton, gbc);
 
         jf.add(panel);
         jf.pack();
@@ -361,7 +345,7 @@ public class Marketplace extends JFrame implements Runnable {
         titlePanel.add(shoppingCartLabel);
 
         JPanel shoppingCartInfo = new JPanel();
-        shoppingCartInfo.setBackground(backgroundColor);
+        shoppingCartInfo.setBackground(outerColor);
         shoppingCartInfo.setLayout(new GridBagLayout());
 
         JLabel candyIDLabel = new JLabel("Candy ID");
@@ -431,7 +415,7 @@ public class Marketplace extends JFrame implements Runnable {
         titlePanel.add(purchaseHistoryLabel);
 
         JPanel purchaseHistoryInfo = new JPanel();
-        purchaseHistoryInfo.setBackground(backgroundColor);
+        purchaseHistoryInfo.setBackground(outerColor);
         purchaseHistoryInfo.setLayout(new GridBagLayout());
 
         JLabel candyIDLabel = new JLabel("Candy ID");

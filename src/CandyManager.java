@@ -11,7 +11,7 @@ public class CandyManager {
     // class doesn't need a constructor, because we're just interested in the static candies ArrayList.
     public ArrayList<Candy> candies = new ArrayList<>();
     public int prodCounter = 0;
-
+    public static Object obj = new Object();
     public CandyManager() {
         this.candies = new ArrayList<>();
         this.prodCounter = 0;
@@ -19,6 +19,9 @@ public class CandyManager {
     public CandyManager(ArrayList<Candy> candies, int prodCounter) {
         this.candies = candies;
         this.prodCounter = prodCounter;
+    }
+    public ArrayList<Candy> getCandies() {
+        return candies;
     }
     // Buyer methods
     public String viewProductPage(int productID) {
@@ -176,27 +179,31 @@ public class CandyManager {
 
         return output.toString();
     }
-    public void buyInstantly(int id, int quantity, Buyer buyer)  {
-        int index = getIndex(id);
-        int totalQuantity = candies.get(index).getTotalQuantity();
-        if (totalQuantity >= quantity) {
-            candies.get(index).setQuantity(totalQuantity - quantity);
-            candies.get(index).getStore().editCandy(id, candies.get(index), this);
-            System.out.println("Thank you for purchasing! Your total was $" + quantity *
-                    candies.get(index).getPrice() );
-            Sale sale = new Sale(candies.get(index), quantity, buyer);
-            candies.get(index).getStore().addSale(sale);
-            buyer.getPurchaseHistory().addPurchase(sale);
-        } else {
-            System.out.println("Error! Not enough candy on stock!");
-        }
+    public synchronized boolean buyInstantly(int id, int quantity, Buyer buyer) {
+            int index = getIndex(id);
+            int totalQuantity = candies.get(index).getTotalQuantity();
+            if (totalQuantity >= quantity) {
+                candies.get(index).setQuantity(totalQuantity - quantity);
+                candies.get(index).getStore().editCandy(id, candies.get(index), this);
+                System.out.println("Thank you for purchasing! Your total was $" + quantity *
+                        candies.get(index).getPrice() );
+                Sale sale = new Sale(candies.get(index), quantity, buyer);
+                candies.get(index).getStore().addSale(sale);
+                buyer.getPurchaseHistory().addPurchase(sale);
+                return true;
+            } else {
+                return false;
+            }
     }
-    public void buyShoppingCart(Buyer buyer) {
-        boolean boughtTooMuch;
-        for (int i = 0; i < buyer.getShoppingCart().getPurchases().size(); i++) {
-            Purchase currPurchase = buyer.getShoppingCart().getPurchases().get(i);
-            buyInstantly(currPurchase.getCandyBought().getCandyID(), currPurchase.getQuantityBought(), buyer);
-        }
+    public synchronized boolean buyShoppingCart(Buyer buyer) {
+            for (int i = 0; i < buyer.getShoppingCart().getPurchases().size(); i++) {
+                Purchase currPurchase = buyer.getShoppingCart().getPurchases().get(i);
+                boolean success = buyInstantly(currPurchase.getCandyBought().getCandyID(), currPurchase.getQuantityBought(), buyer);
+                if (!success) {
+                    return false;
+                }
+            }
+        return true;
     }
     public String search(String keyWord) {
         String result = "";

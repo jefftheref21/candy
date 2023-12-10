@@ -4,8 +4,10 @@ import java.util.*;
 
 public class SellerThread extends Seller implements Runnable {
     private Socket socket;
+
     private ObjectInputStream in;
     private ObjectOutputStream out;
+
     private HashMap<Action, Object> action;
     private CandyManager candyManager;
 
@@ -13,8 +15,9 @@ public class SellerThread extends Seller implements Runnable {
         try {
             this.socket = socket;
             this.candyManager = cm;
-            in = new ObjectInputStream(socket.getInputStream());
+
             out = new ObjectOutputStream(socket.getOutputStream());
+            in = new ObjectInputStream(socket.getInputStream());
         } catch (IOException ie) {
             ie.printStackTrace();
         }

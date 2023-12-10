@@ -55,7 +55,7 @@ public class PurchaseHistory implements Serializable {
      * Write to new file that shows their entire purchase history
      * Use the viewHistory function
      */
-    public void exportHistoryToFile(String username) {
+    public boolean exportHistoryToFile(String username) {
         File f = new File(username + "PurchaseHistory.txt");
         try {
             PrintWriter pw = new PrintWriter(new FileOutputStream(f));
@@ -63,8 +63,10 @@ public class PurchaseHistory implements Serializable {
                 pw.println(purchases.get(i).toString());
             }
             pw.close();
+            return true;
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
     }
 

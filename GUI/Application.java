@@ -3,8 +3,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
 
-//sample comment
-//sample comment nathan park
 public class Application implements Runnable {
     UserClient client;
 
@@ -23,34 +21,44 @@ public class Application implements Runnable {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (e.getSource() == signUpButton) {
-                client.sendSignUp("SIGNUP", usernameTextField.getText(), passwordTextField.getText());
-                if (client.receiveAction() == Action.VALID_CREDENTIALS_BUYER) {
-                    showSuccessfulSignUpDialog();
+                if (userTypeLabel.getText().equals("Buyer")) {
+                    Buyer buyer = new Buyer(usernameTextField.getText(), passwordTextField.getText());
+                    client.sendSignUp(buyer);
+                } else {
+                    Seller seller = new Seller(usernameTextField.getText(), passwordTextField.getText());
+                    client.sendSignUp(seller);
+                }
+                client.receiveAction();
+
+
+                if (client.getAction() == Action.VALID_CREDENTIALS_BUYER) {
+                    Messages.showSuccessfulSignUpDialog();
                     runMarketplace();
                     signUpDialog.dispose();
-                } else if (client.receiveAction() == Action.VALID_CREDENTIALS_SELLER) {
-                    showSuccessfulSignUpDialog();
+                } else if (client.getAction() == Action.VALID_CREDENTIALS_SELLER) {
+                    Messages.showSuccessfulSignUpDialog();
                     runControlCenter();
                     signUpDialog.dispose();
-                } else if (client.receiveAction() == Action.INVALID_CREDENTIALS) {
-                    showUnsuccessfulSignUpDialog();
+                } else if (client.getAction() == Action.INVALID_CREDENTIALS) {
+                    Messages.showUnsuccessfulSignUpDialog();
                     showSignUpDialog();
                 }
             }
             if (e.getSource() == loginButton) {
-                client.sendLogin("LOGIN", usernameTextField.getText(), passwordTextField.getText());
-                // if (client.receiveAction() == Action.VALID_CREDENTIALS_BUYER) {
-                if (true) {
-                    showSuccessfulLoginDialog();
+                client.sendLogin(new User(usernameTextField.getText(), passwordTextField.getText()));
+
+                client.receiveAction();
+
+                if (client.getAction() == Action.VALID_CREDENTIALS_BUYER) {
+                    Messages.showSuccessfulLoginDialog();
                     runMarketplace();
                     loginDialog.dispose();
-                } else if (client.receiveAction() == Action.VALID_CREDENTIALS_SELLER) {
-                    showSuccessfulLoginDialog();
+                } else if (client.getAction() == Action.VALID_CREDENTIALS_SELLER) {
+                    Messages.showSuccessfulLoginDialog();
                     runControlCenter();
                     loginDialog.dispose();
-                } else if (client.receiveAction() == Action.INVALID_CREDENTIALS) {
-                    showUnsuccessfulLoginDialog();
-                    showLoginDialog();
+                } else if (client.getAction() == Action.INVALID_CREDENTIALS) {
+                    Messages.showUnsuccessfulLoginDialog();
                 }
             }
         }
@@ -70,26 +78,23 @@ public class Application implements Runnable {
 
     public void runMarketplace() {
         try {
-            SwingUtilities.invokeLater(new Marketplace(client.getSocket(), client.getCandyManager()));
+            SwingUtilities.invokeLater(new Marketplace(client.getSocket()));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public void runControlCenter() {
-//        try {
-//             SwingUtilities.invokeLater(new ControlCenter(client.getSocket(), client.getCandyManager()));
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        try {
+             SwingUtilities.invokeLater(new ControlCenter(client.getSocket()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void run() {
         showWelcomeMessageDialog();
         showStartingDialog();
-
-//        ControlCenter controlCenter = new ControlCenter();
-//        controlCenter.run();
     }
 
     /**
@@ -126,26 +131,6 @@ public class Application implements Runnable {
                 "User Type", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
                 null, options, options[0]);
         userTypeLabel = new JLabel(options[userType]);
-    }
-
-    public void showSuccessfulSignUpDialog() {
-        JOptionPane.showMessageDialog(null, "Sign up successful!",
-                "Sign Up Confirmation", JOptionPane.PLAIN_MESSAGE);
-    }
-
-    public void showUnsuccessfulSignUpDialog() {
-        JOptionPane.showMessageDialog(null, "Sign up failed!",
-                "Sign Up Failed", JOptionPane.ERROR_MESSAGE);
-    }
-
-    public void showSuccessfulLoginDialog() {
-        JOptionPane.showMessageDialog(null, "Login successful!",
-                "Login Confirmation", JOptionPane.PLAIN_MESSAGE);
-    }
-
-    public void showUnsuccessfulLoginDialog() {
-        JOptionPane.showMessageDialog(null, "Login failed!",
-                "Login Failed", JOptionPane.ERROR_MESSAGE);
     }
 
     /**
