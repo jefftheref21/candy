@@ -1,21 +1,27 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
+import java.util.*;
 import java.net.Socket;
 
 public class BuyerThread extends Buyer implements Runnable {
     private Socket socket;
-    private BufferedReader in;
-    private PrintWriter out;
-    private Action action;
+    private ObjectInputStream in;
+    private ObjectOutputStream out;
+    private HashMap<Action, Object> action;
+    private CandyManager candyManager;
+    private ArrayList<Store> stores;
 
-    public BuyerThread(Socket socket) {
+    // Add this field
+
+    public BuyerThread(Socket socket, CandyManager candyManager) {
         try {
             this.socket = socket;
+            this.candyManager = candyManager; // Initialize CandyManager
 
-            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            out = new PrintWriter(socket.getOutputStream(), true);
+            in = new ObjectInputStream(socket.getInputStream());
+            out = new ObjectOutputStream(socket.getOutputStream());
+            for (Candy candy : candyManager.candies) {
+                stores.add(candy.getStore());
+            }
 
         } catch (IOException e) {
             System.out.println(e);
@@ -24,11 +30,48 @@ public class BuyerThread extends Buyer implements Runnable {
 
     public void run() {
         while (true) {
-            switch(action) {
-                case LOGIN:
-                    break;
-                case SIGNUP:
-                    break;
+            for (Map.Entry<Action, Object> entry : action.entrySet()) {
+                switch (entry.getKey()) {
+                    case VIEW_PRODUCT_PAGE:
+                        // get stuff from client
+                        String productPage = candyManager.viewProductPage((Integer) entry.getValue());
+                        try {
+                            out.writeObject(productPage);
+                            out.flush();
+                        } catch (IOException ie) {
+                            ie.printStackTrace();
+                        }
+                        break;
+
+                    case SORT_STORE_STATS:
+                        // get stuff from client
+                        candyManager.sortStoreStatistics(stores, (Integer) entry.getValue(), this);
+                        try {
+                            out.writeObject(candyManager);
+                            out.flush();
+                        } catch (IOException ie) {
+                            ie.printStackTrace();
+                        }
+                        break;
+
+                    case SORT_PRODUCTS:
+                        // get stuff from client
+                        candyManager.sortProducts((Integer) entry.getValue());
+                        try {
+                            out.writeObject(candyManager.candies);
+                            out.flush();
+                        } catch (IOException ie) {
+                            ie.printStackTrace();
+                        }
+                        break;
+                    case BUY_SHOPPING_CART:
+                        candyManager.buyShoppingCart(this);
+                }
+            }
+            try {
+                action = (HashMap<Action, Object>) in.readObject();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }

@@ -8,6 +8,9 @@ import java.io.IOException;
 public class Application implements Runnable {
     UserClient client;
 
+    JFrame signUpDialog;
+    JFrame loginDialog;
+
     JLabel userTypeLabel;
 
     JButton signUpButton;
@@ -21,17 +24,34 @@ public class Application implements Runnable {
         public void actionPerformed(ActionEvent e) {
             if (e.getSource() == signUpButton) {
                 client.sendSignUp("SIGNUP", usernameTextField.getText(), passwordTextField.getText());
-                if (client.receiveAction() == Action.VALID_CREDENTIALS) {
-                    JOptionPane.showMessageDialog(null, "Sign up successful!",
-                            "Sign Up Confirmation", JOptionPane.PLAIN_MESSAGE);
+                if (client.receiveAction() == Action.VALID_CREDENTIALS_BUYER) {
+                    showSuccessfulSignUpDialog();
+                    runMarketplace();
+                    signUpDialog.dispose();
+                } else if (client.receiveAction() == Action.VALID_CREDENTIALS_SELLER) {
+                    showSuccessfulSignUpDialog();
+                    runControlCenter();
+                    signUpDialog.dispose();
                 } else if (client.receiveAction() == Action.INVALID_CREDENTIALS) {
-                    JOptionPane.showMessageDialog(null, "Sign up failed!",
-                            "Sign Up Failed", JOptionPane.ERROR_MESSAGE);
-                    showSignUpDialog(userTypeLabel.getText());
+                    showUnsuccessfulSignUpDialog();
+                    showSignUpDialog();
                 }
             }
             if (e.getSource() == loginButton) {
                 client.sendLogin("LOGIN", usernameTextField.getText(), passwordTextField.getText());
+                // if (client.receiveAction() == Action.VALID_CREDENTIALS_BUYER) {
+                if (true) {
+                    showSuccessfulLoginDialog();
+                    runMarketplace();
+                    loginDialog.dispose();
+                } else if (client.receiveAction() == Action.VALID_CREDENTIALS_SELLER) {
+                    showSuccessfulLoginDialog();
+                    runControlCenter();
+                    loginDialog.dispose();
+                } else if (client.receiveAction() == Action.INVALID_CREDENTIALS) {
+                    showUnsuccessfulLoginDialog();
+                    showLoginDialog();
+                }
             }
         }
     };
@@ -41,29 +61,35 @@ public class Application implements Runnable {
     }
 
     public static void main(String[] args) throws IOException {
+        runApplication();
+    }
+
+    public static void runApplication() throws IOException {
         SwingUtilities.invokeLater(new Application());
     }
 
-    public void run() {
-        Candy candy1 = new Candy("Snickers", new Store("Walmart"), "Chocolate bar", 1, 50, 1.00);
-        Candy candy2 = new Candy("Twix", new Store("Walmart"), "Chocolate bar",2, 25, 2.00);
-        Candy candy3 = new Candy("M&Ms", new Store("Walmart"), "Chocolate bar", 3, 100, 3.00);
-        Candy candy4 = new Candy("Kit Kat", new Store("Walmart"), "Chocolate bar", 4, 75, 4.00);
-        Candy candy5 = new Candy("Sour Patch Kids", new Store("Walmart"), "Sour candy", 5, 50, 1.00);
-        Candy candy6 = new Candy("Sour Skittles", new Store("Walmart"), "Sour candy", 6, 25, 2.00);
-        Candy[] candies = new Candy[6];
-        candies[0] = candy1;
-        candies[1] = candy2;
-        candies[2] = candy3;
-        candies[3] = candy4;
-        candies[4] = candy5;
-        candies[5] = candy6;
+    public void runMarketplace() {
+        try {
+            SwingUtilities.invokeLater(new Marketplace(client.getSocket(), client.getCandyManager()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
+    public void runControlCenter() {
+//        try {
+//             SwingUtilities.invokeLater(new ControlCenter(client.getSocket(), client.getCandyManager()));
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+    }
+
+    public void run() {
         showWelcomeMessageDialog();
         showStartingDialog();
 
-        Marketplace marketplace = new Marketplace(candies);
-        marketplace.run();
+//        ControlCenter controlCenter = new ControlCenter();
+//        controlCenter.run();
     }
 
     /**
@@ -82,10 +108,9 @@ public class Application implements Runnable {
         int signUpOrLogin = JOptionPane.showOptionDialog(null, "Select an option:",
                 "Sign Up or Login", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
                 null, options, options[0]);
-        String type;
         if (signUpOrLogin == 0) {
-            type = showUserTypeDialog();
-            showSignUpDialog(type);
+            showUserTypeDialog();
+            showSignUpDialog();
         } else {
             showLoginDialog();
         }
@@ -95,27 +120,45 @@ public class Application implements Runnable {
      * Dialog that makes user choose their user type
      * @return the type of user
      */
-    public String showUserTypeDialog() {
+    public void showUserTypeDialog() {
         String[] options = {"Buyer", "Seller"};
         int userType = JOptionPane.showOptionDialog(null, "Select your user type:",
                 "User Type", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
                 null, options, options[0]);
         userTypeLabel = new JLabel(options[userType]);
-        return options[userType];
+    }
+
+    public void showSuccessfulSignUpDialog() {
+        JOptionPane.showMessageDialog(null, "Sign up successful!",
+                "Sign Up Confirmation", JOptionPane.PLAIN_MESSAGE);
+    }
+
+    public void showUnsuccessfulSignUpDialog() {
+        JOptionPane.showMessageDialog(null, "Sign up failed!",
+                "Sign Up Failed", JOptionPane.ERROR_MESSAGE);
+    }
+
+    public void showSuccessfulLoginDialog() {
+        JOptionPane.showMessageDialog(null, "Login successful!",
+                "Login Confirmation", JOptionPane.PLAIN_MESSAGE);
+    }
+
+    public void showUnsuccessfulLoginDialog() {
+        JOptionPane.showMessageDialog(null, "Login failed!",
+                "Login Failed", JOptionPane.ERROR_MESSAGE);
     }
 
     /**
      * For signing up
-     * @param type - based on type of user
      * @return might get rid of return --> void
      */
-    public void showSignUpDialog(String type) {
-        JFrame jf = new JFrame("Sign Up");
+    public void showSignUpDialog() {
+        signUpDialog = new JFrame("Sign Up");
         GridBagConstraints gbc = new GridBagConstraints(0,0, 2, 1, 0.5, 0,
                 GridBagConstraints.LINE_START, GridBagConstraints.NONE,
                 new Insets(10, 10, 10, 10), 0, 0);
 
-        Container content = jf.getContentPane();
+        Container content = signUpDialog.getContentPane();
         content.setLayout(new GridBagLayout());
 
         JLabel signUpLabel = new JLabel("Candy Marketplace Sign Up");
@@ -143,17 +186,17 @@ public class Application implements Runnable {
         content.add(passwordTextField, gbc);
 
         // Let's make it so that you can't repeat usernames
-        JButton signUpButton = new JButton("Sign Up");
+        signUpButton = new JButton("Sign Up");
         signUpButton.addActionListener(actionListener);
 
         gbc.gridwidth = 2;
         gbc.gridy = 4;
         content.add(signUpButton, gbc);
 
-        jf.pack();
-        jf.setLocationRelativeTo(null);
-        jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        jf.setVisible(true);
+        signUpDialog.pack();
+        signUpDialog.setLocationRelativeTo(null);
+        signUpDialog.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        signUpDialog.setVisible(true);
     }
 
     /**
@@ -161,11 +204,11 @@ public class Application implements Runnable {
      * @return might get rid of this return --> void
      */
     public void showLoginDialog() {
-        JFrame jf = new JFrame("Login");
+        loginDialog = new JFrame("Login");
         GridBagConstraints gbc = new GridBagConstraints(0,0, 2, 1, 0.5, 0,
                 GridBagConstraints.LINE_START, GridBagConstraints.NONE,
                 new Insets(10, 10, 10, 10), 0, 0);
-        Container content = jf.getContentPane();
+        Container content = loginDialog.getContentPane();
         content.setLayout(new GridBagLayout());
 
         JLabel loginLabel = new JLabel("Candy Marketplace Login");
@@ -189,15 +232,17 @@ public class Application implements Runnable {
         gbc.gridx = 1;
         content.add(passwordTextField, gbc);
 
-        JButton loginButton = new JButton("Login");
+        loginButton = new JButton("Login");
         loginButton.addActionListener(actionListener);
-        content.add(loginButton, new GridBagConstraints(0, 3, 2, 1, 0.5, 0,
-                GridBagConstraints.LAST_LINE_END, GridBagConstraints.NONE,
-                new Insets(5, 0, 10, 10), 0, 0));
 
-        jf.pack();
-        jf.setLocationRelativeTo(null);
-        jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        jf.setVisible(true);
+        gbc.gridwidth = 2;
+        gbc.gridy = 3;
+
+        content.add(loginButton, gbc);
+
+        loginDialog.pack();
+        loginDialog.setLocationRelativeTo(null);
+        loginDialog.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        loginDialog.setVisible(true);
     }
 }

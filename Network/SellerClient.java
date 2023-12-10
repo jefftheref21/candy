@@ -4,8 +4,7 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class SellerClient {
-
+public class SellerClient extends Seller {
     private Socket socket;
     private final ObjectInputStream in;
     private final ObjectOutputStream out;
