@@ -11,16 +11,11 @@ public class SellerThread extends Seller implements Runnable {
     private HashMap<Action, Object> action;
     private CandyManager candyManager;
 
-    public SellerThread(Socket socket, CandyManager cm) {
-        try {
-            this.socket = socket;
-            this.candyManager = cm;
-
-            out = new ObjectOutputStream(socket.getOutputStream());
-            in = new ObjectInputStream(socket.getInputStream());
-        } catch (IOException ie) {
-            ie.printStackTrace();
-        }
+    public SellerThread(Socket socket, ObjectInputStream in, ObjectOutputStream out, CandyManager cm) {
+        this.socket = socket;
+        this.out = out;
+        this.in = in;
+        this.candyManager = cm;
     }
 
     public void run() {

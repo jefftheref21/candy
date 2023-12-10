@@ -3,6 +3,9 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.lang.reflect.Array;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -45,7 +48,7 @@ public class Marketplace extends JFrame implements Runnable {
 
                 buyerClient.sendSortDecision(sort);
                 buyerClient.receiveSortCandies();
-                run();
+                // run();
             }
             if (e.getSource() == searchButton) {
                 // TODO
@@ -150,8 +153,8 @@ public class Marketplace extends JFrame implements Runnable {
         }
     };
 
-    public Marketplace(Socket socket) throws IOException {
-        buyerClient = new BuyerClient(socket, this);
+    public Marketplace(Socket socket, ObjectInputStream in, ObjectOutputStream out) throws IOException {
+        buyerClient = new BuyerClient(socket, in, out,this);
     }
 
     public void run() {
