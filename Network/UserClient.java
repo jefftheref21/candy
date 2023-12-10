@@ -1,20 +1,17 @@
 import javax.swing.*;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.*;
-import java.util.ArrayList;
+import java.util.*;
 
 public class UserClient extends User {
     private Socket socket;
     private final Application application;
 
-    private final BufferedReader in;
-    private final PrintWriter out;
+    private ObjectInputStream in;
+    private ObjectOutputStream out;
     private Action action;
 
-    private CandyManager candyManager;
+    //private CandyManager candyManager;
 
     public UserClient(Application application) throws IOException {
         this.application = application;
@@ -32,20 +29,20 @@ public class UserClient extends User {
         candies.add(candy4);
         candies.add(candy5);
         candies.add(candy6);
-        candyManager = new CandyManager(candies, 7);
 
         initConnection();
 
-        in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        out = new PrintWriter(socket.getOutputStream(), true);
+        out = new ObjectOutputStream(socket.getOutputStream());
+        in = new ObjectInputStream(socket.getInputStream());
     }
 
-    public CandyManager getCandyManager() {
-        return candyManager;
-    }
 
     public Socket getSocket() {
         return socket;
+    }
+
+    public Action getAction() {
+        return action;
     }
 
     public void initConnection() {
@@ -77,25 +74,37 @@ public class UserClient extends User {
         return hostname;
     }
 
-    public void sendSignUp(String act, String username, String password) {
-        out.println(act);
-        out.println(username);
-        out.println(password);
-    }
-
-    public void sendLogin(String act, String username, String password) {
-        out.println(act);
-        out.println(username);
-        out.println(password);
-    }
-
-    public Action receiveAction() {
+    public void sendSignUp(User user) {
         try {
-            String input = in.readLine();
-            action = Action.valueOf(input);
+            HashMap<Action, Object> map = new HashMap<>();
+            if (user instanceof Buyer) {
+                map.put(Action.BUYER, user);
+            } else {
+                map.put(Action.SELLER, user);
+            }
+            out.writeObject(map);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return action;
+    }
+
+    public void sendLogin(User user) {
+        try {
+            HashMap<Action, Object> map = new HashMap<>();
+            map.put(Action.LOGIN, user);
+            out.writeObject(map);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void receiveAction() {
+        try {
+            action = (Action) in.readObject();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
