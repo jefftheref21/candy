@@ -87,7 +87,7 @@ public class BuyerThread extends Buyer implements Runnable {
                         try {
                             addToCart(purchaseAddToCart.getCandyBought(), purchaseAddToCart.getQuantityBought());
                         } catch (IOException e) {
-                            throw new RuntimeException(e);
+                            e.printStackTrace();
                         }
                     case REMOVE_FROM_CART:
                         Purchase purchaseRemoveFromCart = (Purchase) entry.getValue();
@@ -95,8 +95,30 @@ public class BuyerThread extends Buyer implements Runnable {
                             removeFromCart(purchaseRemoveFromCart.getCandyBought(),
                                     purchaseRemoveFromCart.getQuantityBought());
                         } catch (IOException e) {
-                            throw new RuntimeException(e);
+                            e.printStackTrace();
                         }
+                    case SHOPPING_CART:
+                        try {
+                            out.writeObject(this.getShoppingCart());
+                            out.flush();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    case PURCHASE_HISTORY:
+                        try {
+                            out.writeObject(this.getPurchaseHistory());
+                            out.flush();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    case EXPORT_HISTORY:
+                        File file = (File) entry.getValue();
+                        try {
+                            exportHistory(file);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
                 }
             }
             try {
@@ -106,7 +128,23 @@ public class BuyerThread extends Buyer implements Runnable {
             }
         }
     }
+    private void exportHistory(File file) throws IOException {
+        try {
+            PurchaseHistory ph = this.getPurchaseHistory();
+            PrintWriter pw = new PrintWriter(file);
 
+            for (int i = 0; i < ph.getPurchases().size(); i++) {
+                pw.println(ph.getPurchases().get(i));
+            }
+
+            out.writeObject(Action.EXPORT_HISTORY_SUCCESSFUL);
+            out.flush();
+        } catch (IOException e) {
+            out.writeObject(Action.EXPORT_HISTORY_UNSUCCESSFUL);
+            out.flush();
+            e.printStackTrace();
+        }
+    }
     private void search(String searchWord) {
 
     }

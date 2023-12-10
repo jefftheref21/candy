@@ -100,12 +100,13 @@ public class Marketplace extends JFrame implements Runnable {
                 }
             }
             if (e.getSource() == shoppingCartButton) {
-                // TODO
                 // send to server that we need shopping cart
                 // servers sends back shopping cart
+                buyerClient.sendShoppingCart();
 
+                ShoppingCart shoppingCart = buyerClient.receiveShoppingCart();
 
-                showShoppingCartDialog();
+                showShoppingCartDialog(shoppingCart);
             }
             if (e.getSource() == buyShoppingCartButton) {
                 buyerClient.sendBuyShoppingCart();
@@ -121,14 +122,20 @@ public class Marketplace extends JFrame implements Runnable {
                 }
             }
             if (e.getSource() == historyButton) {
-                // TODO Must be updated from server
-                showPurchaseHistoryDialog();
+                buyerClient.sendHistory();
+
+                PurchaseHistory purchaseHistory = buyerClient.receivePurchaseHistory();
+
+                showPurchaseHistoryDialog(purchaseHistory);
+
             }
             if (e.getSource() == exportHistoryButton) {
-                // TODO buyerClient.sendExportPurchaseHistory()
-                // buyerClient.sendExportPurchaseHistory();
-                boolean expSuccess = buyerClient.getPurchaseHistory().exportHistoryToFile(buyerClient.getUsername());
-                if (expSuccess) {
+                String filePath = Messages.getExportPath();
+
+                buyerClient.sendExportPurchaseHistory(filePath);
+                buyerClient.receiveAction();
+                //boolean expSuccess = buyerClient.getPurchaseHistory().exportHistoryToFile(buyerClient.getUsername());
+                if (buyerClient.getAction() == Action.EXPORT_HISTORY_SUCCESSFUL) {
                     Messages.showExportHistorySuccessful();
                 } else {
                     Messages.showExportHistoryUnsuccessful();
@@ -377,7 +384,7 @@ public class Marketplace extends JFrame implements Runnable {
         jf.setVisible(true);
     }
 
-    public void showShoppingCartDialog() {
+    public void showShoppingCartDialog(ShoppingCart sc) {
         JFrame jf = new JFrame("Shopping Cart");
         GridBagConstraints gbc = new GridBagConstraints(0, 0, 1, 1, 0, 0,
                 GridBagConstraints.LINE_START, GridBagConstraints.NONE,
@@ -446,7 +453,7 @@ public class Marketplace extends JFrame implements Runnable {
         jf.setVisible(true);
     }
 
-    public void showPurchaseHistoryDialog() {
+    public void showPurchaseHistoryDialog(PurchaseHistory ph) {
         JFrame jf = new JFrame("Purchase History");
         GridBagConstraints gbc = new GridBagConstraints(0, 0, 1, 1, 0, 0,
                 GridBagConstraints.LINE_START, GridBagConstraints.NONE,

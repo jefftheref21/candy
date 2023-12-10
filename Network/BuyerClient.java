@@ -79,6 +79,14 @@ public class BuyerClient extends Buyer {
         sendAction(Action.BUY_SHOPPING_CART, this);
     }
 
+    public void sendShoppingCart() {
+        sendAction(Action.SHOPPING_CART, 0);
+    }
+
+    public void sendHistory() {
+        sendAction(Action.PURCHASE_HISTORY, 0);
+    }
+
     //Sends to server the candy in which the user would like to remove from their shopping cart
     public void sendRemoveShoppingCart(Candy candy, int quantity) {
         sendAction(Action.REMOVE_FROM_CART, candy);
@@ -105,6 +113,34 @@ public class BuyerClient extends Buyer {
             throw new RuntimeException(e);
         }
         return null;
+    }
+
+    public ShoppingCart receiveShoppingCart() {
+        try {
+            ShoppingCart sc = (ShoppingCart) in.readObject();
+            return sc;
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
+
+    public PurchaseHistory receivePurchaseHistory() {
+        try {
+            PurchaseHistory ph = (PurchaseHistory) in.readObject();
+            return ph;
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
+
+    public void sendExportPurchaseHistory(String file) {
+        sendAction(Action.EXPORT_HISTORY, file);
     }
 
     //Sends to server the users decision in which they would like to sort the marketplace
