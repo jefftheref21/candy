@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.HashMap;
 
 public class UserThread extends User implements Runnable {
     // TCP Components
@@ -16,6 +17,7 @@ public class UserThread extends User implements Runnable {
 
     private Action action;
     private CandyManager cm;
+    private static HashMap<String, User> userDatabase = new HashMap<>();
 
     public UserThread(Socket socket, CandyManager cm) {
         try {
@@ -62,12 +64,35 @@ public class UserThread extends User implements Runnable {
         }
     }
 
-    private void handleSignup() throws IOException {
-        //  reads username and password from the client and validate/signup the user
+    private void handleSignup(String username, String password) throws IOException {
+        // checks for validation
+
+            // Check if the username already exists in the database
+            if (userDatabase.containsKey(username)) {
+                out.println("Username already exists. Signup failed.");
+            } else {
+                // Add user to the database
+                userDatabase.put(username, new User(username, password));
+                out.println("Signup successful! Welcome, " + username + ".");
+            }
     }
 
-    private void handleLogin() throws IOException {
-        //  reads username and password from the client and validate/login the user
+    private void handleLogin(String username, String password) throws IOException {
+        // checks for validation
+        if (userDatabase.containsKey(username)) {
+            User user = userDatabase.get(username);
+            // Check if the password matches
+            if (user.getPassword().equals(password)) {
+                // Inform the client that login was successful
+                out.println("Login successful! Welcome back, " + username + ".");
+            } else {
+                // Inform the client that login failed
+                out.println("Invalid password. Login failed.");
+            }
+        } else {
+            // Inform the client that login failed
+            out.println("Username not found. Login failed.");
+        }
     }
 
     private void handleException(IOException e) {
