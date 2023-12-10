@@ -44,14 +44,8 @@ public class SellerClient extends Seller {
         }
     }
 
-    public void createStore(String storeName, Candy candy, int quantity) {
-        try {
-            HashMap hashmap = new HashMap<String, Seller>();
-            hashmap.put(Action.CREATE_STORE, this);
-            out.writeObject(hashmap);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void sendCreateStore(Store store) {
+        sendAction(Action.CREATE_STORE, store);
     }
 
     public void sendEditStore(String storeName, Candy candy, int quantity) {
@@ -115,6 +109,17 @@ public class SellerClient extends Seller {
 
     public void sendViewStoreStatistics(Store store){
         sendAction(Action.STORE_STATS, store);
+    }
+
+    public void receiveStoreStatistics() {
+        try {
+            CandyManager cm = (CandyManager) in.readObject();
+            setCandyManager(cm);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void sendImportCSV(String fileName) {

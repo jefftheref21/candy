@@ -50,7 +50,16 @@ public class ControlCenter extends JFrame implements Runnable {
             if (e.getSource() == createStoreButton) {
                 String storeName = createStoreNameTextField.getText();
                 Store newStore = new Store(storeName);
-                // sellerClient.createStore(newStore);
+
+                sellerClient.sendCreateStore(newStore);
+
+                sellerClient.receiveAction();
+
+                if (sellerClient.getAction() == Action.CREATE_STORE_SUCCESSFUL) {
+                    Messages.showSuccessfulCreateStoreDialog();
+                } else if (sellerClient.getAction() == Action.CREATE_STORE_UNSUCCESSFUL) {
+                    Messages.showUnsuccessfulCreateStoreDialog();
+                }
             }
             if (e.getSource() == addCandyButton) {
                 sellerClient.sendToGetCandyID();
@@ -58,7 +67,6 @@ public class ControlCenter extends JFrame implements Runnable {
                 int candyID = sellerClient.receiveCandyID();
 
                 String name = nameTextField.getText();
-                // int candyID = Integer.parseInt(candyIDTextField.getText());
                 String storeName = storeNameTextField.getText();
                 String description = descriptionTextField.getText();
                 double price = Double.parseDouble(priceTextField.getText());
@@ -112,6 +120,10 @@ public class ControlCenter extends JFrame implements Runnable {
 
             if (e.getSource() == viewStoreStatisticsButton) {
                 sellerClient.sendViewStoreStatistics(storeSelected);
+
+                sellerClient.receiveStoreStatistics();
+
+                showStoreStatisticsDialog();
             }
 
             if (e.getSource() == importButton) {
@@ -532,6 +544,19 @@ public class ControlCenter extends JFrame implements Runnable {
         // Add logic to display sales information for the store
         JLabel salesLabel = new JLabel("Sales information for " + store.getName());
         jf.add(salesLabel);
+
+        jf.setSize(300, 300);
+        jf.setLocationRelativeTo(null);
+        jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        jf.setVisible(true);
+    }
+
+    public void showStoreStatisticsDialog() {
+        JFrame jf = new JFrame("Store Statistics");
+        // Add logic to display store statistics
+        JLabel statisticsLabel = new JLabel("Store statistics");
+        jf.add(statisticsLabel);
+        // TODO: Add logic to display store statistics
 
         jf.setSize(300, 300);
         jf.setLocationRelativeTo(null);
