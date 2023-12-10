@@ -3,8 +3,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
 
 public class UserThread extends User implements Runnable {
     // TCP Components
@@ -17,17 +15,19 @@ public class UserThread extends User implements Runnable {
     private Thread sellerThread;
 
     private Action action;
-    public UserThread(Socket socket) {
+    private CandyManager cm;
+
+    public UserThread(Socket socket, CandyManager cm) {
         try {
             this.socket = socket;
-
+            this.cm = cm;
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             out = new PrintWriter(socket.getOutputStream(), true);
 
             thread = new Thread(this);
             thread.start();
         } catch (IOException ie) {
-            ie.printStackTrace();
+            handleException(ie);
         }
     }
 
@@ -35,22 +35,52 @@ public class UserThread extends User implements Runnable {
         try {
             String str = in.readLine();
             action = Action.valueOf(str);
+
             switch (action) {
                 case SIGNUP:
+                    handleSignup();
                     break;
                 case LOGIN:
+                    handleLogin();
                     break;
                 case BUYER:
-                    buyerThread = new Thread(new BuyerThread(socket));
+                    buyerThread = new Thread(new BuyerThread(socket, cm));
                     buyerThread.start();
                     break;
                 case SELLER:
-                    sellerThread = new Thread(new SellerThread(socket));
+                    sellerThread = new Thread(new SellerThread(socket, cm));
                     sellerThread.start();
+                    break;
+                default:
+                    out.println("Invalid action.");
                     break;
             }
         } catch (IOException ie) {
-            ie.printStackTrace();
+            handleException(ie);
+        } finally {
+            closeResources();
+        }
+    }
+
+    private void handleSignup() throws IOException {
+        //  reads username and password from the client and validate/signup the user
+    }
+
+    private void handleLogin() throws IOException {
+        //  reads username and password from the client and validate/login the user
+    }
+
+    private void handleException(IOException e) {
+        System.err.println("Error: " + e.getMessage());
+    }
+
+    private void closeResources() {
+        try {
+            in.close();
+            out.close();
+            socket.close();
+        } catch (IOException e) {
+            handleException(e);
         }
     }
 }
