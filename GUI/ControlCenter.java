@@ -18,7 +18,7 @@ public class ControlCenter extends JFrame {
         Store[] stores = {new Store("Store1"), new Store("Store2"), new Store("Store3")};
         displayStoreButtons(stores, content);
 
-        pack();  // Pack the frame to adjust its size
+        setSize(650, 450);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setVisible(true);
@@ -34,27 +34,27 @@ public class ControlCenter extends JFrame {
         topPanel.setBackground(Marketplace.outerColor);
         content.add(topPanel, BorderLayout.NORTH);
 
-        // Sort by dropdown menu
-        JLabel sortByLabel = new JLabel("Sort by:");
-        String[] sortOptions = {"Alphabetical", "By Revenue"};
-        JComboBox<String> sortComboBox = new JComboBox<>(sortOptions);
-        topPanel.add(sortByLabel, new GridBagConstraints(0, 0, 1, 1, 0, 0,
+        JButton addCandyButton = new JButton(new AbstractAction("Add Candy") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showAddCandyDialog();
+            }
+        });
+        topPanel.add(addCandyButton, new GridBagConstraints(0, 0, 1, 1, 0, 0,
                 GridBagConstraints.WEST, GridBagConstraints.NONE,
                 new Insets(10, 10, 10, 10), 0, 0));
-        topPanel.add(sortComboBox, new GridBagConstraints(1, 0, 1, 1, 0, 0,
-                GridBagConstraints.WEST, GridBagConstraints.NONE,
-                new Insets(10, 0, 10, 10), 0, 0));
 
-        // Search bar and button to the right
         JTextField searchTextField = new JTextField(15);
         JButton searchButton = new JButton("Search");
-        topPanel.add(searchTextField, new GridBagConstraints(2, 0, 1, 1, 0, 0,
+        topPanel.add(searchTextField, new GridBagConstraints(1, 0, 1, 1, 0, 0,
                 GridBagConstraints.EAST, GridBagConstraints.NONE,
                 new Insets(10, 0, 10, 10), 0, 0));
-        topPanel.add(searchButton, new GridBagConstraints(3, 0, 1, 1, 0, 0,
+        topPanel.add(searchButton, new GridBagConstraints(2, 0, 1, 1, 0, 0,
                 GridBagConstraints.EAST, GridBagConstraints.NONE,
                 new Insets(10, 0, 10, 10), 0, 0));
     }
+
+
     /**
      *
      * @param content - To add to the larger frame
@@ -76,24 +76,45 @@ public class ControlCenter extends JFrame {
         bottomPanel.setBackground(Marketplace.outerColor);
 
         // Import, Export, and Store Statistics buttons
-        JButton importsButton = new JButton("Imports");
-        JButton exportsButton = new JButton("Exports");
+        JButton importsButton = new JButton("Import");
+        JButton exportsButton = new JButton("Export");
         JButton storeStatisticsButton = new JButton("Store Statistics");
 
         importsButton.setBackground(buttonColor);
         exportsButton.setBackground(buttonColor);
         storeStatisticsButton.setBackground(buttonColor);
 
+        importsButton.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String filePath = JOptionPane.showInputDialog("Enter file path for import:");
+                if (filePath != null && !filePath.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Import Successful");
+                    // Implement import logic here
+                }
+            }
+        });
+
+        exportsButton.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String filePath = JOptionPane.showInputDialog("Enter file path for export:");
+                if (filePath != null && !filePath.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Export Successful");
+                    // Implement export logic here
+                }
+            }
+        });
+
         bottomPanel.add(importsButton);
         bottomPanel.add(exportsButton);
         bottomPanel.add(storeStatisticsButton);
-
     }
 
     public static void displayStoreButtons(Store[] stores, Container content) {
         JPanel storePanel = new JPanel();
         storePanel.setLayout(new GridBagLayout());
-        storePanel.setBackground(Color.WHITE); // Adjust background color if needed
+        storePanel.setBackground(Color.WHITE);
         content.add(new JScrollPane(storePanel), BorderLayout.CENTER);
 
         for (int i = 0; i < stores.length; i++) {
@@ -171,6 +192,7 @@ public class ControlCenter extends JFrame {
         candyFrame.setVisible(true);
     }
 
+
     public static void showEditCandyDialog(Store store, Candy currCandy) {
         JFrame jf = new JFrame("Edit Candy");
         Container content = jf.getContentPane();
@@ -225,21 +247,139 @@ public class ControlCenter extends JFrame {
                 currCandy.setQuantity(Integer.parseInt(quantityTextField.getText()));
                 currCandy.setDescription(descriptionTextField.getText());
 
-                // Close the dialog
                 jf.dispose();
             }
         });
+
+        JButton deleteButton = new JButton(new AbstractAction("Delete") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showDeleteCandyConfirmation(store, currCandy.getName());
+                jf.dispose();  // Close the edit dialog after deletion
+            }
+        });
+
+        Dimension buttonSize = new Dimension(150, 25);
+        saveButton.setPreferredSize(buttonSize);
+        deleteButton.setPreferredSize(buttonSize);
 
         gbc.gridx = 0;
         gbc.gridy = 4;
         gbc.gridwidth = 2;
         content.add(saveButton, gbc);
 
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        gbc.gridwidth = 2;
+        content.add(deleteButton, gbc);
+
         jf.pack();
         jf.setLocationRelativeTo(null);
         jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         jf.setVisible(true);
     }
+
+    public static void showAddCandyDialog() {
+        JFrame jf = new JFrame("Add Candy");
+        Container content = jf.getContentPane();
+
+        content.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+
+        JTextField nameTextField = new JTextField();
+        nameTextField.setPreferredSize(new Dimension(150, 25));  // Set preferred size
+
+        JTextField candyIDTextField = new JTextField();
+        candyIDTextField.setPreferredSize(new Dimension(150, 25));  // Set preferred size
+
+        JTextField storeNameTextField = new JTextField();
+        storeNameTextField.setPreferredSize(new Dimension(150, 25));  // Set preferred size
+
+        JTextField descriptionTextField = new JTextField();
+        descriptionTextField.setPreferredSize(new Dimension(150, 25));  // Set preferred size
+
+        JTextField priceTextField = new JTextField();
+        priceTextField.setPreferredSize(new Dimension(150, 25));  // Set preferred size
+
+        JTextField quantityTextField = new JTextField();
+        quantityTextField.setPreferredSize(new Dimension(150, 25));  // Set preferred size
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        content.add(new JLabel("Name:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        content.add(nameTextField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        content.add(new JLabel("Candy ID:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        content.add(candyIDTextField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        content.add(new JLabel("Store Name:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        content.add(storeNameTextField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        content.add(new JLabel("Description:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.gridy = 3;
+        content.add(descriptionTextField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        content.add(new JLabel("Price:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.gridy = 4;
+        content.add(priceTextField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        content.add(new JLabel("Quantity:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.gridy = 5;
+        content.add(quantityTextField, gbc);
+
+        JButton addButton = new JButton(new AbstractAction("Add Candy") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String name = nameTextField.getText();
+                int candyID = Integer.parseInt(candyIDTextField.getText());
+                String storeName = storeNameTextField.getText();
+                String description = descriptionTextField.getText();
+                double price = Double.parseDouble(priceTextField.getText());
+                int quantity = Integer.parseInt(quantityTextField.getText());
+
+                Candy newCandy = new Candy(name, new Store(storeName), description, candyID, quantity, price);
+
+                jf.dispose();
+            }
+        });
+
+        gbc.gridx = 0;
+        gbc.gridy = 6;
+        gbc.gridwidth = 2;
+        content.add(addButton, gbc);
+
+        jf.pack();
+        jf.setLocationRelativeTo(null);
+        jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        jf.setVisible(true);
+    }
+
+
 
     public static void viewSalesInformation(Store store) {
         JFrame jf = new JFrame("Sales Information");
@@ -250,5 +390,16 @@ public class ControlCenter extends JFrame {
         jf.setLocationRelativeTo(null);
         jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         jf.setVisible(true);
+    }
+
+    public static void showDeleteCandyConfirmation(Store store, String candyName) {
+        int confirmDialogResult = JOptionPane.showConfirmDialog(null,
+                "Are you sure you want to delete " + candyName + " from " + store.getName() + "?",
+                "Confirm Deletion", JOptionPane.YES_NO_OPTION);
+
+        if (confirmDialogResult == JOptionPane.YES_OPTION) {
+            // Implement candy deletion logic here
+            JOptionPane.showMessageDialog(null, candyName + " was successfully deleted from " + store.getName());
+        }
     }
 }
