@@ -5,9 +5,6 @@ import java.net.Socket;
 import java.util.*;
 
 public class MainServer {
-
-    private LinkedHashMap<String, UserThread> userInfo = new LinkedHashMap<>();
-
     // TCP Components
     private ServerSocket serverSocket;
     private CandyManager candyManager;
@@ -58,9 +55,6 @@ public class MainServer {
         }
     }
 
-    public HashMap<String, UserThread> getUserInfo() {
-        return userInfo;
-    }
 
     // TODO: Pablo, you know what to do
     public static CandyManager readFile(String filename) throws IOException, ClassNotFoundException {

@@ -3,8 +3,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
 
-//sample comment
-//sample comment nathan park
 public class Application implements Runnable {
     UserClient client;
 
@@ -40,11 +38,12 @@ public class Application implements Runnable {
             if (e.getSource() == loginButton) {
                 client.sendLogin("LOGIN", usernameTextField.getText(), passwordTextField.getText());
                 // if (client.receiveAction() == Action.VALID_CREDENTIALS_BUYER) {
-                if (true) {
+                if (1 == 1) {
                     showSuccessfulLoginDialog();
                     runMarketplace();
                     loginDialog.dispose();
-                } else if (client.receiveAction() == Action.VALID_CREDENTIALS_SELLER) {
+                    //} else if (client.receiveAction() == Action.VALID_CREDENTIALS_SELLER) {
+                } else if (true) {
                     showSuccessfulLoginDialog();
                     runControlCenter();
                     loginDialog.dispose();
@@ -70,26 +69,23 @@ public class Application implements Runnable {
 
     public void runMarketplace() {
         try {
-            SwingUtilities.invokeLater(new Marketplace(client.getSocket(), client.getCandyManager()));
+            SwingUtilities.invokeLater(new Marketplace(client.getSocket()));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public void runControlCenter() {
-//        try {
-//             SwingUtilities.invokeLater(new ControlCenter(client.getSocket(), client.getCandyManager()));
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        try {
+             SwingUtilities.invokeLater(new ControlCenter(client.getSocket()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void run() {
         showWelcomeMessageDialog();
         showStartingDialog();
-
-//        ControlCenter controlCenter = new ControlCenter();
-//        controlCenter.run();
     }
 
     /**

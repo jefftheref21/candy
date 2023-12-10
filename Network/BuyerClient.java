@@ -16,7 +16,8 @@ public class BuyerClient extends Buyer {
 
     public BuyerClient(Socket socket, Marketplace marketplace) throws IOException {
         this.socket = socket;
-        this.marketplace = marketplace;Candy candy1 = new Candy("Snickers", new Store("Walmart"), "Chocolate bar", 1, 50, 1.00);
+        this.marketplace = marketplace;
+        Candy candy1 = new Candy("Snickers", new Store("Walmart"), "Chocolate bar", 1, 50, 1.00);
         Candy candy2 = new Candy("Twix", new Store("Walmart"), "Chocolate bar",2, 25, 2.00);
         Candy candy3 = new Candy("M&Ms", new Store("Walmart"), "Chocolate bar", 3, 100, 3.00);
         Candy candy4 = new Candy("Kit Kat", new Store("Walmart"), "Chocolate bar", 4, 75, 4.00);

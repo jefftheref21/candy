@@ -6,16 +6,29 @@ import java.util.HashMap;
 
 public class SellerClient extends Seller {
     private Socket socket;
-    private final ObjectInputStream in;
-    private final ObjectOutputStream out;
+    private ControlCenter controlCenter;
+
+    private ObjectInputStream in;
+    private ObjectOutputStream out;
 
     private Action action;
 
-    public SellerClient(Socket socket) throws IOException {
-        this.socket = socket;
+    private CandyManager candyManager;
 
-        in = new ObjectInputStream(socket.getInputStream());
-        out = new ObjectOutputStream(socket.getOutputStream());
+    public SellerClient(Socket socket, ControlCenter controlCenter) throws IOException {
+        this.socket = socket;
+        this.controlCenter = controlCenter;
+
+        try {
+            in = new ObjectInputStream(socket.getInputStream());
+            out = new ObjectOutputStream(socket.getOutputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void setCandyManager(CandyManager candyManager) {
+        this.candyManager = candyManager;
     }
 
     public void sendSellerDecision(String type) {
