@@ -42,6 +42,7 @@ public class Marketplace extends JFrame implements Runnable {
             }
             if (e.getSource() == searchButton) {
                 String searchWord = searchTextField.getText();
+                buyerClient.sendSearchDecision(searchWord);
             }
             if (e.getSource() == buyButton) {
                 try {
@@ -267,7 +268,7 @@ public class Marketplace extends JFrame implements Runnable {
 
         JPanel panel = new JPanel();
         panel.setLayout(new GridBagLayout());
-        panel.setBackground(backgroundColor);
+        panel.setBackground(outerColor);
 
         JLabel nameLabel = new JLabel(currCandy.getName());
         panel.add(nameLabel, gbc);
@@ -344,7 +345,7 @@ public class Marketplace extends JFrame implements Runnable {
         titlePanel.add(shoppingCartLabel);
 
         JPanel shoppingCartInfo = new JPanel();
-        shoppingCartInfo.setBackground(backgroundColor);
+        shoppingCartInfo.setBackground(outerColor);
         shoppingCartInfo.setLayout(new GridBagLayout());
 
         JLabel candyIDLabel = new JLabel("Candy ID");
@@ -414,7 +415,7 @@ public class Marketplace extends JFrame implements Runnable {
         titlePanel.add(purchaseHistoryLabel);
 
         JPanel purchaseHistoryInfo = new JPanel();
-        purchaseHistoryInfo.setBackground(backgroundColor);
+        purchaseHistoryInfo.setBackground(outerColor);
         purchaseHistoryInfo.setLayout(new GridBagLayout());
 
         JLabel candyIDLabel = new JLabel("Candy ID");

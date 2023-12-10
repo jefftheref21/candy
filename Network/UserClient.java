@@ -74,20 +74,28 @@ public class UserClient extends User {
         return hostname;
     }
 
-    public void sendSignUp(User user) throws IOException {
-        HashMap<Action, Object> map = new HashMap<>();
-        if (user instanceof Buyer) {
-            map.put(Action.BUYER, user);
-        } else {
-            map.put(Action.SELLER, user);
+    public void sendSignUp(User user) {
+        try {
+            HashMap<Action, Object> map = new HashMap<>();
+            if (user instanceof Buyer) {
+                map.put(Action.BUYER, user);
+            } else {
+                map.put(Action.SELLER, user);
+            }
+            out.writeObject(map);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        out.writeObject(map);
     }
 
-    public void sendLogin(User user) throws IOException {
-        HashMap<Action, Object> map = new HashMap<>();
-        map.put(Action.LOGIN, user);
-        out.writeObject(map);
+    public void sendLogin(User user) {
+        try {
+            HashMap<Action, Object> map = new HashMap<>();
+            map.put(Action.LOGIN, user);
+            out.writeObject(map);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void receiveAction() {

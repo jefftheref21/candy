@@ -66,34 +66,22 @@ public class BuyerClient extends Buyer {
     //Sends the candy in which the buyer would like to buy
     //The type refers if the user would like to put in shopping cart or buy instantly
     public void sendCandyProduct(Candy candy, String type, int quantity) {
-        try {
-            Purchase purchase = new Purchase(candy, quantity);
-            if (type.equals("BUY_INSTANTLY")) {
-                sendAction(Action.BUY_ITEM, purchase);
-            } else {
-                sendAction(Action.ADD_TO_CART, purchase);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        Purchase purchase = new Purchase(candy, quantity);
+        if (type.equals("BUY_INSTANTLY")) {
+            sendAction(Action.BUY_ITEM, purchase);
+        } else {
+            sendAction(Action.ADD_TO_CART, purchase);
         }
     }
 
     //Sends to server which user would like to buy everything in their shopping cart
     public void sendBuyShoppingCart() {
-        try {
-            sendAction(Action.BUY_SHOPPING_CART, this);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        sendAction(Action.BUY_SHOPPING_CART, this);
     }
 
     //Sends to server the candy in which the user would like to remove from their shopping cart
     public void sendRemoveShoppingCart(Candy candy) {
-        try {
-            sendAction(Action.REMOVE_FROM_CART, candy);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        sendAction(Action.REMOVE_FROM_CART, candy);
     }
 
     //Sends to server the users search text
@@ -121,11 +109,11 @@ public class BuyerClient extends Buyer {
 
     //Sends to server the users decision in which they would like to sort the marketplace
     public void sendSortDecision(int decision) {
-        try {
-            sendAction(Action.SORT_PRODUCTS, decision);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        sendAction(Action.SORT_PRODUCTS, decision);
+    }
+
+    public void sendSearchDecision(String searchWord) {
+        sendAction(Action.SEARCH, searchWord);
     }
 
     public void receiveSortCandies() {
@@ -148,10 +136,14 @@ public class BuyerClient extends Buyer {
         }
         return action;
     }
-    public void sendAction(Action action, Object object) throws IOException {
-        HashMap<Action, Object> map = new HashMap<>();
-        map.put(action, object);
-        out.writeObject(map);
-        out.flush();
+    public void sendAction(Action action, Object object) {
+        try {
+            HashMap<Action, Object> map = new HashMap<>();
+            map.put(action, object);
+            out.writeObject(map);
+            out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
