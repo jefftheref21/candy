@@ -72,16 +72,18 @@ public class UserThread extends User implements Runnable {
             }
         }
         users.add(user);
+        registerUser();
         if (user instanceof Buyer) {
             out.writeObject(Action.VALID_CREDENTIALS_BUYER);
+            out.flush();
             buyerThread = new Thread(new BuyerThread(socket, cm));
             buyerThread.start();
         } else {
             out.writeObject(Action.VALID_CREDENTIALS_SELLER);
+            out.flush();
             sellerThread = new Thread(new SellerThread(socket, cm));
             sellerThread.start();
         }
-        out.flush();
         isRunning = false;
     }
 
@@ -91,14 +93,15 @@ public class UserThread extends User implements Runnable {
             if (u.getUsername().equals(username) && u.getPassword().equals(password)){
                 if (u instanceof Buyer) {
                     out.writeObject(Action.VALID_CREDENTIALS_BUYER);
+                    out.flush();
                     buyerThread = new Thread(new BuyerThread(socket, cm));
                     buyerThread.start();
                 } else {
                     out.writeObject(Action.VALID_CREDENTIALS_SELLER);
+                    out.flush();
                     sellerThread = new Thread(new SellerThread(socket, cm));
                     sellerThread.start();
                 }
-                out.flush();
                 isRunning = false;
                 return;
             }
@@ -118,5 +121,12 @@ public class UserThread extends User implements Runnable {
         } catch (IOException e) {
             handleException(e);
         }
+    }
+    private void registerUser() throws IOException {
+        File f = new File ("Users.txt");
+        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(f));
+        oos.writeObject(users);
+        oos.flush();
+        oos.close();
     }
 }

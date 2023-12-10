@@ -20,6 +20,9 @@ public class CandyManager {
         this.candies = candies;
         this.prodCounter = prodCounter;
     }
+    public ArrayList<Candy> getCandies() {
+        return candies;
+    }
     // Buyer methods
     public String viewProductPage(int productID) {
         String productPage = "";
@@ -176,8 +179,7 @@ public class CandyManager {
 
         return output.toString();
     }
-    public void buyInstantly(int id, int quantity, Buyer buyer) {
-        synchronized(obj) {
+    public synchronized boolean buyInstantly(int id, int quantity, Buyer buyer) {
             int index = getIndex(id);
             int totalQuantity = candies.get(index).getTotalQuantity();
             if (totalQuantity >= quantity) {
@@ -188,19 +190,20 @@ public class CandyManager {
                 Sale sale = new Sale(candies.get(index), quantity, buyer);
                 candies.get(index).getStore().addSale(sale);
                 buyer.getPurchaseHistory().addPurchase(sale);
+                return true;
             } else {
-                System.out.println("Error! Not enough candy on stock!");
+                return false;
             }
-        }
     }
-    public void buyShoppingCart(Buyer buyer) {
-        synchronized (obj) {
-            boolean boughtTooMuch;
+    public synchronized boolean buyShoppingCart(Buyer buyer) {
             for (int i = 0; i < buyer.getShoppingCart().getPurchases().size(); i++) {
                 Purchase currPurchase = buyer.getShoppingCart().getPurchases().get(i);
-                buyInstantly(currPurchase.getCandyBought().getCandyID(), currPurchase.getQuantityBought(), buyer);
+                boolean success = buyInstantly(currPurchase.getCandyBought().getCandyID(), currPurchase.getQuantityBought(), buyer);
+                if (!success) {
+                    return false;
+                }
             }
-        }
+        return true;
     }
     public String search(String keyWord) {
         String result = "";

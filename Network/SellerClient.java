@@ -72,4 +72,13 @@ public class SellerClient extends Seller {
             e.printStackTrace();
         }
     }
+    public void receiveAction() {
+        try {
+            action = (Action) in.readObject();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

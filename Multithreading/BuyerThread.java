@@ -69,7 +69,17 @@ public class BuyerThread extends Buyer implements Runnable {
                         }
                         break;
                     case BUY_SHOPPING_CART:
-                        candyManager.buyShoppingCart(this);
+                        boolean successful = candyManager.buyShoppingCart(this);
+                        try {
+                            if (successful) {
+                                out.writeObject(Action.BUY_SUCCESSFUL);
+                            } else {
+                                out.writeObject(Action.BUY_QUANTITY_EXCEEDS);
+                            }
+                            out.flush();
+                        } catch (IOException ie) {
+                            ie.printStackTrace();
+                        }
                 }
             }
             try {

@@ -15,6 +15,8 @@ public class Marketplace extends JFrame implements Runnable {
     BuyerClient buyerClient;
 
     JComboBox sortComboBox;
+    String[] sortOptions = {"Price - Least to Greatest", "Price - Greatest to Least",
+            "Quantity - Least to Greatest", "Quantity - Greatest to Least"};
     JButton searchButton;
     JButton buyButton;
     JButton shoppingCartButton;
@@ -32,7 +34,11 @@ public class Marketplace extends JFrame implements Runnable {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (e.getSource() == sortComboBox) {
-                // sort();
+                // need to figure out how to update marketplace with sorted candy
+                int sort = sortComboBox.getSelectedIndex();
+                buyerClient.sendSortDecision(sort);
+                buyerClient.receiveSortCandies();
+                run();
             }
             if (e.getSource() == searchButton) {
                 String searchWord = searchTextField.getText();
@@ -80,16 +86,15 @@ public class Marketplace extends JFrame implements Runnable {
             }
             if (e.getSource() == exportHistoryButton) {
                 // buyerClient.sendExportPurchaseHistory();
-                buyerClient.receiveAction();
-
-                if (buyerClient.getAction() == Action.EXPORT_HISTORY_SUCCESSFUL) {
+                boolean expSuccess = buyerClient.getPurchaseHistory().exportHistoryToFile(buyerClient.getUsername());
+                if (expSuccess) {
                     Messages.showExportHistorySuccessful();
-                } else if (buyerClient.getAction() == Action.EXPORT_HISTORY_UNSUCCESSFUL) {
+                } else {
                     Messages.showExportHistoryUnsuccessful();
                 }
             }
             if (e.getSource() == viewStatisticsButton) {
-                // viewStatistics();
+                //buyerClient.
             }
 
         }
@@ -136,9 +141,6 @@ public class Marketplace extends JFrame implements Runnable {
 
         JLabel sortLabel = new JLabel("Sort by: ");
         topPanel.add(sortLabel, gbc);
-
-        String[] sortOptions = {"Price - Least to Greatest", "Price - Greatest to Least",
-                "Quantity - Least to Greatest", "Quantity - Greatest to Least"};
 
         JComboBox sortComboBox = new JComboBox(sortOptions);
         topPanel.add(sortComboBox, gbc);
