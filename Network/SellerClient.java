@@ -20,8 +20,8 @@ public class SellerClient extends Seller {
         this.controlCenter = controlCenter;
 
         try {
-            in = new ObjectInputStream(socket.getInputStream());
             out = new ObjectOutputStream(socket.getOutputStream());
+            in = new ObjectInputStream(socket.getInputStream());
         } catch (IOException e) {
             e.printStackTrace();
         }

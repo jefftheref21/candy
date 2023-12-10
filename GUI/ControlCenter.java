@@ -12,7 +12,12 @@ public class ControlCenter extends JFrame implements Runnable {
 
     SellerClient sellerClient;
 
+    JTextField nameTextField;
+    JTextField priceTextField;
+    JTextField quantityTextField;
+    JTextField descriptionTextField;
 
+    Store storeSelected;
 
     ActionListener actionListener = new ActionListener() {
         @Override
@@ -45,7 +50,7 @@ public class ControlCenter extends JFrame implements Runnable {
      * Should have sort
      * @param content - To add to the larger frame
      */
-    public static void displayTopPanel(Container content) {
+    public void displayTopPanel(Container content) {
         JPanel topPanel = new JPanel();
         topPanel.setLayout(new GridBagLayout());
         topPanel.setBackground(Marketplace.outerColor);
@@ -76,7 +81,7 @@ public class ControlCenter extends JFrame implements Runnable {
      *
      * @param content - To add to the larger frame
      */
-    public static void displaySidePanel(Container content) {
+    public void displaySidePanel(Container content) {
         JPanel sidePanel = new JPanel();
         content.add(sidePanel, BorderLayout.WEST);
 
@@ -87,7 +92,7 @@ public class ControlCenter extends JFrame implements Runnable {
         sidePanel.add(viewCandiesButton);
     }
 
-    public static void displayBottomPanel(Container content) {
+    public void displayBottomPanel(Container content) {
         JPanel bottomPanel = new JPanel();
         content.add(bottomPanel, BorderLayout.SOUTH);
         bottomPanel.setBackground(Marketplace.outerColor);
@@ -128,7 +133,7 @@ public class ControlCenter extends JFrame implements Runnable {
         bottomPanel.add(storeStatisticsButton);
     }
 
-    public static void displayStoreButtons(Store[] stores, Container content) {
+    public void displayStoreButtons(Store[] stores, Container content) {
         JPanel storePanel = new JPanel();
         storePanel.setLayout(new GridBagLayout());
         storePanel.setBackground(Color.WHITE);
@@ -148,14 +153,14 @@ public class ControlCenter extends JFrame implements Runnable {
             });
 
             storeButton.setBackground(buttonColor);
-            storeButton.setPreferredSize(new Dimension(150, 50));
+            storeButton.setPreferredSize(new Dimension(100, 100));
             storeButton.setHorizontalAlignment(SwingConstants.CENTER);
             storeButton.setText(currStore.getName());
             storePanel.add(storeButton, gbc);
         }
     }
 
-    public static void showStoreOptionDialog(Store store) {
+    public void showStoreOptionDialog(Store store) {
         String[] options = {"View Products", "View Sales"};
         int signUpOrLogin = JOptionPane.showOptionDialog(null, "Store: " + store.getName(),
                 "Store Options", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
@@ -170,7 +175,7 @@ public class ControlCenter extends JFrame implements Runnable {
         }
     }
 
-    public static void displayCandyButtons(Store store) {
+    public void displayCandyButtons(Store store) {
         // Dummy data for candies
         Candy candy1 = new Candy("Chocolate Bar", store, "Delicious chocolate", 1, 50, 1.00);
         Candy candy2 = new Candy("Sour Candy", store, "Tasty sour candy", 2, 25, 2.00);
@@ -196,7 +201,7 @@ public class ControlCenter extends JFrame implements Runnable {
             });
 
             candyButton.setBackground(buttonColor);
-            candyButton.setPreferredSize(new Dimension(150, 50));
+            candyButton.setPreferredSize(new Dimension(100, 100));
             candyButton.setHorizontalAlignment(SwingConstants.CENTER);
             candyButton.setText(currCandy.getName());
             candyPanel.add(candyButton, gbc);
@@ -210,7 +215,7 @@ public class ControlCenter extends JFrame implements Runnable {
     }
 
 
-    public static void showEditCandyDialog(Store store, Candy currCandy) {
+    public void showEditCandyDialog(Store store, Candy currCandy) {
         JFrame jf = new JFrame("Edit Candy");
         Container content = jf.getContentPane();
 
@@ -218,10 +223,10 @@ public class ControlCenter extends JFrame implements Runnable {
 
         GridBagConstraints gbc = new GridBagConstraints();
 
-        JTextField nameTextField = new JTextField(currCandy.getName());
-        JTextField priceTextField = new JTextField(String.valueOf(currCandy.getPrice()));
-        JTextField quantityTextField = new JTextField(String.valueOf(currCandy.getQuantity()));
-        JTextField descriptionTextField = new JTextField(currCandy.getDescription());
+        nameTextField = new JTextField(currCandy.getName());
+        priceTextField = new JTextField(String.valueOf(currCandy.getPrice()));
+        quantityTextField = new JTextField(String.valueOf(currCandy.getQuantity()));
+        descriptionTextField = new JTextField(currCandy.getDescription());
 
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -398,18 +403,19 @@ public class ControlCenter extends JFrame implements Runnable {
 
 
 
-    public static void viewSalesInformation(Store store) {
+    public void viewSalesInformation(Store store) {
         JFrame jf = new JFrame("Sales Information");
         // Add logic to display sales information for the store
         JLabel salesLabel = new JLabel("Sales information for " + store.getName());
         jf.add(salesLabel);
-        jf.pack();
+
+        jf.setSize(300, 300);
         jf.setLocationRelativeTo(null);
         jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         jf.setVisible(true);
     }
 
-    public static void showDeleteCandyConfirmation(Store store, String candyName) {
+    public void showDeleteCandyConfirmation(Store store, String candyName) {
         int confirmDialogResult = JOptionPane.showConfirmDialog(null,
                 "Are you sure you want to delete " + candyName + " from " + store.getName() + "?",
                 "Confirm Deletion", JOptionPane.YES_NO_OPTION);

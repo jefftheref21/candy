@@ -32,13 +32,17 @@ public class UserClient extends User {
 
         initConnection();
 
-        in = new ObjectInputStream(socket.getInputStream());
         out = new ObjectOutputStream(socket.getOutputStream());
+        in = new ObjectInputStream(socket.getInputStream());
     }
 
 
     public Socket getSocket() {
         return socket;
+    }
+
+    public Action getAction() {
+        return action;
     }
 
     public void initConnection() {
@@ -86,13 +90,13 @@ public class UserClient extends User {
         out.writeObject(map);
     }
 
-    public Action receiveAction() {
+    public void receiveAction() {
         try {
-            String input = in.readLine();
-            action = Action.valueOf(input);
+            action = (Action) in.readObject();
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
         }
-        return action;
     }
 }

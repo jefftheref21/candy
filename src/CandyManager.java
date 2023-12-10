@@ -11,7 +11,7 @@ public class CandyManager {
     // class doesn't need a constructor, because we're just interested in the static candies ArrayList.
     public ArrayList<Candy> candies = new ArrayList<>();
     public int prodCounter = 0;
-
+    public static Object obj = new Object();
     public CandyManager() {
         this.candies = new ArrayList<>();
         this.prodCounter = 0;
@@ -176,26 +176,30 @@ public class CandyManager {
 
         return output.toString();
     }
-    public void buyInstantly(int id, int quantity, Buyer buyer)  {
-        int index = getIndex(id);
-        int totalQuantity = candies.get(index).getTotalQuantity();
-        if (totalQuantity >= quantity) {
-            candies.get(index).setQuantity(totalQuantity - quantity);
-            candies.get(index).getStore().editCandy(id, candies.get(index), this);
-            System.out.println("Thank you for purchasing! Your total was $" + quantity *
-                    candies.get(index).getPrice() );
-            Sale sale = new Sale(candies.get(index), quantity, buyer);
-            candies.get(index).getStore().addSale(sale);
-            buyer.getPurchaseHistory().addPurchase(sale);
-        } else {
-            System.out.println("Error! Not enough candy on stock!");
+    public void buyInstantly(int id, int quantity, Buyer buyer) {
+        synchronized(obj) {
+            int index = getIndex(id);
+            int totalQuantity = candies.get(index).getTotalQuantity();
+            if (totalQuantity >= quantity) {
+                candies.get(index).setQuantity(totalQuantity - quantity);
+                candies.get(index).getStore().editCandy(id, candies.get(index), this);
+                System.out.println("Thank you for purchasing! Your total was $" + quantity *
+                        candies.get(index).getPrice() );
+                Sale sale = new Sale(candies.get(index), quantity, buyer);
+                candies.get(index).getStore().addSale(sale);
+                buyer.getPurchaseHistory().addPurchase(sale);
+            } else {
+                System.out.println("Error! Not enough candy on stock!");
+            }
         }
     }
     public void buyShoppingCart(Buyer buyer) {
-        boolean boughtTooMuch;
-        for (int i = 0; i < buyer.getShoppingCart().getPurchases().size(); i++) {
-            Purchase currPurchase = buyer.getShoppingCart().getPurchases().get(i);
-            buyInstantly(currPurchase.getCandyBought().getCandyID(), currPurchase.getQuantityBought(), buyer);
+        synchronized (obj) {
+            boolean boughtTooMuch;
+            for (int i = 0; i < buyer.getShoppingCart().getPurchases().size(); i++) {
+                Purchase currPurchase = buyer.getShoppingCart().getPurchases().get(i);
+                buyInstantly(currPurchase.getCandyBought().getCandyID(), currPurchase.getQuantityBought(), buyer);
+            }
         }
     }
     public String search(String keyWord) {

@@ -35,24 +35,6 @@ public class User implements Serializable {
     public void setPassword(String password) {
         this.password = password;
     }
-    public boolean checkAccount(String filename) {
-        try {
-            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filename));
-            boolean found = false;
-            ArrayList<User> users = (ArrayList<User>) ois.readObject();
-            ois.close();
-            for (int i = 0; i < users.size(); i++) {
-                User currUser = users.get(i);
-                if (currUser.getUsername().equals(this.getUsername()) && currUser.getPassword().equals(this.getPassword())) {
-                    found = true;
-                }
-            }
-            return found;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
     // Maybe not necessary in Project 5
     public String toString() {
         return username + ", " + password;
