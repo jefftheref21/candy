@@ -29,6 +29,70 @@ public class Messages {
                 "Login Failed", JOptionPane.ERROR_MESSAGE);
     }
 
+    // CONTROLCENTER MESSAGES
+
+    public static void showSuccessfulAddCandyDialog() {
+        JOptionPane.showMessageDialog(null, "Candy added successfully!",
+                "Add Candy Confirmation", JOptionPane.PLAIN_MESSAGE);
+    }
+
+    public static void showUnsuccessfulAddCandyDialog() {
+        JOptionPane.showMessageDialog(null, "Candy add failed!",
+                "Add Candy Failed", JOptionPane.ERROR_MESSAGE);
+    }
+
+    public static void showSuccessfulEditCandyDialog() {
+        JOptionPane.showMessageDialog(null, "Candy edited successfully!",
+                "Edit Candy Confirmation", JOptionPane.PLAIN_MESSAGE);
+    }
+
+    public static void showUnsuccessfulEditCandyDialog() {
+        JOptionPane.showMessageDialog(null, "Candy edit failed!",
+                "Edit Candy Failed", JOptionPane.ERROR_MESSAGE);
+    }
+
+    public static void showSuccessfulDeleteCandyDialog() {
+        JOptionPane.showMessageDialog(null, "Candy deleted successfully!",
+                "Delete Candy Confirmation", JOptionPane.PLAIN_MESSAGE);
+    }
+
+    public static void showUnsuccessfulDeleteCandyDialog() {
+        JOptionPane.showMessageDialog(null, "Candy delete failed!",
+                "Delete Candy Failed", JOptionPane.ERROR_MESSAGE);
+    }
+
+    public static String getImportPath() {
+        String fileName = JOptionPane.showInputDialog(null, "Enter file path for import:",
+                "Import from CSV", JOptionPane.PLAIN_MESSAGE);
+        return fileName;
+    }
+
+    public static String getExportPath() {
+        String fileName = JOptionPane.showInputDialog(null, "Enter file path for export:",
+                "Export to CSV", JOptionPane.PLAIN_MESSAGE);
+        return fileName;
+    }
+
+    public static void showSuccessfulImportDialog() {
+        JOptionPane.showMessageDialog(null, "Import successful!",
+                "Import Confirmation", JOptionPane.PLAIN_MESSAGE);
+    }
+
+    public static void showSuccessfulExportDialog() {
+        JOptionPane.showMessageDialog(null, "Export successful!",
+                "Export Confirmation", JOptionPane.PLAIN_MESSAGE);
+    }
+
+    public static void showUnsuccessfulImportDialog() {
+        JOptionPane.showMessageDialog(null, "Import failed!",
+                "Import Failed", JOptionPane.ERROR_MESSAGE);
+    }
+
+    public static void showUnsuccessfulExportDialog() {
+        JOptionPane.showMessageDialog(null, "Export failed!",
+                "Export Failed", JOptionPane.ERROR_MESSAGE);
+    }
+
     // MARKETPLACE MESSAGES
 
     public static void showSuccessfulPurchase() {

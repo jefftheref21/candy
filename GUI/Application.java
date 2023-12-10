@@ -23,20 +23,13 @@ public class Application implements Runnable {
             if (e.getSource() == signUpButton) {
                 if (userTypeLabel.getText().equals("Buyer")) {
                     Buyer buyer = new Buyer(usernameTextField.getText(), passwordTextField.getText());
-                    try {
-                        client.sendSignUp(buyer);
-                    } catch (IOException ie) {
-                        ie.printStackTrace();
-                    }
+                    client.sendSignUp(buyer);
                 } else {
                     Seller seller = new Seller(usernameTextField.getText(), passwordTextField.getText());
-                    try {
-                        client.sendSignUp(seller);
-                    } catch (IOException ie) {
-                        ie.printStackTrace();
-                    }
+                    client.sendSignUp(seller);
                 }
                 client.receiveAction();
+
 
                 if (client.getAction() == Action.VALID_CREDENTIALS_BUYER) {
                     Messages.showSuccessfulSignUpDialog();
@@ -52,11 +45,8 @@ public class Application implements Runnable {
                 }
             }
             if (e.getSource() == loginButton) {
-                try {
-                    client.sendLogin(new User(usernameTextField.getText(), passwordTextField.getText()));
-                } catch (IOException ie) {
-                    ie.printStackTrace();
-                }
+                client.sendLogin(new User(usernameTextField.getText(), passwordTextField.getText()));
+
                 client.receiveAction();
 
                 if (client.getAction() == Action.VALID_CREDENTIALS_BUYER) {
