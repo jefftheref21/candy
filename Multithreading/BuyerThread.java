@@ -4,13 +4,16 @@ import java.net.Socket;
 
 public class BuyerThread extends Buyer implements Runnable {
     private Socket socket;
+
     private ObjectInputStream in;
     private ObjectOutputStream out;
+
     private HashMap<Action, Object> action;
+
     private CandyManager candyManager;
     private ArrayList<Store> stores;
 
-    // Add this field
+
 
     public BuyerThread(Socket socket, CandyManager candyManager) {
         try {

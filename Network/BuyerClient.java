@@ -40,6 +40,10 @@ public class BuyerClient extends Buyer {
         }
     }
 
+    public Action getAction() {
+        return action;
+    }
+
     public CandyManager getCandyManager() {
         return candyManager;
     }
