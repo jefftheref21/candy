@@ -1,28 +1,27 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
+import java.util.*;
 
 public class UserThread extends User implements Runnable {
     // TCP Components
+
     private Socket socket;
-    private BufferedReader in;
-    private PrintWriter out;
+    private ObjectInputStream in;
+    private ObjectOutputStream out;
 
     private Thread thread;
     private Thread buyerThread;
     private Thread sellerThread;
 
-    private Action action;
+    private HashMap<Action, Object> action;
     private CandyManager cm;
 
     public UserThread(Socket socket, CandyManager cm) {
         try {
             this.socket = socket;
             this.cm = cm;
-            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            out = new PrintWriter(socket.getOutputStream(), true);
+            in = new ObjectInputStream(socket.getInputStream());
+            out = new ObjectOutputStream(socket.getOutputStream());
 
             thread = new Thread(this);
             thread.start();
@@ -33,36 +32,33 @@ public class UserThread extends User implements Runnable {
 
     public void run() {
         try {
-            String str = in.readLine();
-            action = Action.valueOf(str);
+            action = (HashMap<Action, Object>) in.readObject();
+            for (Map.Entry<Action, Object> entry : action.entrySet()) {
+                switch (entry.getKey()) {
+                    case LOGIN:
+                        handleLogin();
 
-            switch (action) {
-                case SIGNUP:
-                    handleSignup();
-                    break;
-                case LOGIN:
-                    handleLogin();
-                    break;
-                case BUYER:
-                    buyerThread = new Thread(new BuyerThread(socket, cm));
-                    buyerThread.start();
-                    break;
-                case SELLER:
-                    sellerThread = new Thread(new SellerThread(socket, cm));
-                    sellerThread.start();
-                    break;
-                default:
-                    out.println("Invalid action.");
-                    break;
+                        break;
+                    case BUYER:
+                        handleSignup((Buyer) entry.getValue());
+                        buyerThread = new Thread(new BuyerThread(socket, cm));
+                        buyerThread.start();
+                        break;
+                    case SELLER:
+                        handleSignup((Seller) entry.getValue());
+                        sellerThread = new Thread(new SellerThread(socket, cm));
+                        sellerThread.start();
+                        break;
+                }
             }
-        } catch (IOException ie) {
-            handleException(ie);
+        } catch (Exception e) {
+            handleException(e);
         } finally {
             closeResources();
         }
     }
 
-    private void handleSignup() throws IOException {
+    private void handleSignup(User user) throws IOException {
         //  reads username and password from the client and validate/signup the user
     }
 
@@ -70,7 +66,7 @@ public class UserThread extends User implements Runnable {
         //  reads username and password from the client and validate/login the user
     }
 
-    private void handleException(IOException e) {
+    private void handleException(Exception e) {
         System.err.println("Error: " + e.getMessage());
     }
 

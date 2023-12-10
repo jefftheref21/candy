@@ -1,8 +1,6 @@
 public enum Action {
     BUYER,
     SELLER,
-
-    SIGNUP,
     LOGIN,
 
     USERNAME,

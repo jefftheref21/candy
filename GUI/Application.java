@@ -21,7 +21,21 @@ public class Application implements Runnable {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (e.getSource() == signUpButton) {
-                client.sendSignUp("SIGNUP", usernameTextField.getText(), passwordTextField.getText());
+                if (userTypeLabel.getText().equals("Buyer")) {
+                    Buyer buyer = new Buyer(usernameTextField.getText(), passwordTextField.getText());
+                    try {
+                        client.sendSignUp(buyer);
+                    } catch (IOException ie) {
+                        ie.printStackTrace();
+                    }
+                } else {
+                    Seller seller = new Seller(usernameTextField.getText(), passwordTextField.getText());
+                    try {
+                        client.sendSignUp(seller);
+                    } catch (IOException ie) {
+                        ie.printStackTrace();
+                    }
+                }
                 if (client.receiveAction() == Action.VALID_CREDENTIALS_BUYER) {
                     showSuccessfulSignUpDialog();
                     runMarketplace();
@@ -36,7 +50,11 @@ public class Application implements Runnable {
                 }
             }
             if (e.getSource() == loginButton) {
-                client.sendLogin("LOGIN", usernameTextField.getText(), passwordTextField.getText());
+                try {
+                    client.sendLogin(new User(usernameTextField.getText(), passwordTextField.getText()));
+                } catch (IOException ie) {
+                    ie.printStackTrace();
+                }
                 // if (client.receiveAction() == Action.VALID_CREDENTIALS_BUYER) {
                 if (1 == 1) {
                     showSuccessfulLoginDialog();

@@ -1,27 +1,41 @@
 import javax.swing.*;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.*;
-import java.util.ArrayList;
+import java.util.*;
 
 public class UserClient extends User {
     private Socket socket;
     private final Application application;
 
-    private final BufferedReader in;
-    private final PrintWriter out;
+    private ObjectInputStream in;
+    private ObjectOutputStream out;
     private Action action;
+
+    //private CandyManager candyManager;
 
     public UserClient(Application application) throws IOException {
         this.application = application;
 
+        Candy candy1 = new Candy("Snickers", new Store("Walmart"), "Chocolate bar", 1, 50, 1.00);
+        Candy candy2 = new Candy("Twix", new Store("Walmart"), "Chocolate bar",2, 25, 2.00);
+        Candy candy3 = new Candy("M&Ms", new Store("Walmart"), "Chocolate bar", 3, 100, 3.00);
+        Candy candy4 = new Candy("Kit Kat", new Store("Walmart"), "Chocolate bar", 4, 75, 4.00);
+        Candy candy5 = new Candy("Sour Patch Kids", new Store("Walmart"), "Sour candy", 5, 50, 1.00);
+        Candy candy6 = new Candy("Sour Skittles", new Store("Walmart"), "Sour candy", 6, 25, 2.00);
+        ArrayList<Candy> candies = new ArrayList<>();
+        candies.add(candy1);
+        candies.add(candy2);
+        candies.add(candy3);
+        candies.add(candy4);
+        candies.add(candy5);
+        candies.add(candy6);
+
         initConnection();
 
-        in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        out = new PrintWriter(socket.getOutputStream(), true);
+        in = new ObjectInputStream(socket.getInputStream());
+        out = new ObjectOutputStream(socket.getOutputStream());
     }
+
 
     public Socket getSocket() {
         return socket;
@@ -56,16 +70,20 @@ public class UserClient extends User {
         return hostname;
     }
 
-    public void sendSignUp(String act, String username, String password) {
-        out.println(act);
-        out.println(username);
-        out.println(password);
+    public void sendSignUp(User user) throws IOException {
+        HashMap<Action, Object> map = new HashMap<>();
+        if (user instanceof Buyer) {
+            map.put(Action.BUYER, user);
+        } else {
+            map.put(Action.SELLER, user);
+        }
+        out.writeObject(map);
     }
 
-    public void sendLogin(String act, String username, String password) {
-        out.println(act);
-        out.println(username);
-        out.println(password);
+    public void sendLogin(User user) throws IOException {
+        HashMap<Action, Object> map = new HashMap<>();
+        map.put(Action.LOGIN, user);
+        out.writeObject(map);
     }
 
     public Action receiveAction() {
