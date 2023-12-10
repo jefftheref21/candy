@@ -13,27 +13,25 @@ public class BuyerThread extends Buyer implements Runnable {
     private CandyManager candyManager;
     private ArrayList<Store> stores;
 
+    public BuyerThread(Socket socket, ObjectInputStream in, ObjectOutputStream out, CandyManager candyManager) {
+        this.socket = socket;
+        this.out = out;
+        this.in = in;
 
+        this.candyManager = candyManager; // Initialize CandyManager
 
-    public BuyerThread(Socket socket, CandyManager candyManager) {
-        try {
-            this.socket = socket;
-            this.candyManager = candyManager; // Initialize CandyManager
-
-            out = new ObjectOutputStream(socket.getOutputStream());
-            in = new ObjectInputStream(socket.getInputStream());
-
-            for (Candy candy : candyManager.candies) {
-                stores.add(candy.getStore());
-            }
-
-        } catch (IOException e) {
-            System.out.println(e);
+        for (Candy candy : candyManager.candies) {
+            stores.add(candy.getStore());
         }
     }
 
     public void run() {
         while (true) {
+            try {
+                action = (HashMap<Action, Object>) in.readObject();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             for (Map.Entry<Action, Object> entry : action.entrySet()) {
                 switch (entry.getKey()) {
                     case VIEW_PRODUCT_PAGE:
@@ -120,11 +118,6 @@ public class BuyerThread extends Buyer implements Runnable {
                         }
 
                 }
-            }
-            try {
-                action = (HashMap<Action, Object>) in.readObject();
-            } catch (Exception e) {
-                e.printStackTrace();
             }
         }
     }

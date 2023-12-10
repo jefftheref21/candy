@@ -15,16 +15,11 @@ public class SellerClient extends Seller {
 
     private CandyManager candyManager;
 
-    public SellerClient(Socket socket, ControlCenter controlCenter) throws IOException {
+    public SellerClient(Socket socket, ObjectInputStream in, ObjectOutputStream out, ControlCenter controlCenter) {
         this.socket = socket;
+        this.out = out;
+        this.in = in;
         this.controlCenter = controlCenter;
-
-        try {
-            out = new ObjectOutputStream(socket.getOutputStream());
-            in = new ObjectInputStream(socket.getInputStream());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     public Action getAction() {

@@ -77,7 +77,7 @@ public class Application implements Runnable {
 
     public void runMarketplace() {
         try {
-            SwingUtilities.invokeLater(new Marketplace(client.getSocket()));
+            SwingUtilities.invokeLater(new Marketplace(client.getSocket(), client.getIn(), client.getOut()));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -85,7 +85,7 @@ public class Application implements Runnable {
 
     public void runControlCenter() {
         try {
-             SwingUtilities.invokeLater(new ControlCenter(client.getSocket()));
+             SwingUtilities.invokeLater(new ControlCenter(client.getSocket(), client.getIn(), client.getOut()));
         } catch (IOException e) {
             e.printStackTrace();
         }

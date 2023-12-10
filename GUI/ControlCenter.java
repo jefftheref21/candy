@@ -3,6 +3,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 public class ControlCenter extends JFrame implements Runnable {
@@ -161,8 +163,8 @@ public class ControlCenter extends JFrame implements Runnable {
             }
         }
     };
-    public ControlCenter(Socket socket) throws IOException {
-        sellerClient = new SellerClient(socket, this);
+    public ControlCenter(Socket socket, ObjectInputStream in, ObjectOutputStream out) throws IOException {
+        sellerClient = new SellerClient(socket, in, out, this);
     }
 
     public void run() {

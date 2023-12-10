@@ -14,9 +14,12 @@ public class BuyerClient extends Buyer {
 
     private CandyManager candyManager;
 
-    public BuyerClient(Socket socket, Marketplace marketplace) throws IOException {
+    public BuyerClient(Socket socket, ObjectInputStream in, ObjectOutputStream out, Marketplace marketplace) {
         this.socket = socket;
+        this.out = out;
+        this.in = in;
         this.marketplace = marketplace;
+
         Candy candy1 = new Candy("Snickers", new Store("Walmart"), "Chocolate bar", 1, 50, 1.00);
         Candy candy2 = new Candy("Twix", new Store("Walmart"), "Chocolate bar",2, 25, 2.00);
         Candy candy3 = new Candy("M&Ms", new Store("Walmart"), "Chocolate bar", 3, 100, 3.00);
@@ -31,13 +34,6 @@ public class BuyerClient extends Buyer {
         candies.add(candy5);
         candies.add(candy6);
         candyManager = new CandyManager(candies, 7);
-
-        try {
-            out = new ObjectOutputStream(socket.getOutputStream());
-            in = new ObjectInputStream(socket.getInputStream());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     public Action getAction() {
@@ -80,11 +76,11 @@ public class BuyerClient extends Buyer {
     }
 
     public void sendShoppingCart() {
-        sendAction(Action.SHOPPING_CART, 0);
+        sendAction(Action.SHOPPING_CART, this.getShoppingCart());
     }
 
     public void sendHistory() {
-        sendAction(Action.PURCHASE_HISTORY, 0);
+        sendAction(Action.PURCHASE_HISTORY, this.getPurchaseHistory());
     }
 
     //Sends to server the candy in which the user would like to remove from their shopping cart
@@ -154,8 +150,7 @@ public class BuyerClient extends Buyer {
 
     public void receiveSortCandies() {
         try {
-            CandyManager cm = (CandyManager) in.readObject();
-            setCandyManager(cm);
+            candyManager = (CandyManager) in.readObject();
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
@@ -176,6 +171,7 @@ public class BuyerClient extends Buyer {
         try {
             HashMap<Action, Object> map = new HashMap<>();
             map.put(action, object);
+            System.out.println("hashmap " + map);
             out.writeObject(map);
             out.flush();
         } catch (IOException e) {
