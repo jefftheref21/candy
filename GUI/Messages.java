@@ -119,4 +119,14 @@ public class Messages {
         JOptionPane.showMessageDialog(null, "Purchase history export unsuccessful",
                 "Error", JOptionPane.ERROR_MESSAGE);
     }
+
+    public static void showAddToCartSuccessful() {
+        JOptionPane.showMessageDialog(null, "Added to Shopping Cart Successful",
+                "Success", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    public static void showRemoveToCartSuccessful() {
+        JOptionPane.showMessageDialog(null, "Removed to Shopping Cart Successful",
+                "Success", JOptionPane.INFORMATION_MESSAGE);
+    }
 }
