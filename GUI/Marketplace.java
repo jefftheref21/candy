@@ -14,6 +14,7 @@ public class Marketplace extends JFrame implements Runnable {
 
     BuyerClient buyerClient;
 
+    JButton sortButton;
     JComboBox sortComboBox;
     String[] sortOptions = {"Price - Least to Greatest", "Price - Greatest to Least",
             "Quantity - Least to Greatest", "Quantity - Greatest to Least"};
@@ -37,10 +38,11 @@ public class Marketplace extends JFrame implements Runnable {
     ActionListener actionListener = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (e.getSource() == sortComboBox) {
-                // TODO
+            if (e.getSource() == sortButton) {
                 // need to figure out how to update marketplace with sorted candy
+                System.out.println(sortComboBox.getSelectedIndex());
                 int sort = sortComboBox.getSelectedIndex();
+
                 buyerClient.sendSortDecision(sort);
                 buyerClient.receiveSortCandies();
                 run();
@@ -50,6 +52,7 @@ public class Marketplace extends JFrame implements Runnable {
                 String searchWord = searchTextField.getText();
                 buyerClient.sendSearchDecision(searchWord);
             }
+
             if (e.getSource() == buyButton) {
                 try {
                     int quantityToBuy = Integer.parseInt(quantityToBuyTextField.getText());
@@ -72,6 +75,7 @@ public class Marketplace extends JFrame implements Runnable {
                 }
 
             }
+
             if (e.getSource() == addToCartButton) {
                 try {
                     buyerClient.sendCandyProduct(candySelected, "ADD_TO_CART",
@@ -178,11 +182,16 @@ public class Marketplace extends JFrame implements Runnable {
                 GridBagConstraints.LINE_START, GridBagConstraints.NONE,
                 new Insets(10, 10, 10, 10), 0, 0);
 
-        JLabel sortLabel = new JLabel("Sort by: ");
-        topPanel.add(sortLabel, gbc);
+        sortComboBox = new JComboBox(sortOptions);
 
-        JComboBox sortComboBox = new JComboBox(sortOptions);
+        sortButton = new JButton("Sort");
+        sortButton.addActionListener(actionListener);
+        sortButton.setBackground(buttonColor);
+
         topPanel.add(sortComboBox, gbc);
+
+        gbc.gridx = 1;
+        topPanel.add(sortButton, gbc);
 
         searchTextField = new JTextField(8);
         searchButton = new JButton("Search");
@@ -190,10 +199,10 @@ public class Marketplace extends JFrame implements Runnable {
         searchButton.setBackground(buttonColor);
         searchButton.addActionListener(actionListener);
 
-        gbc.gridx = 1;
+        gbc.gridx = 2;
         topPanel.add(searchTextField, gbc);
 
-        gbc.gridx = 2;
+        gbc.gridx = 3;
         topPanel.add(searchButton, gbc);
 
         content.add(topPanel, BorderLayout.NORTH);

@@ -30,7 +30,6 @@ public class Application implements Runnable {
                 }
                 client.receiveAction();
 
-
                 if (client.getAction() == Action.VALID_CREDENTIALS_BUYER) {
                     Messages.showSuccessfulSignUpDialog();
                     runMarketplace();
