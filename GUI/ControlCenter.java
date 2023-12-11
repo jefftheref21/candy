@@ -681,7 +681,7 @@ public class ControlCenter extends JFrame implements Runnable {
             Buyer buyer = sale.getBuyerAccount();
             for (Purchase purchase : buyer.getShoppingCart().getPurchases()) {
                 Candy candy = purchase.getCandyBought();
-                Object[] rowData = {candy.getName(), candy.getStore().getName(), purchase.getQuantityBought(), candy.getPrice()};
+                Object[] rowData = {candy.getName(), candy.getStore(), purchase.getQuantityBought(), candy.getPrice()};
                 productData.add(rowData);
             }
         }

@@ -78,7 +78,6 @@ public class BuyerThread extends Buyer implements Runnable {
                             int index = candyManager.getIndex(purchase.getCandyBought().getCandyID());
                             int totalQuantity = candyManager.candies.get(index).getQuantity();
 
-
                             if (totalQuantity >= purchase.getQuantityBought()) {
                                 candyManager.buyInstantly(purchase.getCandyBought().getCandyID(),
                                         purchase.getQuantityBought(), this);
@@ -113,11 +112,7 @@ public class BuyerThread extends Buyer implements Runnable {
                         }
                         case ADD_TO_CART: {
                             Purchase purchaseAddToCart = (Purchase) entry.getValue();
-                            try {
-                                addToCart(purchaseAddToCart.getCandyBought(), purchaseAddToCart.getQuantityBought());
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
+                            addToCart(purchaseAddToCart);
                             break;
                         }
                         case REMOVE_FROM_CART: {
@@ -132,7 +127,7 @@ public class BuyerThread extends Buyer implements Runnable {
                         }
                         case SHOPPING_CART: {
                             try {
-                                out.writeUnshared(this.getShoppingCart());
+                                this.getShoppingCart().writeObject(out);
                                 out.flush();
                             } catch (IOException e) {
                                 e.printStackTrace();
@@ -191,18 +186,39 @@ public class BuyerThread extends Buyer implements Runnable {
             e.printStackTrace();
         }
     }
-    private void addToCart(Candy candy, int quantity) throws IOException {
-        if (quantity > candy.getQuantity()) {
-            out.writeUnshared(Action.BUY_QUANTITY_EXCEEDS);
-            out.flush();
-            return;
-        }
 
-        Purchase purchase = new Purchase(candy, quantity);
-        this.addToShoppingCart(purchase);
-        out.writeUnshared(Action.ADD_TO_CART);
-        out.flush();
+    private void addToCart(Purchase purchase) {
+        if (purchase.getQuantityBought() < 0) {
+            try {
+                out.writeUnshared(Action.ADD_TO_CART_INVALID);
+                out.flush();
+                return;
+            } catch (IOException ie) {
+                ie.printStackTrace();
+            }
+        }
+        int index = candyManager.getIndex(purchase.getCandyBought().getCandyID());
+        int totalQuantity = candyManager.candies.get(index).getQuantity();
+
+        if (totalQuantity >= purchase.getQuantityBought()) {
+            this.addToShoppingCart(purchase);
+
+            try {
+                out.writeUnshared(Action.ADD_TO_CART_SUCCESSFUL);
+                out.flush();
+            } catch (IOException ie) {
+                ie.printStackTrace();
+            }
+        } else {
+            try {
+                out.writeUnshared(Action.ADD_TO_CART_EXCEEDS);
+                out.flush();
+            } catch (IOException ie) {
+                ie.printStackTrace();
+            }
+        }
     }
+
     private void removeFromCart(Candy candy, int quantity) throws IOException {
         Purchase purchase = new Purchase(candy, quantity);
         for (int i = 0; i < this.getShoppingCart().getPurchases().size(); i++) {

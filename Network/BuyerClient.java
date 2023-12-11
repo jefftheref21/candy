@@ -58,7 +58,7 @@ public class BuyerClient extends Buyer {
         Purchase purchase = new Purchase(candy, quantity);
         if (type.equals("BUY_INSTANTLY")) {
             sendAction(Action.BUY_INSTANTLY, purchase);
-        } else {
+        } else if (type.equals("ADD_TO_CART")) {
             sendAction(Action.ADD_TO_CART, purchase);
         }
     }
@@ -72,6 +72,17 @@ public class BuyerClient extends Buyer {
         sendAction(Action.SHOPPING_CART, 0);
     }
 
+
+    public void receiveShoppingCart() {
+        try {
+            this.getShoppingCart().readObject(in);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public void sendHistory() {
         sendAction(Action.PURCHASE_HISTORY, 0);
     }
@@ -81,28 +92,14 @@ public class BuyerClient extends Buyer {
         sendAction(Action.REMOVE_FROM_CART, candy);
     }
 
-    public ShoppingCart receiveShoppingCart() {
+    public void receivePurchaseHistory() {
         try {
-            ShoppingCart sc = (ShoppingCart) in.readUnshared();
-            return sc;
+            this.setPurchaseHistory((PurchaseHistory) in.readUnshared());
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
-        return null;
-    }
-
-    public PurchaseHistory receivePurchaseHistory() {
-        try {
-            PurchaseHistory ph = (PurchaseHistory) in.readUnshared();
-            return ph;
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-        return null;
     }
 
     public void sendExportPurchaseHistory(String file) {
@@ -139,6 +136,5 @@ public class BuyerClient extends Buyer {
             e.printStackTrace();
         }
     }
-
 
 }
