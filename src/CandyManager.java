@@ -193,11 +193,8 @@ public class CandyManager implements Serializable {
             System.out.println(index + " " + totalQuantity);
             candies.get(index).setQuantity(totalQuantity - quantity);
             System.out.println(candies.get(index).getQuantity());
-            // candies.get(index).getStore().editCandy(id, candies.get(index), this);
 
-            Sale sale = new Sale(candies.get(index), quantity, buyer);
-            // candies.get(index).getStore().addSale(sale);
-            buyer.getPurchaseHistory().addPurchase(sale);
+            buyer.getPurchaseHistory().addPurchase(new Purchase(candies.get(index), quantity));
         }
     }
     public boolean buyShoppingCart(Buyer buyer) {
@@ -215,6 +212,7 @@ public class CandyManager implements Serializable {
                 Purchase currPurchase = buyer.getShoppingCart().getPurchases().get(j);
                 buyInstantly(currPurchase.getCandyBought().getCandyID(),
                         currPurchase.getQuantityBought(), buyer);
+                buyer.getPurchaseHistory().addPurchase(currPurchase);
             }
             return true;
         }

@@ -196,13 +196,13 @@ public class Marketplace extends JFrame implements Runnable {
             }
             if (e.getSource() == exportHistoryButton) {
                 String filePath = Messages.getExportPath();
-
                 buyerClient.sendExportPurchaseHistory(filePath);
+
                 buyerClient.receiveAction();
-                //boolean expSuccess = buyerClient.getPurchaseHistory().exportHistoryToFile(buyerClient.getUsername());
+
                 if (buyerClient.getAction() == Action.EXPORT_HISTORY_SUCCESSFUL) {
                     Messages.showExportHistorySuccessful();
-                } else {
+                } else if (buyerClient.getAction() == Action.EXPORT_HISTORY_UNSUCCESSFUL){
                     Messages.showExportHistoryUnsuccessful();
                 }
             }
@@ -218,8 +218,8 @@ public class Marketplace extends JFrame implements Runnable {
                 // TODO: Aadiv, add these to the table they will be displayed in
                 ArrayList<Store> storesByProducts = buyerClient.getCandyManager().sortStoreStatistics(stores, 0, buyerClient);
                 ArrayList<Store> storesByBuyer = buyerClient.getCandyManager().sortStoreStatistics(stores, 1, buyerClient);
-            }
 
+            }
         }
     };
 
@@ -505,8 +505,8 @@ public class Marketplace extends JFrame implements Runnable {
             data[i][3] = shoppingCart.getPurchases().get(i).getQuantityBought();  // Quantity bought
         }
 
-        JTable salesTable = new JTable(data, columnNames);
-        JScrollPane scrollPane = new JScrollPane(salesTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+        JTable shoppingCartTable = new JTable(data, columnNames);
+        JScrollPane scrollPane = new JScrollPane(shoppingCartTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
         shoppingCartInfo.add(scrollPane);
@@ -541,7 +541,7 @@ public class Marketplace extends JFrame implements Runnable {
         shoppingCartFrame.setVisible(true);
     }
 
-    public void showPurchaseHistoryDialog(PurchaseHistory ph) {
+    public void showPurchaseHistoryDialog(PurchaseHistory purchaseHistory) {
         JFrame jf = new JFrame("Purchase History");
         GridBagConstraints gbc = new GridBagConstraints(0, 0, 1, 1, 0, 0,
                 GridBagConstraints.LINE_START, GridBagConstraints.NONE,
@@ -552,47 +552,32 @@ public class Marketplace extends JFrame implements Runnable {
 
         JPanel titlePanel = new JPanel();
         titlePanel.setBackground(outerColor);
-
         JLabel purchaseHistoryLabel = new JLabel("Purchase History");
         titlePanel.add(purchaseHistoryLabel);
 
         JPanel purchaseHistoryInfo = new JPanel();
         purchaseHistoryInfo.setBackground(outerColor);
-        purchaseHistoryInfo.setLayout(new GridBagLayout());
 
-        JLabel candyIDLabel = new JLabel("Candy ID");
-        JLabel storeNameLabel = new JLabel("Store");
-        JLabel candyNameLabel = new JLabel("Candy Name");
-        JLabel quantityLabel = new JLabel("Quantity");
+        String[] columnNames = {"Candy ID", "Store", "Candy Name", "Quantity Bought"};
 
-        purchaseHistoryInfo.add(candyIDLabel, gbc);
-        gbc.gridx = 1;
-        purchaseHistoryInfo.add(storeNameLabel, gbc);
-        gbc.gridx = 2;
-        purchaseHistoryInfo.add(candyNameLabel, gbc);
-        gbc.gridx = 3;
-        purchaseHistoryInfo.add(quantityLabel, gbc);
-
-        PurchaseHistory purchaseHistory = buyerClient.getPurchaseHistory();
-
+        Object[][] data = new Object[purchaseHistory.getPurchases().size()][columnNames.length];
         for (int i = 0; i < purchaseHistory.getPurchases().size(); i++) {
-            JLabel idLabel = new JLabel(purchaseHistory.getPurchases().get(i).getCandyBought().getCandyID() + "");
-            JLabel storeLabel = new JLabel(purchaseHistory.getPurchases().get(i).getCandyBought().getStore());
-            JLabel nameLabel = new JLabel(purchaseHistory.getPurchases().get(i).getCandyBought().getName());
-            JLabel quantityBoughtLabel = new JLabel(purchaseHistory.getPurchases().get(i).getQuantityBought() + "");
-            gbc.gridy = i + 1;
-            gbc.gridx = 0;
-            purchaseHistoryInfo.add(idLabel, gbc);
-            gbc.gridx = 1;
-            purchaseHistoryInfo.add(storeLabel, gbc);
-            gbc.gridx = 2;
-            purchaseHistoryInfo.add(nameLabel, gbc);
-            gbc.gridx = 3;
-            purchaseHistoryInfo.add(quantityBoughtLabel, gbc);
+            Candy currCandy = purchaseHistory.getPurchases().get(i).getCandyBought();
+            data[i][0] = currCandy.getCandyID();  // Candy ID
+            data[i][1] = currCandy.getStore();  // Store name
+            data[i][2] = currCandy.getName();  // Candy name
+            data[i][3] = purchaseHistory.getPurchases().get(i).getQuantityBought();  // Quantity bought
         }
+
+        JTable historyTable = new JTable(data, columnNames);
+        JScrollPane scrollPane = new JScrollPane(historyTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+        purchaseHistoryInfo.add(scrollPane);
 
         JPanel exportPanel = new JPanel();
         exportPanel.setBackground(outerColor);
+
         exportHistoryButton = new JButton("Export Purchase History");
         exportHistoryButton.setBackground(buttonColor);
         exportHistoryButton.addActionListener(actionListener);
@@ -603,11 +588,9 @@ public class Marketplace extends JFrame implements Runnable {
         content.add(purchaseHistoryInfo, BorderLayout.CENTER);
         content.add(exportPanel, BorderLayout.SOUTH);
 
-        jf.setSize(400, 400);
+        jf.pack();;
         jf.setLocationRelativeTo(null);
         jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         jf.setVisible(true);
     }
-
-
 }
