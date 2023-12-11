@@ -402,23 +402,16 @@ public class CandyManager implements Serializable {
 
         for (Candy candy : candies) {
             out.writeUnshared(candy);
-//            System.out.println("__________________");
-//            System.out.println(candy.getName());
-//            System.out.println(candy.getQuantity());
         }
     }
 
     public void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-
         int candiesSize = in.readInt();
 
         candies = new ArrayList<>(candiesSize);
 
         for (int i = 0; i < candiesSize; i++) {
             Candy candy = (Candy) in.readUnshared();
-//            System.out.println("__________________________");
-//            System.out.println(candy.getName());
-//            System.out.println(candy.getQuantity());
             candies.add(candy);
         }
     }
