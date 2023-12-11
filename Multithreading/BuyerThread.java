@@ -82,6 +82,8 @@ public class BuyerThread extends Buyer implements Runnable {
                                 candyManager.buyInstantly(purchase.getCandyBought().getCandyID(),
                                         purchase.getQuantityBought(), this);
 
+                                storeManager.buyInstantly(purchase.getCandyBought(),
+                                        purchase.getQuantityBought(), this);
                                 try {
                                     out.writeUnshared(Action.BUY_SUCCESSFUL);
                                 } catch (IOException ie) {
@@ -137,7 +139,7 @@ public class BuyerThread extends Buyer implements Runnable {
                         }
                         case PURCHASE_HISTORY: {
                             try {
-                                out.writeUnshared(this.getPurchaseHistory());
+                                this.getPurchaseHistory().writeObject(out);
                                 out.flush();
                             } catch (IOException e) {
                                 e.printStackTrace();
@@ -145,9 +147,10 @@ public class BuyerThread extends Buyer implements Runnable {
                             break;
                         }
                         case EXPORT_HISTORY: {
-                            File file = (File) entry.getValue();
+                            String file = (String) entry.getValue();
                             try {
-                                exportHistory(file);
+                                File f = new File(file);
+                                exportHistory(f);
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -172,12 +175,7 @@ public class BuyerThread extends Buyer implements Runnable {
 
     private void exportHistory(File file) throws IOException {
         try {
-            PurchaseHistory ph = this.getPurchaseHistory();
-            PrintWriter pw = new PrintWriter(file);
-
-            for (int i = 0; i < ph.getPurchases().size(); i++) {
-                pw.println(ph.getPurchases().get(i));
-            }
+            this.getPurchaseHistory().exportHistory(file);
 
             out.writeUnshared(Action.EXPORT_HISTORY_SUCCESSFUL);
             out.flush();
