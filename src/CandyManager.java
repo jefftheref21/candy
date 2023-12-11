@@ -24,6 +24,10 @@ public class CandyManager implements Serializable {
     public ArrayList<Candy> getCandies() {
         return candies;
     }
+
+    public void setCandies(ArrayList<Candy> candies) {
+        this.candies = candies;
+    }
     // Buyer methods
     public String viewProductPage(int productID) {
         String productPage = "";
@@ -120,7 +124,7 @@ public class CandyManager implements Serializable {
             int j = i - 1;
 
             switch (choice) {
-                case 1 -> { // Least to greatest by price
+                case 0 -> { // Least to greatest by price
                     while (j >= 0 && this.candies.get(temp).getPrice() <
                             this.candies.get(j).getPrice()) {
                         Collections.swap(this.candies, temp, j);
@@ -128,7 +132,7 @@ public class CandyManager implements Serializable {
                         j--;
                     }
                 }
-                case 2 -> { // Greatest to least by price
+                case 1 -> { // Greatest to least by price
                     while (j >= 0 && this.candies.get(temp).getPrice() >
                             this.candies.get(j).getPrice()) {
                         Collections.swap(this.candies, temp, j);
@@ -136,14 +140,14 @@ public class CandyManager implements Serializable {
                         j--;
                     }
                 }
-                case 3 -> { // Least to greatest by quantity
+                case 2 -> { // Least to greatest by quantity
                     while (j >= 0 && this.candies.get(temp).getQuantity() < this.candies.get(j).getQuantity()) {
                         Collections.swap(this.candies, temp, j);
                         temp = j;
                         j--;
                     }
                 }
-                case 4 -> { // Greatest to least by quantity
+                case 3 -> { // Greatest to least by quantity
                     while (j >= 0 && this.candies.get(temp).getQuantity() > this.candies.get(j).getQuantity()) {
                         Collections.swap(this.candies, temp, j);
                         temp = j;
@@ -226,6 +230,8 @@ public class CandyManager implements Serializable {
                 result.add(candies.get(i));
             }
         }
+        System.out.println("please work oiwjfwwejoifjwe" + result.size());
+
         return result;
     }
     // Seller methods

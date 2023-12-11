@@ -49,19 +49,53 @@ public class Marketplace extends JFrame implements Runnable {
                 System.out.println(sortComboBox.getSelectedIndex());
                 int sort = sortComboBox.getSelectedIndex();
 
-                buyerClient.sendSortDecision(sort);
-                buyerClient.receiveSortCandies();
-                // run();
+                buyerClient.receiveSortCandies(sort);
+                updateScreen();
             }
             if (e.getSource() == searchButton) {
                 // TODO
                 String searchWord = searchTextField.getText();
-                ArrayList<Candy> result = buyerClient.searchCandies(searchWord);
-                 if (result == null) {
-                     Messages.showSearchUnsuccesful();
-                 } else {
-                     displayCandyButtons(result);
-                 }
+                if (searchWord.equals("")) {
+
+                    buyerClient.sendCandyManager();
+                    buyerClient.receiveCandyManager();
+                    updateScreen();
+                    return;
+                }
+
+                ArrayList<Candy> result = buyerClient.getCandyManager().search(searchWord);
+
+                buyerClient.getCandyManager().setCandies(result);
+                if (result.isEmpty()) {
+                    Messages.showSearchUnsuccesful();
+                } else {
+                    updateScreen();
+                }
+            }
+
+            if (e.getSource() == buyShoppingCartButton) {
+                try {
+                    buyerClient.sendBuyShoppingCart();
+                } catch (NumberFormatException ex) {
+                    Messages.showNumberFormatError();
+                    return;
+                }
+
+                buyerClient.receiveAction();
+
+                switch (buyerClient.getAction()) {
+                    case BUY_SUCCESSFUL:
+                        buyerClient.sendCandyManager();
+                        buyerClient.receiveCandyManager();
+
+                        //candyPageFrame.dispose();
+                        updateScreen();
+                        Messages.showSuccessfulPurchase();
+                        break;
+                    case BUY_QUANTITY_EXCEEDS:
+                        Messages.showQuantityExceededError();
+                        break;
+                }
             }
 
             if (e.getSource() == buyButton) {
@@ -130,19 +164,6 @@ public class Marketplace extends JFrame implements Runnable {
                 ShoppingCart shoppingCart = buyerClient.receiveShoppingCart();
 
                 showShoppingCartDialog(shoppingCart);
-            }
-            if (e.getSource() == buyShoppingCartButton) {
-                buyerClient.sendBuyShoppingCart();
-                buyerClient.receiveAction();
-
-                switch (buyerClient.getAction()) {
-                    case BUY_SUCCESSFUL:
-                        Messages.showSuccessfulPurchase();
-                        break;
-                    case BUY_QUANTITY_EXCEEDS:
-                        Messages.showQuantityExceededError();
-                        break;
-                }
             }
             if (e.getSource() == historyButton) {
                 buyerClient.sendHistory();

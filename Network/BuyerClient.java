@@ -81,11 +81,6 @@ public class BuyerClient extends Buyer {
         sendAction(Action.REMOVE_FROM_CART, candy);
     }
 
-    //receives the arraylist of candies that the user searched from the server
-    public ArrayList<Candy> searchCandies(String search) {
-        return candyManager.search(search);
-    }
-
     public ShoppingCart receiveShoppingCart() {
         try {
             ShoppingCart sc = (ShoppingCart) in.readUnshared();
@@ -119,14 +114,8 @@ public class BuyerClient extends Buyer {
         sendAction(Action.SORT_PRODUCTS, decision);
     }
 
-    public void receiveSortCandies() {
-        try {
-            candyManager = (CandyManager) in.readUnshared();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+    public void receiveSortCandies(int index) {
+        this.candyManager.sortProducts(index);
     }
 
     public void receiveAction() {

@@ -15,7 +15,6 @@ public enum Action {
     ADD_TO_CART,
     BACK,
 
-    SORT,
     SEARCH,
 
     SHOPPING_CART,

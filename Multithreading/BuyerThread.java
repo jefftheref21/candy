@@ -63,17 +63,6 @@ public class BuyerThread extends Buyer implements Runnable {
                             }
                             break;
                         }
-                        case SORT_PRODUCTS: {
-                            // get stuff from client
-                            candyManager.sortProducts((Integer) entry.getValue());
-                            try {
-                                out.writeUnshared(candyManager.candies);
-                                out.flush();
-                            } catch (IOException ie) {
-                                ie.printStackTrace();
-                            }
-                            break;
-                        }
                         case BUY_INSTANTLY: {
                             Purchase purchase = (Purchase) entry.getValue();
                             if (purchase.getQuantityBought() < 0) {
@@ -201,9 +190,6 @@ public class BuyerThread extends Buyer implements Runnable {
             out.flush();
             e.printStackTrace();
         }
-    }
-    private void search(String searchWord) {
-
     }
     private void addToCart(Candy candy, int quantity) throws IOException {
         if (quantity > candy.getQuantity()) {
