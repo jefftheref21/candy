@@ -28,18 +28,6 @@ public class Buyer extends User {
         shoppingCart = new ShoppingCart();
         purchaseHistory = new PurchaseHistory();
     }
-    /* // Lets not use this constructors, instead just set it afterwards
-    public Buyer(String username, String password, ShoppingCart shoppingCart) {
-        super(username, password);
-        this.shoppingCart = shoppingCart;
-        purchaseHistory = new PurchaseHistory();
-    }
-    public Buyer (String username, String password, ShoppingCart shoppingCart, PurchaseHistory purchaseHistory) {
-        super(username, password);
-        this.shoppingCart = shoppingCart;
-        this.purchaseHistory = purchaseHistory;
-    }
-     */
 
     public ShoppingCart getShoppingCart() {
         return shoppingCart;
