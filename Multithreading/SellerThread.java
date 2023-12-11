@@ -11,6 +11,8 @@ public class SellerThread extends Seller implements Runnable {
     private HashMap<Action, Object> action;
     private CandyManager candyManager;
 
+    private boolean isRunning = true;
+
     public SellerThread(Socket socket, ObjectInputStream in, ObjectOutputStream out, CandyManager cm) {
         this.socket = socket;
         this.out = out;
@@ -19,93 +21,97 @@ public class SellerThread extends Seller implements Runnable {
     }
 
     public void run() {
-        for (Map.Entry<Action, Object> entry : action.entrySet()) {
-            switch (entry.getKey()) {
-                case STORE_STATS:
-                    String sellerStats = listSellerStatistics(this);
-                    try {
-                        out.writeObject(sellerStats);
-                        out.flush();
-                    } catch (IOException ie) {
-                        ie.printStackTrace();
-                    }
-                    break;
-
-                case SORT_STORE_STATS:
-                    int sortChoice = 1;
-                    sortSellerStatistics(sortChoice, this);
-                    try {
-                        out.writeObject(candyManager);
-                        out.flush();
-                    } catch (IOException ie) {
-                        ie.printStackTrace();
-                    }
-                    break;
-
-                case LIST_SALES:
-                    String salesInfo = listSales(this);
-                    try {
-                        out.writeObject(salesInfo);
-                        out.flush();
-                    } catch (IOException ie) {
-                        ie.printStackTrace();
-                    }
-                    break;
-
-                case IMPORT_CSV:
-                    String importFileName = "your_import_file.csv";
-                    try {
-                        importCSV(importFileName, this);
-                        try {
-                            out.writeObject(true);
-                            out.flush();
-                        } catch (IOException ie) {
-                            ie.printStackTrace();
-                        }
-                    } catch (IOException e) {
-                        try {
-                            out.writeObject(false);
-                        } catch (IOException ie) {
-                            ie.printStackTrace();
-                        }
-                        e.printStackTrace();
-                    }
-                    break;
-
-                case EXPORT_CSV:
-                    String exportFileName = "your_export_file.csv";
-                    try {
-                        exportToCSV(exportFileName, this);
-                        try {
-                            out.writeObject(true);
-                            out.flush();
-                        } catch (IOException ie) {
-                            ie.printStackTrace();
-                        }
-                    } catch (IOException e) {
-                        try {
-                            out.writeObject(false);
-                            out.flush();
-                        } catch (IOException ie) {
-                            ie.printStackTrace();
-                        }
-                    }
-                    break;
-                case TOTAL_PURCHASE_QUANTITIES:
-                    ArrayList<Integer> quantities = candyManager.getTotalPurchaseQuantity(this.getStoreManager().getStores(), (Buyer) entry.getValue());
-                    try {
-                        out.writeObject(quantities);
-                        out.flush();
-                    } catch (IOException ie) {
-                        ie.printStackTrace();
-                    }
-                    break;
-            }
-        }
         try {
-            action = (HashMap<Action, Object>) in.readObject();
+            while (isRunning) {
+                action = (HashMap<Action, Object>) in.readObject();
+                for (Map.Entry<Action, Object> entry : action.entrySet()) {
+                    switch (entry.getKey()) {
+                        case STORE_STATS: {
+                            String sellerStats = listSellerStatistics(this);
+                            try {
+                                out.writeObject(sellerStats);
+                                out.flush();
+                            } catch (IOException ie) {
+                                ie.printStackTrace();
+                            }
+                            break;
+                        }
+                        case SORT_STORE_STATS: {
+                            int sortChoice = 1;
+                            sortSellerStatistics(sortChoice, this);
+                            try {
+                                out.writeObject(candyManager);
+                                out.flush();
+                            } catch (IOException ie) {
+                                ie.printStackTrace();
+                            }
+                            break;
+                        }
+                        case LIST_SALES: {
+                            String salesInfo = listSales(this);
+                            try {
+                                out.writeObject(salesInfo);
+                                out.flush();
+                            } catch (IOException ie) {
+                                ie.printStackTrace();
+                            }
+                            break;
+                        }
+                        case IMPORT_CSV: {
+                            String importFileName = "your_import_file.csv";
+                            try {
+                                importCSV(importFileName, this);
+                                try {
+                                    out.writeObject(true);
+                                    out.flush();
+                                } catch (IOException ie) {
+                                    ie.printStackTrace();
+                                }
+                            } catch (IOException e) {
+                                try {
+                                    out.writeObject(false);
+                                } catch (IOException ie) {
+                                    ie.printStackTrace();
+                                }
+                                e.printStackTrace();
+                            }
+                            break;
+                        }
+                        case EXPORT_CSV: {
+                            String exportFileName = "your_export_file.csv";
+                            try {
+                                exportToCSV(exportFileName, this);
+                                try {
+                                    out.writeObject(true);
+                                    out.flush();
+                                } catch (IOException ie) {
+                                    ie.printStackTrace();
+                                }
+                            } catch (IOException e) {
+                                try {
+                                    out.writeObject(false);
+                                    out.flush();
+                                } catch (IOException ie) {
+                                    ie.printStackTrace();
+                                }
+                            }
+                            break;
+                        }
+                        case TOTAL_PURCHASE_QUANTITIES: {
+                            ArrayList<Integer> quantities = candyManager.getTotalPurchaseQuantity(this.getStoreManager().getStores(), (Buyer) entry.getValue());
+                            try {
+                                out.writeObject(quantities);
+                                out.flush();
+                            } catch (IOException ie) {
+                                ie.printStackTrace();
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
         } catch (Exception e) {
-            e.printStackTrace();
+            closeResources();
         }
     }
 
@@ -144,5 +150,16 @@ public class SellerThread extends Seller implements Runnable {
 
     public int getIndex(int id) {
         return candyManager.getIndex(id);
+    }
+
+    public void closeResources() {
+        try {
+            in.close();
+            out.close();
+            socket.close();
+        } catch(IOException ie) {
+            ie.printStackTrace();
+        }
+        isRunning = false;
     }
 }
