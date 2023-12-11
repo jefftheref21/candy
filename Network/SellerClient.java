@@ -122,14 +122,21 @@ public class SellerClient extends Seller {
 
     public void receiveStoreStatistics() {
         try {
-            CandyManager cm = (CandyManager) in.readObject();
-            setCandyManager(cm);
-        } catch (IOException e) {
+            // Instead of casting directly to CandyManager, check if the received object is an instance of CandyManager
+            Object receivedObject = in.readObject();
+
+            if (receivedObject instanceof CandyManager) {
+                CandyManager cm = (CandyManager) receivedObject;
+                setCandyManager(cm);
+            } else {
+                // Handle the case where the received object is not of the expected type
+                System.err.println("Unexpected object type received for Action.STORE_STATS");
+            }
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
         }
     }
+
 
     public void sendImportCSV(String fileName) {
         sendAction(Action.IMPORT_CSV, fileName);
