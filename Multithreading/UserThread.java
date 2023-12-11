@@ -60,6 +60,9 @@ public class UserThread extends User implements Runnable {
                         case SELLER:
                             handleSignUp((Seller) entry.getValue());
                             break;
+                        case EDIT_USER:
+                            ArrayList<String> users = (ArrayList<String>) entry.getValue();
+                            handleEditUser(users.get(0), users.get(1), users.get(2), users.get(3));
                     }
                 }
             }
@@ -136,6 +139,38 @@ public class UserThread extends User implements Runnable {
         }
         out.writeUnshared(Action.INVALID_CREDENTIALS);
         out.flush();
+    }
+
+    public void handleEditUser(String oldUsername, String oldPassword, String newUsername, String newPassword)
+            throws IOException {
+        User oldUser = new User(oldUsername, oldPassword);
+        User newUser = new User(newUsername, newPassword);
+        for (User u : users) {
+            if (u.getUsername().equals(newUser.getUsername())) {
+                out.writeObject(Action.INVALID_CREDENTIALS);
+                out.flush();
+                return;
+            }
+        }
+
+        for (User u : users) {
+            if (u.getUsername().equals(oldUser.getUsername()) && u.getPassword().equals(oldUser.getPassword())){
+                if (u instanceof Buyer) {
+                    out.writeObject(Action.VALID_CREDENTIALS_BUYER);
+                } else {
+                    out.writeObject(Action.VALID_CREDENTIALS_SELLER);
+                }
+                System.out.println("Old username: " + oldUsername);
+                System.out.println("Old password: " + oldPassword);
+                System.out.println("Username: " + newUsername);
+                System.out.println("Password: " + newPassword);
+                oldUser.setUsername(newUsername);
+                oldUser.setPassword(newPassword);
+
+                out.flush();
+            }
+        }
+
     }
 
     private void handleException(Exception e) {

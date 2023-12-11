@@ -77,6 +77,7 @@ public class UserClient extends User {
                 map.put(Action.SELLER, user);
             }
             out.writeObject(map);
+            out.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -87,6 +88,24 @@ public class UserClient extends User {
             HashMap<Action, Object> map = new HashMap<>();
             map.put(Action.LOGIN, user);
             out.writeObject(map);
+            out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void sendEditUser(User user, String newUsername, String newPassword) {
+        try {
+            User newUser = new User(newUsername, newPassword);
+            ArrayList<String> users = new ArrayList<>();
+            users.add(user.getUsername());
+            users.add(user.getPassword());
+            users.add(newUser.getUsername());
+            users.add(newUser.getPassword());
+            HashMap<Action, Object> map = new HashMap<>();
+            map.put(Action.EDIT_USER, users);
+            out.writeObject(map);
+            out.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }

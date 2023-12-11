@@ -30,6 +30,8 @@ public class ControlCenter extends JFrame implements Runnable {
     JButton exportButton;
     JButton customerShoppingCartsButton;
 
+    JButton editStoreButton;
+
     JTextField createStoreNameTextField;
 
     JTextField nameTextField;
@@ -299,14 +301,18 @@ public class ControlCenter extends JFrame implements Runnable {
         viewProductsButton = new JButton("View Products");
         viewSalesButton = new JButton("View Sales");
         viewStoreStatisticsButton = new JButton("View Store Statistics");
+        editStoreButton = new JButton("Edit Store");
+
 
         viewProductsButton.setBackground(buttonColor);
         viewSalesButton.setBackground(buttonColor);
         viewStoreStatisticsButton.setBackground(buttonColor);
+        editStoreButton.setBackground(buttonColor);
 
         viewProductsButton.addActionListener(actionListener);
         viewSalesButton.addActionListener(actionListener);
         viewStoreStatisticsButton.addActionListener(actionListener);
+        editStoreButton.addActionListener(actionListener);
 
         content.add(viewProductsButton, gbc);
 
@@ -315,6 +321,8 @@ public class ControlCenter extends JFrame implements Runnable {
 
         gbc.gridy = 2;
         content.add(viewStoreStatisticsButton, gbc);
+        gbc.gridy = 3;
+        content.add(editStoreButton, gbc);
 
         storeOptionFrame.setSize(250, 250);
         storeOptionFrame.setLocationRelativeTo(null);
