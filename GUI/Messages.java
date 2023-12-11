@@ -31,6 +31,16 @@ public class Messages {
 
     // CONTROLCENTER MESSAGES
 
+    public static void showSuccessfulCreateStoreDialog() {
+        JOptionPane.showMessageDialog(null, "Store created successfully!",
+                "Create Store Confirmation", JOptionPane.PLAIN_MESSAGE);
+    }
+
+    public static void showUnsuccessfulCreateStoreDialog() {
+        JOptionPane.showMessageDialog(null, "Store creation failed!",
+                "Create Store Failed", JOptionPane.ERROR_MESSAGE);
+    }
+
     public static void showSuccessfulAddCandyDialog() {
         JOptionPane.showMessageDialog(null, "Candy added successfully!",
                 "Add Candy Confirmation", JOptionPane.PLAIN_MESSAGE);
@@ -98,6 +108,10 @@ public class Messages {
     public static void showSuccessfulPurchase() {
         JOptionPane.showMessageDialog(null, "Thank you for your purchase",
                 "Success", JOptionPane.INFORMATION_MESSAGE);
+    }
+    public static void showSearchUnsuccesful() {
+        JOptionPane.showMessageDialog(null, "No candy found for such keyword. Please try another one.",
+                "Error", JOptionPane.ERROR_MESSAGE);
     }
 
     public static void showNumberFormatError() {

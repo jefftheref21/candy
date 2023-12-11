@@ -3,6 +3,9 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.lang.reflect.Array;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -14,6 +17,7 @@ public class Marketplace extends JFrame implements Runnable {
 
     BuyerClient buyerClient;
 
+    JButton sortButton;
     JComboBox sortComboBox;
     String[] sortOptions = {"Price - Least to Greatest", "Price - Greatest to Least",
             "Quantity - Least to Greatest", "Quantity - Greatest to Least"};
@@ -37,19 +41,26 @@ public class Marketplace extends JFrame implements Runnable {
     ActionListener actionListener = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (e.getSource() == sortComboBox) {
-                // TODO
+            if (e.getSource() == sortButton) {
                 // need to figure out how to update marketplace with sorted candy
+                System.out.println(sortComboBox.getSelectedIndex());
                 int sort = sortComboBox.getSelectedIndex();
+
                 buyerClient.sendSortDecision(sort);
                 buyerClient.receiveSortCandies();
-                run();
+                // run();
             }
             if (e.getSource() == searchButton) {
                 // TODO
                 String searchWord = searchTextField.getText();
-                buyerClient.sendSearchDecision(searchWord);
+                ArrayList<Candy> result = buyerClient.searchCandies(searchWord);
+                 if (result == null) {
+                     Messages.showSearchUnsuccesful();
+                 } else {
+                     displayCandyButtons(result, getContentPane());
+                 }
             }
+
             if (e.getSource() == buyButton) {
                 try {
                     int quantityToBuy = Integer.parseInt(quantityToBuyTextField.getText());
@@ -72,6 +83,7 @@ public class Marketplace extends JFrame implements Runnable {
                 }
 
             }
+
             if (e.getSource() == addToCartButton) {
                 try {
                     buyerClient.sendCandyProduct(candySelected, "ADD_TO_CART",
@@ -96,12 +108,13 @@ public class Marketplace extends JFrame implements Runnable {
                 }
             }
             if (e.getSource() == shoppingCartButton) {
-                // TODO
                 // send to server that we need shopping cart
                 // servers sends back shopping cart
+                buyerClient.sendShoppingCart();
 
+                ShoppingCart shoppingCart = buyerClient.receiveShoppingCart();
 
-                showShoppingCartDialog();
+                showShoppingCartDialog(shoppingCart);
             }
             if (e.getSource() == buyShoppingCartButton) {
                 buyerClient.sendBuyShoppingCart();
@@ -117,30 +130,44 @@ public class Marketplace extends JFrame implements Runnable {
                 }
             }
             if (e.getSource() == historyButton) {
-                // TODO Must be updated from server
-                showPurchaseHistoryDialog();
+                buyerClient.sendHistory();
+
+                PurchaseHistory purchaseHistory = buyerClient.receivePurchaseHistory();
+
+                showPurchaseHistoryDialog(purchaseHistory);
+
             }
             if (e.getSource() == exportHistoryButton) {
-                // TODO buyerClient.sendExportPurchaseHistory()
-                // buyerClient.sendExportPurchaseHistory();
-                boolean expSuccess = buyerClient.getPurchaseHistory().exportHistoryToFile(buyerClient.getUsername());
-                if (expSuccess) {
+                String filePath = Messages.getExportPath();
+
+                buyerClient.sendExportPurchaseHistory(filePath);
+                buyerClient.receiveAction();
+                //boolean expSuccess = buyerClient.getPurchaseHistory().exportHistoryToFile(buyerClient.getUsername());
+                if (buyerClient.getAction() == Action.EXPORT_HISTORY_SUCCESSFUL) {
                     Messages.showExportHistorySuccessful();
                 } else {
                     Messages.showExportHistoryUnsuccessful();
                 }
             }
             if (e.getSource() == viewStatisticsButton) {
-                // TODO Must have data sent from server
-
-                //buyerClient.
+                ArrayList<Store> stores = new ArrayList<>();
+                ArrayList<String> storeNames = new ArrayList<>();
+                for (Candy candy : buyerClient.getCandyManager().candies) {
+                    if (!storeNames.contains(candy.getStore().getName())) {
+                        stores.add(candy.getStore());
+                        storeNames.add(candy.getStore().getName());
+                    }
+                }
+                // TODO: Aadiv, add these to the table they will be displayed in
+                ArrayList<Store> storesByProducts = buyerClient.getCandyManager().sortStoreStatistics(stores, 0, buyerClient);
+                ArrayList<Store> storesByBuyer = buyerClient.getCandyManager().sortStoreStatistics(stores, 1, buyerClient);
             }
 
         }
     };
 
-    public Marketplace(Socket socket) throws IOException {
-        buyerClient = new BuyerClient(socket, this);
+    public Marketplace(Socket socket, ObjectInputStream in, ObjectOutputStream out) throws IOException {
+        buyerClient = new BuyerClient(socket, in, out,this);
     }
 
     public void run() {
@@ -178,11 +205,16 @@ public class Marketplace extends JFrame implements Runnable {
                 GridBagConstraints.LINE_START, GridBagConstraints.NONE,
                 new Insets(10, 10, 10, 10), 0, 0);
 
-        JLabel sortLabel = new JLabel("Sort by: ");
-        topPanel.add(sortLabel, gbc);
+        sortComboBox = new JComboBox(sortOptions);
 
-        JComboBox sortComboBox = new JComboBox(sortOptions);
+        sortButton = new JButton("Sort");
+        sortButton.addActionListener(actionListener);
+        sortButton.setBackground(buttonColor);
+
         topPanel.add(sortComboBox, gbc);
+
+        gbc.gridx = 1;
+        topPanel.add(sortButton, gbc);
 
         searchTextField = new JTextField(8);
         searchButton = new JButton("Search");
@@ -190,10 +222,10 @@ public class Marketplace extends JFrame implements Runnable {
         searchButton.setBackground(buttonColor);
         searchButton.addActionListener(actionListener);
 
-        gbc.gridx = 1;
+        gbc.gridx = 2;
         topPanel.add(searchTextField, gbc);
 
-        gbc.gridx = 2;
+        gbc.gridx = 3;
         topPanel.add(searchButton, gbc);
 
         content.add(topPanel, BorderLayout.NORTH);
@@ -368,7 +400,7 @@ public class Marketplace extends JFrame implements Runnable {
         jf.setVisible(true);
     }
 
-    public void showShoppingCartDialog() {
+    public void showShoppingCartDialog(ShoppingCart sc) {
         JFrame jf = new JFrame("Shopping Cart");
         GridBagConstraints gbc = new GridBagConstraints(0, 0, 1, 1, 0, 0,
                 GridBagConstraints.LINE_START, GridBagConstraints.NONE,
@@ -437,7 +469,7 @@ public class Marketplace extends JFrame implements Runnable {
         jf.setVisible(true);
     }
 
-    public void showPurchaseHistoryDialog() {
+    public void showPurchaseHistoryDialog(PurchaseHistory ph) {
         JFrame jf = new JFrame("Purchase History");
         GridBagConstraints gbc = new GridBagConstraints(0, 0, 1, 1, 0, 0,
                 GridBagConstraints.LINE_START, GridBagConstraints.NONE,
