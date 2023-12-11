@@ -96,4 +96,41 @@ public class MainServer {
         oos.flush();
 //        oos.close();
     }
+    public void writeToFile(User user) throws IOException, ClassNotFoundException {
+        File f = new File("Users.txt");
+        ArrayList<User> users = new ArrayList<>();
+        if (f.exists() && f.length() > 0) {
+            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(f));
+            users = (ArrayList<User>) ois.readObject();
+            ois.close();
+        }
+        boolean present = false;
+        for (int i = 0; i < users.size(); i++) {
+            User currUser = users.get(i);
+            if (currUser instanceof Seller) {
+                Seller currSeller = (Seller) currUser;
+                for (int k = 0; k < currSeller.getStoreManager().getStores().size(); k++) {
+                    Store currStore = currSeller.getStoreManager().getStores().get(k);
+                    ArrayList<Candy> currCandies = new ArrayList<>();
+                    for (int j = 0; j < candyManager.candies.size(); j++) {
+                        if (candyManager.candies.get(j).getStore().equals(currStore.getName())) {
+                            currCandies.add(candyManager.candies.get(j));
+                        }
+                    }
+                    currSeller.getStoreManager().getStores().get(k).setCandies(currCandies);
+                }
+            }
+            if (currUser.getUsername().equals(user.getUsername()) && currUser.getPassword().equals(user.getPassword())) {
+                users.set(i, user);
+                present = true;
+            }
+        }
+        if (!present) {
+            users.add(user);
+        }
+        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(f, false));
+        oos.writeObject(users);
+        oos.flush();
+        oos.close();
+    }
 }

@@ -82,23 +82,6 @@ public class ControlCenter extends JFrame implements Runnable {
                 sellerClient.sendAddCandy(newCandy);
             }
 
-            if (e.getSource() == saveCandyButton) {
-                candySelected.setName(nameTextField.getText());
-                candySelected.setPrice(Double.parseDouble(priceTextField.getText()));
-                candySelected.setQuantity(Integer.parseInt(quantityTextField.getText()));
-                candySelected.setDescription(descriptionTextField.getText());
-
-                sellerClient.sendEditCandy(candySelected);
-
-                sellerClient.receiveAction();
-
-                if (sellerClient.getAction() == Action.EDIT_CANDY_SUCCESSFUL) {
-                    Messages.showSuccessfulEditCandyDialog();
-                } else if (sellerClient.getAction() == Action.EDIT_CANDY_UNSUCCESSFUL) {
-                    Messages.showUnsuccessfulEditCandyDialog();
-                }
-            }
-
             if (e.getSource() == deleteCandyButton) {
                 sellerClient.sendDeleteCandy(candySelected);
 
@@ -118,9 +101,25 @@ public class ControlCenter extends JFrame implements Runnable {
             if (e.getSource() == viewSalesButton) {
                 sellerClient.sendViewSales(storeSelected);
 
-                sellerClient.receiveUpdatedSales();
+                ArrayList<Sale> updatedSales = sellerClient.receiveUpdatedSales();
 
-                viewSalesInformationDialog(storeSelected);
+                viewSalesInformationDialog(storeSelected, updatedSales);
+            }
+            if (e.getSource() == saveCandyButton) {
+                candySelected.setName(nameTextField.getText());
+                candySelected.setPrice(Double.parseDouble(priceTextField.getText()));
+                candySelected.setQuantity(Integer.parseInt(quantityTextField.getText()));
+                candySelected.setDescription(descriptionTextField.getText());
+
+                sellerClient.sendEditCandy(candySelected);
+
+                sellerClient.receiveAction();
+
+                if (sellerClient.getAction() == Action.EDIT_CANDY_SUCCESSFUL) {
+                    Messages.showSuccessfulEditCandyDialog();
+                } else if (sellerClient.getAction() == Action.EDIT_CANDY_UNSUCCESSFUL) {
+                    Messages.showUnsuccessfulEditCandyDialog();
+                }
             }
 
             if (e.getSource() == viewStoreStatisticsButton) {
@@ -270,6 +269,14 @@ public class ControlCenter extends JFrame implements Runnable {
 
         for (int i = 0; i < stores.length; i++) {
             Store currStore = stores[i];
+
+            Candy candy1 = new Candy("Chocolate Bar", currStore.getName(), "Delicious chocolate",
+                    1, 50, 1.00);
+            Candy candy2 = new Candy("Sour Candy", currStore.getName(), "Tasty sour candy",
+                    2, 25, 2.00);
+            currStore.addCandy(candy1, new CandyManager());
+            currStore.addCandy(candy2, new CandyManager());
+
             GridBagConstraints gbc = new GridBagConstraints(i % 4, i / 4, 1, 1,
                     0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
                     new Insets(10, 10, 10, 10), 5, 5);
@@ -334,37 +341,40 @@ public class ControlCenter extends JFrame implements Runnable {
 
     public void displayCandyButtons(Store store) {
         // Dummy data for candies
-        Candy candy1 = new Candy("Chocolate Bar", store.getName(), "Delicious chocolate",
-                1, 50, 1.00);
-        Candy candy2 = new Candy("Sour Candy", store.getName(), "Tasty sour candy",
-                2, 25, 2.00);
-        Candy[] candies = {candy1, candy2};
 
         JFrame candyFrame = new JFrame("Candies in " + store.getName());
         Container candyContent = candyFrame.getContentPane();
 
         JPanel candyPanel = new JPanel();
         candyPanel.setLayout(new GridBagLayout());
+        candyPanel.setBackground(backgroundColor);
+        int skipped = 0;
 
-        for (int i = 0; i < candies.length; i++) {
-            Candy currCandy = candies[i];
-            GridBagConstraints gbc = new GridBagConstraints(i % 2, i / 2, 1, 1,
-                    0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                    new Insets(10, 10, 10, 10), 5, 5);
-
-            JButton candyButton = new JButton(new AbstractAction() {
+        for (int i = 0; i < store.getCandies().size(); i++) {
+            Candy currCandy = store.getCandies().get(i);
+            if (currCandy.getQuantity() == 0) {
+                skipped++;
+                continue;
+            }
+            JButton currButton = new JButton(new AbstractAction() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     candySelected = currCandy;
-                    showEditCandyDialog(store, currCandy);
+                    showEditCandyDialog(store, candySelected);
                 }
             });
 
-            candyButton.setBackground(buttonColor);
-            candyButton.setPreferredSize(new Dimension(100, 100));
-            candyButton.setHorizontalAlignment(SwingConstants.CENTER);
-            candyButton.setText(currCandy.getName());
-            candyPanel.add(candyButton, gbc);
+            currButton.setBackground(buttonColor);
+            currButton.setPreferredSize(new Dimension(100, 100));
+            currButton.setHorizontalAlignment(SwingConstants.CENTER);
+            String buttonText = currCandy.getStore() + "\n" + currCandy.getName() + "\n$"
+                    + currCandy.getPrice() + "\n" + currCandy.getQuantity();
+            currButton.setText("<html>" + buttonText.replaceAll("\\n", "<br>") + "</html>");
+            System.out.println(currCandy.getName());
+
+            candyPanel.add(currButton, new GridBagConstraints((i - skipped) % 4, (i - skipped) / 4, 1, 1,
+                    0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                    new Insets(10, 10, 10, 10), 5, 5));
         }
 
         candyContent.add(new JScrollPane(candyPanel));
@@ -422,12 +432,15 @@ public class ControlCenter extends JFrame implements Runnable {
 
         saveCandyButton = new JButton("Save");
         saveCandyButton.addActionListener(actionListener);
+        candySelected = currCandy;
 
         deleteCandyButton = new JButton(new AbstractAction("Delete") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                showDeleteCandyConfirmation(store, currCandy.getName());
-                jf.dispose();  // Close the edit dialog after deletion
+                if (e.getSource() == deleteCandyButton) {
+                    showDeleteCandyConfirmation(store, currCandy.getName());
+                    jf.dispose();  // Close the edit dialog after deletion
+                }
             }
         });
 
@@ -548,7 +561,7 @@ public class ControlCenter extends JFrame implements Runnable {
     }
 
 
-    public void viewSalesInformationDialog(Store store) {
+    public void viewSalesInformationDialog(Store store, ArrayList<Sale> sales) {
         JFrame salesFrame = new JFrame("Sales Information for " + store.getName());
         Container salesContent = salesFrame.getContentPane();
 
@@ -557,15 +570,16 @@ public class ControlCenter extends JFrame implements Runnable {
                 1, 50, 1.00), 5, new Buyer("John Doe", "password1"));
         Sale sale2 = new Sale(new Candy("Sour Candy", store.getName(), "Tasty sour candy",
                 2, 25, 2.00), 3, new Buyer("Jane Doe", "password2"));
-        Sale[] sales = {sale1, sale2};
-
+        sales.add(sale1);
+        sales.add(sale2);
+//
         String[] columnNames = {"Customer Name", "Revenue"};
 
         //2D array to hold sales data (temporary):
-        Object[][] data = new Object[sales.length][columnNames.length];
-        for (int i = 0; i < sales.length; i++) {
-            data[i][0] = sales[i].getBuyerAccount().getUsername();  // Customer name
-            data[i][1] = sales[i].getTotalRevenue();  // Total revenue
+        Object[][] data = new Object[sales.size()][columnNames.length];
+        for (int i = 0; i < sales.size(); i++) {
+            data[i][0] = sales.get(i).getBuyerAccount().getUsername();  // Customer name
+            data[i][1] = sales.get(i).getTotalRevenue();  // Total revenue
         }
 
         JTable salesTable = new JTable(data, columnNames);

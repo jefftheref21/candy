@@ -97,7 +97,7 @@ public class UserThread extends User implements Runnable {
         } else {
             out.writeUnshared(Action.VALID_CREDENTIALS_SELLER);
             out.flush();
-            sellerThread = new Thread(new SellerThread(socket, in, out, sm));
+            sellerThread = new Thread(new SellerThread(socket, in, out, sm, users, cm));
             sellerThread.start();
             try {
                 sellerThread.join();
@@ -125,7 +125,7 @@ public class UserThread extends User implements Runnable {
                 } else {
                     out.writeUnshared(Action.VALID_CREDENTIALS_SELLER);
                     out.flush();
-                    sellerThread = new Thread(new SellerThread(socket, in, out, sm));
+                    sellerThread = new Thread(new SellerThread(socket, in, out, sm, users, cm));
                     sellerThread.start();
                     try {
                         sellerThread.join();
