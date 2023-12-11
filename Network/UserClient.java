@@ -16,20 +16,6 @@ public class UserClient extends User {
     public UserClient(Application application) throws IOException {
         this.application = application;
 
-        Candy candy1 = new Candy("Snickers", new Store("Walmart"), "Chocolate bar", 1, 50, 1.00);
-        Candy candy2 = new Candy("Twix", new Store("Walmart"), "Chocolate bar",2, 25, 2.00);
-        Candy candy3 = new Candy("M&Ms", new Store("Walmart"), "Chocolate bar", 3, 100, 3.00);
-        Candy candy4 = new Candy("Kit Kat", new Store("Walmart"), "Chocolate bar", 4, 75, 4.00);
-        Candy candy5 = new Candy("Sour Patch Kids", new Store("Walmart"), "Sour candy", 5, 50, 1.00);
-        Candy candy6 = new Candy("Sour Skittles", new Store("Walmart"), "Sour candy", 6, 25, 2.00);
-        ArrayList<Candy> candies = new ArrayList<>();
-        candies.add(candy1);
-        candies.add(candy2);
-        candies.add(candy3);
-        candies.add(candy4);
-        candies.add(candy5);
-        candies.add(candy6);
-
         initConnection();
 
         out = new ObjectOutputStream(socket.getOutputStream());
@@ -39,6 +25,14 @@ public class UserClient extends User {
 
     public Socket getSocket() {
         return socket;
+    }
+
+    public ObjectOutputStream getOut() {
+        return out;
+    }
+
+    public ObjectInputStream getIn() {
+        return in;
     }
 
     public Action getAction() {

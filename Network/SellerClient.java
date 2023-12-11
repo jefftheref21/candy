@@ -15,16 +15,11 @@ public class SellerClient extends Seller {
 
     private CandyManager candyManager;
 
-    public SellerClient(Socket socket, ControlCenter controlCenter) throws IOException {
+    public SellerClient(Socket socket, ObjectInputStream in, ObjectOutputStream out, ControlCenter controlCenter) {
         this.socket = socket;
+        this.out = out;
+        this.in = in;
         this.controlCenter = controlCenter;
-
-        try {
-            out = new ObjectOutputStream(socket.getOutputStream());
-            in = new ObjectInputStream(socket.getInputStream());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     public Action getAction() {
@@ -44,36 +39,24 @@ public class SellerClient extends Seller {
         }
     }
 
-    public void createStore(String storeName, Candy candy, int quantity) {
-        try {
-            HashMap hashmap = new HashMap<String, Seller>();
-            hashmap.put(Action.CREATE_STORE, this);
-            out.writeObject(hashmap);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void sendCreateStore(Store store) {
+        sendAction(Action.CREATE_STORE, store);
     }
 
-    public void sendEditStore(String storeName, Candy candy, int quantity) {
-        try {
-            out.writeObject(candy);
-            out.flush();
-            out.writeUTF(storeName);
-            out.flush();
-            out.write(quantity);
-            out.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
+    public void sendEditStore(String storeName, Candy candy) {
+        for (Store store : this.getStoreManager().getStores()) {
+            if (store.getName().equals(storeName)) {
+                store.addCandy(candy, candyManager);
+                sendAction(Action.EDIT_STORE, store);
+            }
         }
+    }
+    public void sendShoppingCartRequest() {
+        sendAction(Action.VIEW_SHOPPING_CARTS, new Object());
     }
 
     public void sendToGetCandyID() {
-        try {
-            out.writeObject(Action.GET_CANDY_ID);
-            out.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        sendAction(Action.GET_CANDY_ID, new Object());
     }
 
     public int receiveCandyID() {
@@ -115,6 +98,17 @@ public class SellerClient extends Seller {
 
     public void sendViewStoreStatistics(Store store){
         sendAction(Action.STORE_STATS, store);
+    }
+
+    public void receiveStoreStatistics() {
+        try {
+            CandyManager cm = (CandyManager) in.readObject();
+            setCandyManager(cm);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void sendImportCSV(String fileName) {

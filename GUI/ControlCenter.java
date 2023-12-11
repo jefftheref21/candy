@@ -3,7 +3,11 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ControlCenter extends JFrame implements Runnable {
     public static final Color buttonColor = new Color(235, 158, 52);
@@ -52,7 +56,16 @@ public class ControlCenter extends JFrame implements Runnable {
             if (e.getSource() == createStoreButton) {
                 String storeName = createStoreNameTextField.getText();
                 Store newStore = new Store(storeName);
-                // sellerClient.createStore(newStore);
+
+                sellerClient.sendCreateStore(newStore);
+
+                sellerClient.receiveAction();
+
+                if (sellerClient.getAction() == Action.CREATE_STORE_SUCCESSFUL) {
+                    Messages.showSuccessfulCreateStoreDialog();
+                } else if (sellerClient.getAction() == Action.CREATE_STORE_UNSUCCESSFUL) {
+                    Messages.showUnsuccessfulCreateStoreDialog();
+                }
             }
             if (e.getSource() == addCandyButton) {
                 sellerClient.sendToGetCandyID();
@@ -60,13 +73,12 @@ public class ControlCenter extends JFrame implements Runnable {
                 int candyID = sellerClient.receiveCandyID();
 
                 String name = nameTextField.getText();
-                // int candyID = Integer.parseInt(candyIDTextField.getText());
                 String storeName = storeNameTextField.getText();
                 String description = descriptionTextField.getText();
                 double price = Double.parseDouble(priceTextField.getText());
                 int quantity = Integer.parseInt(quantityTextField.getText());
 
-                Candy newCandy = new Candy(name, new Store(storeName), description, candyID, quantity, price);
+                Candy newCandy = new Candy(name, storeName, description, candyID, quantity, price);
 
                 sellerClient.sendAddCandy(newCandy);
             }
@@ -114,6 +126,10 @@ public class ControlCenter extends JFrame implements Runnable {
 
             if (e.getSource() == viewStoreStatisticsButton) {
                 sellerClient.sendViewStoreStatistics(storeSelected);
+
+                sellerClient.receiveStoreStatistics();
+
+                showStoreStatisticsDialog();
             }
 
             if (e.getSource() == importButton) {
@@ -147,12 +163,13 @@ public class ControlCenter extends JFrame implements Runnable {
             }
 
             if (e.getSource() == customerShoppingCartsButton) {
-                // sellerClient.sendCustomerShoppingCarts();
+                //sellerClient.sendCustomerShoppingCarts(;
             }
+            //if (e.getSource() == editStore)
         }
     };
-    public ControlCenter(Socket socket) throws IOException {
-        sellerClient = new SellerClient(socket, this);
+    public ControlCenter(Socket socket, ObjectInputStream in, ObjectOutputStream out) throws IOException {
+        sellerClient = new SellerClient(socket, in, out, this);
     }
 
     public void run() {
@@ -201,19 +218,11 @@ public class ControlCenter extends JFrame implements Runnable {
         });
         addCandyDisplayButton.setBackground(buttonColor);
 
-        JTextField searchTextField = new JTextField(8);
-        JButton searchButton = new JButton("Search");
 
         topPanel.add(createStoreDisplayButton, gbc);
 
         gbc.gridx = 1;
         topPanel.add(addCandyDisplayButton, gbc);
-
-        gbc.gridx = 2;
-        topPanel.add(searchTextField, gbc);
-
-        gbc.gridx = 3;
-        topPanel.add(searchButton, gbc);
 
         content.add(topPanel, BorderLayout.NORTH);
     }
@@ -315,7 +324,7 @@ public class ControlCenter extends JFrame implements Runnable {
         gbc.gridy = 3;
         content.add(editStoreButton, gbc);
 
-        storeOptionFrame.pack();
+        storeOptionFrame.setSize(250, 250);
         storeOptionFrame.setLocationRelativeTo(null);
         storeOptionFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         storeOptionFrame.setVisible(true);
@@ -323,8 +332,10 @@ public class ControlCenter extends JFrame implements Runnable {
 
     public void displayCandyButtons(Store store) {
         // Dummy data for candies
-        Candy candy1 = new Candy("Chocolate Bar", store, "Delicious chocolate", 1, 50, 1.00);
-        Candy candy2 = new Candy("Sour Candy", store, "Tasty sour candy", 2, 25, 2.00);
+        Candy candy1 = new Candy("Chocolate Bar", store.getName(), "Delicious chocolate",
+                1, 50, 1.00);
+        Candy candy2 = new Candy("Sour Candy", store.getName(), "Tasty sour candy",
+                2, 25, 2.00);
         Candy[] candies = {candy1, candy2};
 
         JFrame candyFrame = new JFrame("Candies in " + store.getName());
@@ -355,7 +366,7 @@ public class ControlCenter extends JFrame implements Runnable {
         }
 
         candyContent.add(new JScrollPane(candyPanel));
-        candyFrame.pack();
+        candyFrame.setSize(350, 350);
         candyFrame.setLocationRelativeTo(null);
         candyFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         candyFrame.setVisible(true);
@@ -536,10 +547,43 @@ public class ControlCenter extends JFrame implements Runnable {
 
 
     public void viewSalesInformationDialog(Store store) {
-        JFrame jf = new JFrame("Sales Information");
-        // Add logic to display sales information for the store
-        JLabel salesLabel = new JLabel("Sales information for " + store.getName());
-        jf.add(salesLabel);
+        JFrame salesFrame = new JFrame("Sales Information for " + store.getName());
+        Container salesContent = salesFrame.getContentPane();
+
+        // Dummy data for sales
+        Sale sale1 = new Sale(new Candy("Chocolate Bar", store.getName(), "Delicious chocolate",
+                1, 50, 1.00), 5, new Buyer("John Doe", "password1"));
+        Sale sale2 = new Sale(new Candy("Sour Candy", store.getName(), "Tasty sour candy",
+                2, 25, 2.00), 3, new Buyer("Jane Doe", "password2"));
+        Sale[] sales = {sale1, sale2};
+
+        String[] columnNames = {"Customer Name", "Revenue"};
+
+        //2D array to hold sales data (temporary):
+        Object[][] data = new Object[sales.length][columnNames.length];
+        for (int i = 0; i < sales.length; i++) {
+            data[i][0] = sales[i].getBuyerAccount().getUsername();  // Customer name
+            data[i][1] = sales[i].getTotalRevenue();  // Total revenue
+        }
+
+        JTable salesTable = new JTable(data, columnNames);
+        JScrollPane scrollPane = new JScrollPane(salesTable);
+
+        salesContent.add(scrollPane);
+
+        // Set the size of the sales information dialog to a reasonable size
+        salesFrame.setSize(400, 300);
+        salesFrame.setLocationRelativeTo(null);
+        salesFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        salesFrame.setVisible(true);
+    }
+
+    public void showStoreStatisticsDialog() {
+        JFrame jf = new JFrame("Store Statistics");
+        // Add logic to display store statistics
+        JLabel statisticsLabel = new JLabel("Store statistics");
+        jf.add(statisticsLabel);
+        // TODO: Add logic to display store statistics
 
         jf.setSize(300, 300);
         jf.setLocationRelativeTo(null);

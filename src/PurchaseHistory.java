@@ -21,7 +21,7 @@ public class PurchaseHistory implements Serializable {
     public int getNumOfProductsBoughtAt(Store store) {
         int numOfProductsBought = 0;
         for (int j = 0; j < purchases.size(); j++) {
-            if (store.getName().equals(purchases.get(j).getCandyBought().getStore().getName())) {
+            if (store.getName().equals(purchases.get(j).getCandyBought().getStore())) {
                 numOfProductsBought += purchases.get(j).getQuantityBought();
             }
         }
