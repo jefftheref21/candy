@@ -56,7 +56,6 @@ public enum Action {
     GET_CANDY_ID,
     ADD_CANDY,
     EDIT_CANDY,
-    EDIT_USER,
     DELETE_CANDY,
 
     ADD_CANDY_SUCCESSFUL,
