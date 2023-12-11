@@ -9,15 +9,18 @@ public class SellerThread extends Seller implements Runnable {
     private ObjectOutputStream out;
 
     private HashMap<Action, Object> action;
-    private CandyManager candyManager;
-
+    private StoreManager serverStoreManager;
     private boolean isRunning = true;
+    private ArrayList<User> users;
+    private CandyManager cm;
 
-    public SellerThread(Socket socket, ObjectInputStream in, ObjectOutputStream out, CandyManager cm) {
+    public SellerThread(Socket socket, ObjectInputStream in, ObjectOutputStream out, StoreManager storeManager, ArrayList<User> users, CandyManager cm) {
         this.socket = socket;
         this.out = out;
         this.in = in;
-        this.candyManager = cm;
+        this.serverStoreManager = storeManager;
+        this.users = users;
+        this.cm = cm;
     }
 
     public void run() {
@@ -40,7 +43,7 @@ public class SellerThread extends Seller implements Runnable {
                             int sortChoice = 1;
                             sortSellerStatistics(sortChoice, this);
                             try {
-                                out.writeObject(candyManager);
+                                out.writeObject(this.getStoreManager());
                                 out.flush();
                             } catch (IOException ie) {
                                 ie.printStackTrace();
@@ -98,7 +101,8 @@ public class SellerThread extends Seller implements Runnable {
                             break;
                         }
                         case TOTAL_PURCHASE_QUANTITIES: {
-                            ArrayList<Integer> quantities = candyManager.getTotalPurchaseQuantity(this.getStoreManager().getStores(), (Buyer) entry.getValue());
+                            ArrayList<Integer> quantities = new ArrayList<>();
+                            //cm.getTotalPurchaseQuantity(this.getStoreManager().getStores(), (Buyer) entry.getValue());
                             try {
                                 out.writeObject(quantities);
                                 out.flush();
@@ -135,8 +139,23 @@ public class SellerThread extends Seller implements Runnable {
                             }
                             out.flush();
                             break;
+                        case EDIT_CANDY:
+                            Candy edCandy = (Candy) entry.getValue();
+                            boolean edited = false;
+                            for (int i = 0; i < this.getStoreManager().getStores().size(); i++) {
+                                Store currStore = this.getStoreManager().getStores().get(i);
+                                if (currStore.getName().equals(edCandy.getStore())) {
+                                    currStore.editCandy(edCandy.getCandyID(), edCandy, cm);
+                                    out.writeObject(Action.EDIT_CANDY_SUCCESSFUL);
+                                    edited = true;
+                                }
+                            }
+                            if (!edited) {
+                                out.writeObject(Action.EDIT_CANDY_UNSUCCESSFUL);
+                            }
+                            out.flush();
                         case VIEW_SHOPPING_CARTS:
-
+                            
                     }
                 }
             }
@@ -145,21 +164,9 @@ public class SellerThread extends Seller implements Runnable {
         }
     }
 
-    public void buyInstantly(int id, int quantity, Buyer buyer) {
-        candyManager.buyInstantly(id, quantity, buyer);
-    }
-
-    public void buyShoppingCart(Buyer buyer) {
-        candyManager.buyShoppingCart(buyer);
-    }
-
-    public ArrayList<Candy> searchCandy(String keyWord) {
-        return candyManager.search(keyWord);
-    }
-
 
     public void importCSV(String filename, Seller seller) throws IOException {
-        candyManager.importCSV(filename, seller);
+        //this.getStoreManager().importCSV(filename, seller);
     }
 
     public void exportToCSV(String filename, Seller seller) throws IOException {
@@ -176,19 +183,17 @@ public class SellerThread extends Seller implements Runnable {
     }
 
     public String listSellerStatistics(Seller seller) {
-        return candyManager.listSellerStatistics(seller);
+        // return cm.listSellerStatistics(seller);
+        return "";
     }
 
     public String listSales(Seller seller) {
-        return candyManager.listSales(seller);
+        // return cm.listSales(seller);
+        return "";
     }
 
     public void sortSellerStatistics(int choice, Seller seller) {
-        candyManager.sortSellerStatistics(choice, seller);
-    }
-
-    public int getIndex(int id) {
-        return candyManager.getIndex(id);
+        // cm.sortSellerStatistics(choice, seller);
     }
 
     public void closeResources() {

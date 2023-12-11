@@ -3,6 +3,7 @@ import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class BuyerClient extends Buyer {
     private Socket socket;
@@ -19,21 +20,7 @@ public class BuyerClient extends Buyer {
         this.out = out;
         this.in = in;
         this.marketplace = marketplace;
-
-        Candy candy1 = new Candy("Snickers", new Store("Walmart"), "Chocolate bar", 1, 50, 1.00);
-        Candy candy2 = new Candy("Twix", new Store("Walmart"), "Chocolate bar",2, 25, 2.00);
-        Candy candy3 = new Candy("M&Ms", new Store("Walmart"), "Chocolate bar", 3, 100, 3.00);
-        Candy candy4 = new Candy("Kit Kat", new Store("Walmart"), "Chocolate bar", 4, 75, 4.00);
-        Candy candy5 = new Candy("Sour Patch Kids", new Store("Walmart"), "Sour candy", 5, 50, 1.00);
-        Candy candy6 = new Candy("Sour Skittles", new Store("Walmart"), "Sour candy", 6, 25, 2.00);
-        ArrayList<Candy> candies = new ArrayList<>();
-        candies.add(candy1);
-        candies.add(candy2);
-        candies.add(candy3);
-        candies.add(candy4);
-        candies.add(candy5);
-        candies.add(candy6);
-        candyManager = new CandyManager(candies, 7);
+        candyManager = new CandyManager();
     }
 
     public Action getAction() {
@@ -48,14 +35,20 @@ public class BuyerClient extends Buyer {
         this.candyManager = candyManager;
     }
 
-    //Sends the button in which the user clicks within marketplace.
-    //ie sort, shopping cart, ect.
-    public void sendBuyerDecision(String type) {
+    public void sendCandyManager() {
+        sendAction(Action.UPDATE_CANDY_MANAGER, this.candyManager);
+        System.out.println("Sent candy manager");
+    }
+
+    public void receiveCandyManager() {
         try {
-            out.writeUTF(type);
-            out.flush();
+            System.out.println(in);
+            candyManager.readObject(in);
+
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -64,19 +57,30 @@ public class BuyerClient extends Buyer {
     public void sendCandyProduct(Candy candy, String type, int quantity) {
         Purchase purchase = new Purchase(candy, quantity);
         if (type.equals("BUY_INSTANTLY")) {
-            sendAction(Action.BUY_ITEM, purchase);
-        } else {
+            sendAction(Action.BUY_INSTANTLY, purchase);
+        } else if (type.equals("ADD_TO_CART")) {
             sendAction(Action.ADD_TO_CART, purchase);
         }
     }
 
     //Sends to server which user would like to buy everything in their shopping cart
     public void sendBuyShoppingCart() {
-        sendAction(Action.BUY_SHOPPING_CART, this);
+        sendAction(Action.BUY_SHOPPING_CART, 0);
     }
 
     public void sendShoppingCart() {
         sendAction(Action.SHOPPING_CART, 0);
+    }
+
+
+    public void receiveShoppingCart() {
+        try {
+            this.getShoppingCart().readObject(in);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void sendHistory() {
@@ -85,36 +89,18 @@ public class BuyerClient extends Buyer {
 
     //Sends to server the candy in which the user would like to remove from their shopping cart
     public void sendRemoveShoppingCart(Candy candy, int quantity) {
-        sendAction(Action.REMOVE_FROM_CART, candy);
+        Purchase purchase = new Purchase(candy, quantity);
+        sendAction(Action.REMOVE_FROM_CART, purchase);
     }
 
-    //receives the arraylist of candies that the user searched from the server
-    public ArrayList<Candy> searchCandies(String search) {
-        return candyManager.search(search);
-    }
-
-    public ShoppingCart receiveShoppingCart() {
+    public void receivePurchaseHistory() {
         try {
-            ShoppingCart sc = (ShoppingCart) in.readObject();
-            return sc;
+            this.setPurchaseHistory((PurchaseHistory) in.readUnshared());
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
-        return null;
-    }
-
-    public PurchaseHistory receivePurchaseHistory() {
-        try {
-            PurchaseHistory ph = (PurchaseHistory) in.readObject();
-            return ph;
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-        return null;
     }
 
     public void sendExportPurchaseHistory(String file) {
@@ -126,9 +112,13 @@ public class BuyerClient extends Buyer {
         sendAction(Action.SORT_PRODUCTS, decision);
     }
 
-    public void receiveSortCandies() {
+    public void receiveSortCandies(int index) {
+        this.candyManager.sortProducts(index);
+    }
+
+    public void receiveAction() {
         try {
-            candyManager = (CandyManager) in.readObject();
+            action = (Action) in.readUnshared();
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
@@ -136,26 +126,16 @@ public class BuyerClient extends Buyer {
         }
     }
 
-    public Action receiveAction() {
-        try {
-            String input = in.readLine();
-            action = Action.valueOf(input);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return action;
-    }
     public void sendAction(Action action, Object object) {
         try {
             HashMap<Action, Object> map = new HashMap<>();
             map.put(action, object);
             System.out.println("hashmap " + map);
-            out.writeObject(map);
+            out.writeUnshared(map);
             out.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
 
 }

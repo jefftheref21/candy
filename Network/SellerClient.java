@@ -85,15 +85,19 @@ public class SellerClient extends Seller {
         sendAction(Action.STORE_SALES, store);
     }
 
-    public void receiveUpdatedSales() {
+    public ArrayList<Sale> receiveUpdatedSales() {
         try {
-            CandyManager cm = (CandyManager) in.readObject();
-            setCandyManager(cm);
+            ArrayList<Object> input = (ArrayList<Object>) in.readObject();
+            Store store = (Store) input.get(1);
+            ArrayList<Sale> sales = (ArrayList<Sale>) input.get(0);
+            store.setSales(sales);
+            return sales;
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
+        return new ArrayList<>();
     }
 
     public void sendViewStoreStatistics(Store store){

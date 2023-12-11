@@ -7,21 +7,26 @@ import java.io.*;
  * @version Nov 13, 2023
  * @authors Pablo Garces, Nathan Park, Aadiv Reki, Jeffrey Wu, Jaden Ye
  */
-public class CandyManager {
-    // class doesn't need a constructor, because we're just interested in the static candies ArrayList.
-    public ArrayList<Candy> candies = new ArrayList<>();
+public class CandyManager implements Serializable {
+    public ArrayList<Candy> candies;
     public int prodCounter = 0;
-    public static Object obj = new Object();
+    public static transient Object obj;
     public CandyManager() {
         this.candies = new ArrayList<>();
         this.prodCounter = 0;
+        obj = new Object();
     }
     public CandyManager(ArrayList<Candy> candies, int prodCounter) {
         this.candies = candies;
         this.prodCounter = prodCounter;
+        obj = new Object();
     }
     public ArrayList<Candy> getCandies() {
         return candies;
+    }
+
+    public void setCandies(ArrayList<Candy> candies) {
+        this.candies = candies;
     }
     // Buyer methods
     public String viewProductPage(int productID) {
@@ -119,7 +124,7 @@ public class CandyManager {
             int j = i - 1;
 
             switch (choice) {
-                case 1 -> { // Least to greatest by price
+                case 0 -> { // Least to greatest by price
                     while (j >= 0 && this.candies.get(temp).getPrice() <
                             this.candies.get(j).getPrice()) {
                         Collections.swap(this.candies, temp, j);
@@ -127,7 +132,7 @@ public class CandyManager {
                         j--;
                     }
                 }
-                case 2 -> { // Greatest to least by price
+                case 1 -> { // Greatest to least by price
                     while (j >= 0 && this.candies.get(temp).getPrice() >
                             this.candies.get(j).getPrice()) {
                         Collections.swap(this.candies, temp, j);
@@ -135,14 +140,14 @@ public class CandyManager {
                         j--;
                     }
                 }
-                case 3 -> { // Least to greatest by quantity
+                case 2 -> { // Least to greatest by quantity
                     while (j >= 0 && this.candies.get(temp).getQuantity() < this.candies.get(j).getQuantity()) {
                         Collections.swap(this.candies, temp, j);
                         temp = j;
                         j--;
                     }
                 }
-                case 4 -> { // Greatest to least by quantity
+                case 3 -> { // Greatest to least by quantity
                     while (j >= 0 && this.candies.get(temp).getQuantity() > this.candies.get(j).getQuantity()) {
                         Collections.swap(this.candies, temp, j);
                         temp = j;
@@ -181,43 +186,52 @@ public class CandyManager {
                 }
         return stores;
     }
-    public synchronized boolean buyInstantly(int id, int quantity, Buyer buyer) {
+    public void buyInstantly(int id, int quantity, Buyer buyer) {
+        synchronized (obj) {
             int index = getIndex(id);
-            int totalQuantity = candies.get(index).getTotalQuantity();
-            if (totalQuantity >= quantity) {
-                candies.get(index).setQuantity(totalQuantity - quantity);
-                candies.get(index).getStore().editCandy(id, candies.get(index), this);
-                System.out.println("Thank you for purchasing! Your total was $" + quantity *
-                        candies.get(index).getPrice() );
-                Sale sale = new Sale(candies.get(index), quantity, buyer);
-                candies.get(index).getStore().addSale(sale);
-                buyer.getPurchaseHistory().addPurchase(sale);
-                return true;
-            } else {
-                return false;
-            }
+            int totalQuantity = candies.get(index).getQuantity();
+            System.out.println(index + " " + totalQuantity);
+            candies.get(index).setQuantity(totalQuantity - quantity);
+            System.out.println(candies.get(index).getQuantity());
+            // candies.get(index).getStore().editCandy(id, candies.get(index), this);
+
+            Sale sale = new Sale(candies.get(index), quantity, buyer);
+            // candies.get(index).getStore().addSale(sale);
+            buyer.getPurchaseHistory().addPurchase(sale);
+        }
     }
-    public synchronized boolean buyShoppingCart(Buyer buyer) {
+    public boolean buyShoppingCart(Buyer buyer) {
+        synchronized (obj) {
             for (int i = 0; i < buyer.getShoppingCart().getPurchases().size(); i++) {
                 Purchase currPurchase = buyer.getShoppingCart().getPurchases().get(i);
-                boolean success = buyInstantly(currPurchase.getCandyBought().getCandyID(), currPurchase.getQuantityBought(), buyer);
-                if (!success) {
+                int index = getIndex(currPurchase.getCandyBought().getCandyID());
+                int totalQuantity = candies.get(index).getQuantity();
+
+                if (totalQuantity < currPurchase.getQuantityBought()) {
                     return false;
                 }
             }
-        return true;
+            for (int j = 0; j < buyer.getShoppingCart().getPurchases().size(); j++) {
+                Purchase currPurchase = buyer.getShoppingCart().getPurchases().get(j);
+                buyInstantly(currPurchase.getCandyBought().getCandyID(),
+                        currPurchase.getQuantityBought(), buyer);
+            }
+            return true;
+        }
     }
     public ArrayList<Candy> search(String keyWord) {
         ArrayList<Candy> result = new ArrayList<>();
         for (int i = 0; i < candies.size(); i++) {
             String name = candies.get(i).getName();
-            String store = candies.get(i).getStore().getName();
+            String store = candies.get(i).getStore();
             String description = candies.get(i).getDescription();
 
             if (name.contains(keyWord) || store.contains(keyWord) || description.contains(keyWord)) {
                 result.add(candies.get(i));
             }
         }
+        System.out.println("please work oiwjfwwejoifjwe" + result.size());
+
         return result;
     }
     // Seller methods
@@ -325,7 +339,7 @@ public class CandyManager {
             ArrayList<Store> stores = seller.getStoreManager().getStores();
             for (int i = 0; i < stores.size(); i++) {
                 if (stores.get(i).getName().equals(data[1])) {
-                    Candy currCandy = new Candy(data[0], stores.get(i), data[1], this.prodCounter,
+                    Candy currCandy = new Candy(data[0], stores.get(i).getName(), data[1], this.prodCounter,
                             Integer.parseInt(data[3]), Integer.parseInt(data[4]));
                     stores.get(i).addCandy(currCandy, this);
                     this.prodCounter++;
@@ -336,43 +350,6 @@ public class CandyManager {
         br.close();
     }
     // User methods
-    public void writeToFile(User user) throws IOException, ClassNotFoundException {
-        File f = new File("Users.txt");
-        ArrayList<User> users = new ArrayList<>();
-        if (f.exists() && f.length() > 0) {
-            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(f));
-            users = (ArrayList<User>) ois.readObject();
-            ois.close();
-        }
-        boolean present = false;
-        for (int i = 0; i < users.size(); i++) {
-            User currUser = users.get(i);
-            if (currUser instanceof Seller) {
-                Seller currSeller = (Seller) currUser;
-                for (int k = 0; k < currSeller.getStoreManager().getStores().size(); k++) {
-                    Store currStore = currSeller.getStoreManager().getStores().get(k);
-                    ArrayList<Candy> currCandies = new ArrayList<>();
-                    for (int j = 0; j < this.candies.size(); j++) {
-                        if (this.candies.get(j).getStore().getName().equals(currStore.getName())) {
-                            currCandies.add(this.candies.get(j));
-                        }
-                    }
-                    currSeller.getStoreManager().getStores().get(k).setCandies(currCandies);
-                }
-            }
-            if (currUser.getUsername().equals(user.getUsername()) && currUser.getPassword().equals(user.getPassword())) {
-                users.set(i, user);
-                present = true;
-            }
-        }
-        if (!present) {
-            users.add(user);
-        }
-        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(f, false));
-        oos.writeObject(users);
-        oos.flush();
-        oos.close();
-    }
 
     public int getIndex(int id) {
         for (int i = 0; i < candies.size(); i++) {
@@ -381,5 +358,24 @@ public class CandyManager {
             }
         }
         return -1;
+    }
+
+    public void writeObject(ObjectOutputStream out) throws IOException {
+        out.writeInt(candies.size());
+
+        for (Candy candy : candies) {
+            out.writeUnshared(candy);
+        }
+    }
+
+    public void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        int candiesSize = in.readInt();
+
+        candies = new ArrayList<>(candiesSize);
+
+        for (int i = 0; i < candiesSize; i++) {
+            Candy candy = (Candy) in.readUnshared();
+            candies.add(candy);
+        }
     }
 }

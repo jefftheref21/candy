@@ -106,7 +106,7 @@ public class Messages {
     // MARKETPLACE MESSAGES
 
     public static void showSuccessfulPurchase() {
-        JOptionPane.showMessageDialog(null, "Thank you for your purchase",
+        JOptionPane.showMessageDialog(null, "Thank you for your purchase!",
                 "Success", JOptionPane.INFORMATION_MESSAGE);
     }
     public static void showSearchUnsuccesful() {
@@ -115,13 +115,18 @@ public class Messages {
     }
 
     public static void showNumberFormatError() {
-        JOptionPane.showMessageDialog(null, "Please enter a valid number",
+        JOptionPane.showMessageDialog(null, "Please enter a valid number.",
                 "Error", JOptionPane.ERROR_MESSAGE);
     }
 
     public static void showQuantityExceededError() {
         JOptionPane.showMessageDialog(null, "The quantity entered exceeds the current " +
                 "quantity. Please enter a valid quantity.", "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+    public static void showInvalidQuantityError() {
+        JOptionPane.showMessageDialog(null, "Please enter a valid quantity.",
+                "Error", JOptionPane.ERROR_MESSAGE);
     }
 
     public static void showExportHistorySuccessful() {
@@ -142,5 +147,15 @@ public class Messages {
     public static void showRemoveToCartSuccessful() {
         JOptionPane.showMessageDialog(null, "Removed to Shopping Cart Successful",
                 "Success", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    public static void showEditUserSuccessful() {
+        JOptionPane.showMessageDialog(null, "Edited User Successful",
+                "Success", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    public static void showEditUserUnsuccessful() {
+        JOptionPane.showMessageDialog(null, "Edited User Unsuccessful",
+                "Error", JOptionPane.ERROR_MESSAGE);
     }
 }
