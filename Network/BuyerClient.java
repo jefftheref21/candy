@@ -76,11 +76,11 @@ public class BuyerClient extends Buyer {
     }
 
     public void sendShoppingCart() {
-        sendAction(Action.SHOPPING_CART, this.getShoppingCart());
+        sendAction(Action.SHOPPING_CART, 0);
     }
 
     public void sendHistory() {
-        sendAction(Action.PURCHASE_HISTORY, this.getPurchaseHistory());
+        sendAction(Action.PURCHASE_HISTORY, 0);
     }
 
     //Sends to server the candy in which the user would like to remove from their shopping cart
@@ -178,4 +178,6 @@ public class BuyerClient extends Buyer {
             e.printStackTrace();
         }
     }
+
+
 }
