@@ -148,4 +148,14 @@ public class Messages {
         JOptionPane.showMessageDialog(null, "Removed to Shopping Cart Successful",
                 "Success", JOptionPane.INFORMATION_MESSAGE);
     }
+
+    public static void showEditUserSuccessful() {
+        JOptionPane.showMessageDialog(null, "Edited User Successful",
+                "Success", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    public static void showEditUserUnsuccessful() {
+        JOptionPane.showMessageDialog(null, "Edited User Unsuccessful",
+                "Error", JOptionPane.ERROR_MESSAGE);
+    }
 }

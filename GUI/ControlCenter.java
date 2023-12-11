@@ -7,7 +7,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.List;
 
 public class ControlCenter extends JFrame implements Runnable {
     public static final Color buttonColor = new Color(235, 158, 52);
@@ -29,6 +28,8 @@ public class ControlCenter extends JFrame implements Runnable {
     JButton importButton;
     JButton exportButton;
     JButton customerShoppingCartsButton;
+
+    JButton editStoreButton;
 
     JTextField createStoreNameTextField;
 
@@ -124,10 +125,10 @@ public class ControlCenter extends JFrame implements Runnable {
 
             if (e.getSource() == viewStoreStatisticsButton) {
                 sellerClient.sendViewStoreStatistics(storeSelected);
-
                 sellerClient.receiveStoreStatistics();
+                ArrayList<Sale> sales = storeSelected.getSales();
 
-                showStoreStatisticsDialog();
+                showStoreStatisticsDialog(storeSelected, sales);
             }
 
             if (e.getSource() == importButton) {
@@ -160,10 +161,13 @@ public class ControlCenter extends JFrame implements Runnable {
                 }
             }
 
-            if (e.getSource() == customerShoppingCartsButton) {
-                //sellerClient.sendCustomerShoppingCarts(;
-            }
-            //if (e.getSource() == editStore)
+            // TODO : Add these methods in SellerClient class:
+            /*if (e.getSource() == customerShoppingCartsButton) {
+                sellerClient.sendCustomerShoppingCarts();
+                ArrayList<Sale> customerShoppingCarts = sellerClient.receiveCustomerShoppingCarts();
+
+                viewCustomerShoppingCartsDialog(customerShoppingCarts);
+            }*/
         }
     };
     public ControlCenter(Socket socket, ObjectInputStream in, ObjectOutputStream out) throws IOException {
@@ -299,14 +303,18 @@ public class ControlCenter extends JFrame implements Runnable {
         viewProductsButton = new JButton("View Products");
         viewSalesButton = new JButton("View Sales");
         viewStoreStatisticsButton = new JButton("View Store Statistics");
+        editStoreButton = new JButton("Edit Store");
+
 
         viewProductsButton.setBackground(buttonColor);
         viewSalesButton.setBackground(buttonColor);
         viewStoreStatisticsButton.setBackground(buttonColor);
+        editStoreButton.setBackground(buttonColor);
 
         viewProductsButton.addActionListener(actionListener);
         viewSalesButton.addActionListener(actionListener);
         viewStoreStatisticsButton.addActionListener(actionListener);
+        editStoreButton.addActionListener(actionListener);
 
         content.add(viewProductsButton, gbc);
 
@@ -315,6 +323,8 @@ public class ControlCenter extends JFrame implements Runnable {
 
         gbc.gridy = 2;
         content.add(viewStoreStatisticsButton, gbc);
+        gbc.gridy = 3;
+        content.add(editStoreButton, gbc);
 
         storeOptionFrame.setSize(250, 250);
         storeOptionFrame.setLocationRelativeTo(null);
@@ -570,18 +580,58 @@ public class ControlCenter extends JFrame implements Runnable {
         salesFrame.setVisible(true);
     }
 
-    public void showStoreStatisticsDialog() {
-        JFrame jf = new JFrame("Store Statistics");
-        // Add logic to display store statistics
-        JLabel statisticsLabel = new JLabel("Store statistics");
-        jf.add(statisticsLabel);
-        // TODO: Add logic to display store statistics
+    public void showStoreStatisticsDialog(Store store, ArrayList<Sale> sales) {
+        JFrame jf = new JFrame(store.getName() + " Store Statistics");
+        Container content = jf.getContentPane();
+        content.setLayout(new BorderLayout());
 
-        jf.setSize(300, 300);
+        JPanel customerPanel = new JPanel();
+        customerPanel.setLayout(new BorderLayout());
+
+        String[] customerColumnNames = {"Customer Name", "Number of Items Purchased"};
+        Object[][] customerData = new Object[sales.size()][customerColumnNames.length];
+
+        for (int i = 0; i < sales.size(); i++) {
+            Sale sale = sales.get(i);
+            customerData[i][0] = sale.getBuyerAccount().getUsername();  // Customer name
+            customerData[i][1] = sale.getQuantityBought();  // Number of items purchased
+        }
+
+        JTable customerTable = new JTable(customerData, customerColumnNames);
+        JScrollPane customerScrollPane = new JScrollPane(customerTable);
+
+        customerPanel.add(new JLabel("Customer Statistics"), BorderLayout.NORTH);
+        customerPanel.add(customerScrollPane, BorderLayout.CENTER);
+
+        JPanel productPanel = new JPanel();
+        productPanel.setLayout(new BorderLayout());
+
+        String[] productColumnNames = {"Product Name", "Number of Sales"};
+        Object[][] productData = new Object[sales.size()][productColumnNames.length];
+
+        for (int i = 0; i < sales.size(); i++) {
+            Sale sale = sales.get(i);
+            productData[i][0] = sale.getCandyBought().getName();
+            productData[i][1] = sale.getQuantityBought();
+        }
+
+        JTable productTable = new JTable(productData, productColumnNames);
+        JScrollPane productScrollPane = new JScrollPane(productTable);
+
+        productPanel.add(new JLabel("Product Statistics"), BorderLayout.NORTH);
+        productPanel.add(productScrollPane, BorderLayout.CENTER);
+
+        // Add the customer and product panels to the main content pane
+        content.add(customerPanel, BorderLayout.WEST);
+        content.add(productPanel, BorderLayout.EAST);
+
+        jf.setSize(600, 400);
         jf.setLocationRelativeTo(null);
         jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         jf.setVisible(true);
     }
+
+
 
     public void showDeleteCandyConfirmation(Store store, String candyName) {
         int confirmDialogResult = JOptionPane.showConfirmDialog(null,
@@ -593,5 +643,64 @@ public class ControlCenter extends JFrame implements Runnable {
             JOptionPane.showMessageDialog(null, candyName + " was successfully deleted!",
                     "Deletion Successful", JOptionPane.PLAIN_MESSAGE);
         }
+    }
+
+    public void viewCustomerShoppingCartsDialog(ArrayList<Sale> sales) {
+        JFrame jf = new JFrame("Customer Shopping Carts");
+        Container content = jf.getContentPane();
+        content.setLayout(new BorderLayout());
+
+        JPanel buyerPanel = new JPanel();
+        buyerPanel.setLayout(new BorderLayout());
+
+        String[] buyerColumnNames = {"Buyer Name", "Total Products"};
+        ArrayList<Object[]> buyerData = new ArrayList<>();
+
+        for (Sale sale : sales) {
+            Buyer buyer = sale.getBuyerAccount();
+            Object[] rowData = {buyer.getUsername(), sale.getQuantityBought()};
+            buyerData.add(rowData);
+        }
+
+        Object[][] buyerArray = new Object[buyerData.size()][buyerColumnNames.length];
+        buyerArray = buyerData.toArray(buyerArray);
+
+        JTable buyerTable = new JTable(buyerArray, buyerColumnNames);
+        JScrollPane buyerScrollPane = new JScrollPane(buyerTable);
+
+        buyerPanel.add(new JLabel("Buyer Statistics"), BorderLayout.NORTH);
+        buyerPanel.add(buyerScrollPane, BorderLayout.CENTER);
+
+        JPanel productPanel = new JPanel();
+        productPanel.setLayout(new BorderLayout());
+
+        String[] productColumnNames = {"Candy Name", "Store Name", "Quantity", "Price"};
+        ArrayList<Object[]> productData = new ArrayList<>();
+
+        for (Sale sale : sales) {
+            Buyer buyer = sale.getBuyerAccount();
+            for (Purchase purchase : buyer.getShoppingCart().getPurchases()) {
+                Candy candy = purchase.getCandyBought();
+                Object[] rowData = {candy.getName(), candy.getStore().getName(), purchase.getQuantityBought(), candy.getPrice()};
+                productData.add(rowData);
+            }
+        }
+
+        Object[][] productArray = new Object[productData.size()][productColumnNames.length];
+        productArray = productData.toArray(productArray);
+
+        JTable productTable = new JTable(productArray, productColumnNames);
+        JScrollPane productScrollPane = new JScrollPane(productTable);
+
+        productPanel.add(new JLabel("Product Details"), BorderLayout.NORTH);
+        productPanel.add(productScrollPane, BorderLayout.CENTER);
+
+        content.add(buyerPanel, BorderLayout.NORTH);
+        content.add(productPanel, BorderLayout.CENTER);
+
+        jf.setSize(800, 600);
+        jf.setLocationRelativeTo(null);
+        jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        jf.setVisible(true);
     }
 }
