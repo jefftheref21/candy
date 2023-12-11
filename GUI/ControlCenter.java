@@ -49,6 +49,11 @@ public class ControlCenter extends JFrame implements Runnable {
 
     Candy candySelected;
 
+    JButton sortButton;
+    JComboBox sortComboBox;
+    String[] sortOptions = {"Price - Least to Greatest", "Price - Greatest to Least",
+            "Quantity - Least to Greatest", "Quantity - Greatest to Least"};
+
     ActionListener actionListener = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -100,9 +105,7 @@ public class ControlCenter extends JFrame implements Runnable {
 
             if (e.getSource() == viewSalesButton) {
                 sellerClient.sendViewSales(storeSelected);
-
                 ArrayList<Sale> updatedSales = sellerClient.receiveUpdatedSales();
-
                 viewSalesInformationDialog(storeSelected, updatedSales);
             }
             if (e.getSource() == saveCandyButton) {
@@ -163,6 +166,7 @@ public class ControlCenter extends JFrame implements Runnable {
             if (e.getSource() == customerShoppingCartsButton) {
                 sellerClient.sendCustomerShoppingCarts(storeSelected);
                 ArrayList<ShoppingCart> customerShoppingCarts = sellerClient.receiveCustomerShoppingCarts();
+
                 viewCustomerShoppingCartsDialog(customerShoppingCarts);
             }
         }
@@ -642,13 +646,19 @@ public class ControlCenter extends JFrame implements Runnable {
         content.add(customerPanel, BorderLayout.WEST);
         content.add(productPanel, BorderLayout.EAST);
 
-        jf.setSize(600, 400);
+        JPanel sortPanel = new JPanel();
+        sortPanel.setLayout(new FlowLayout());
+        sortButton = new JButton("Sort");
+        sortComboBox = new JComboBox<>(sortOptions);
+        sortPanel.add(sortComboBox);
+        sortPanel.add(sortButton);
+        content.add(sortPanel, BorderLayout.SOUTH);
+
+        jf.pack();
         jf.setLocationRelativeTo(null);
         jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         jf.setVisible(true);
     }
-
-
 
     public void showDeleteCandyConfirmation(Store store, String candyName) {
         int confirmDialogResult = JOptionPane.showConfirmDialog(null,
