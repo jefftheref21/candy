@@ -97,6 +97,7 @@ public class BuyerThread extends Buyer implements Runnable {
                             break;
                         }
                         case BUY_SHOPPING_CART: {
+                            System.out.println("foiejwejf: " + this.getShoppingCart().getPurchases().size());
                             boolean successful = candyManager.buyShoppingCart(this);
                             try {
                                 if (successful) {
@@ -228,7 +229,7 @@ public class BuyerThread extends Buyer implements Runnable {
                 break;
             }
         }
-        out.writeUnshared(Action.REMOVE_FROM_CART);
+        out.writeUnshared(Action.REMOVE_FROM_CART_SUCCESSFUL);
         out.flush();
     }
 

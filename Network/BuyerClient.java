@@ -89,7 +89,8 @@ public class BuyerClient extends Buyer {
 
     //Sends to server the candy in which the user would like to remove from their shopping cart
     public void sendRemoveShoppingCart(Candy candy, int quantity) {
-        sendAction(Action.REMOVE_FROM_CART, candy);
+        Purchase purchase = new Purchase(candy, quantity);
+        sendAction(Action.REMOVE_FROM_CART, purchase);
     }
 
     public void receivePurchaseHistory() {

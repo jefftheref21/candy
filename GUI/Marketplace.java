@@ -18,6 +18,7 @@ public class Marketplace extends JFrame implements Runnable {
     BuyerClient buyerClient;
 
     JFrame candyPageFrame;
+    JFrame shoppingCartFrame;
     JPanel candyPanel;
 
     JButton sortButton;
@@ -38,7 +39,6 @@ public class Marketplace extends JFrame implements Runnable {
 
     JTextField searchTextField;
     JTextField quantityToBuyTextField;
-    JTextField removeCandyIDTextField;
     
     Candy candySelected;
 
@@ -84,12 +84,23 @@ public class Marketplace extends JFrame implements Runnable {
 
                 buyerClient.receiveAction();
 
+                buyerClient.sendCandyManager();
+                buyerClient.receiveCandyManager();
+
                 switch (buyerClient.getAction()) {
                     case BUY_SUCCESSFUL:
-                        buyerClient.sendCandyManager();
-                        buyerClient.receiveCandyManager();
+                        int quantityToBuy = Integer.parseInt(quantityToBuyTextField.getText());
+                        buyerClient.sendRemoveShoppingCart(candySelected, quantityToBuy);
 
-                        //candyPageFrame.dispose();
+                        buyerClient.receiveAction();
+
+                        if (buyerClient.getAction() == Action.REMOVE_FROM_CART_SUCCESSFUL) {
+                            buyerClient.sendShoppingCart();
+                            buyerClient.receiveShoppingCart();
+                            shoppingCartFrame.dispose();
+                        }
+
+                        shoppingCartFrame.dispose();
                         updateScreen();
                         Messages.showSuccessfulPurchase();
                         break;
@@ -111,11 +122,11 @@ public class Marketplace extends JFrame implements Runnable {
                 buyerClient.receiveAction();
 
 
-                buyerClient.sendCandyManager();
-                buyerClient.receiveCandyManager();
-
                 switch (buyerClient.getAction()) {
                     case BUY_SUCCESSFUL: {
+                        buyerClient.sendShoppingCart();
+                        buyerClient.receiveShoppingCart();
+
                         candyPageFrame.dispose();
 
                         updateScreen();
@@ -164,7 +175,10 @@ public class Marketplace extends JFrame implements Runnable {
                 buyerClient.sendRemoveShoppingCart(candySelected, Integer.parseInt(quantityToBuyTextField.getText()));
                 buyerClient.receiveAction();
 
-                if (buyerClient.getAction() == Action.REMOVE_FROM_CART) {
+                if (buyerClient.getAction() == Action.REMOVE_FROM_CART_SUCCESSFUL) {
+                    buyerClient.sendShoppingCart();
+                    buyerClient.receiveShoppingCart();
+                    shoppingCartFrame.dispose();
                     Messages.showRemoveToCartSuccessful();
                 }
             }
@@ -464,12 +478,12 @@ public class Marketplace extends JFrame implements Runnable {
     }
 
     public void showShoppingCartDialog(ShoppingCart shoppingCart) {
-        JFrame jf = new JFrame("Shopping Cart");
+        shoppingCartFrame = new JFrame("Shopping Cart");
         GridBagConstraints gbc = new GridBagConstraints(0, 0, 1, 1, 0, 0,
                 GridBagConstraints.LINE_START, GridBagConstraints.NONE,
                 new Insets(10, 10, 10, 10), 0, 0);
 
-        Container content = jf.getContentPane();
+        Container content = shoppingCartFrame.getContentPane();
         content.setLayout(new BorderLayout());
 
         JPanel titlePanel = new JPanel();
@@ -501,10 +515,6 @@ public class Marketplace extends JFrame implements Runnable {
         bottomPanel.setBackground(outerColor);
         bottomPanel.setLayout(new GridBagLayout());
 
-        JLabel removeCandyIDLabel = new JLabel("Candy ID");
-
-        removeCandyIDTextField = new JTextField(8);
-
         removeFromCartButton = new JButton("Remove from Cart");
         removeFromCartButton.setBackground(buttonColor);
         removeFromCartButton.addActionListener(actionListener);
@@ -513,28 +523,22 @@ public class Marketplace extends JFrame implements Runnable {
         buyShoppingCartButton.setBackground(buttonColor);
         buyShoppingCartButton.addActionListener(actionListener);
 
-        bottomPanel.add(removeCandyIDLabel, gbc);
-
-        gbc.gridx = 1;
-        bottomPanel.add(removeCandyIDTextField, gbc);
-
-        gbc.gridx = 2;
         bottomPanel.add(removeFromCartButton, gbc);
 
-        gbc.gridx = 3;
+        gbc.gridx = 1;
         bottomPanel.add(buyShoppingCartButton, gbc);
 
         content.add(titlePanel, BorderLayout.NORTH);
         content.add(shoppingCartInfo, BorderLayout.CENTER);
         content.add(bottomPanel, BorderLayout.SOUTH);
 
-        jf.add(titlePanel, BorderLayout.NORTH);
-        jf.add(shoppingCartInfo, BorderLayout.CENTER);
+        shoppingCartFrame.add(titlePanel, BorderLayout.NORTH);
+        shoppingCartFrame.add(shoppingCartInfo, BorderLayout.CENTER);
 
-        jf.pack();
-        jf.setLocationRelativeTo(null);
-        jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        jf.setVisible(true);
+        shoppingCartFrame.pack();
+        shoppingCartFrame.setLocationRelativeTo(null);
+        shoppingCartFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        shoppingCartFrame.setVisible(true);
     }
 
     public void showPurchaseHistoryDialog(PurchaseHistory ph) {
