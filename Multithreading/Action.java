@@ -33,6 +33,8 @@ public enum Action {
 
     REMOVE_FROM_CART_SUCCESSFUL,
 
+    SEND_SHOPPING_CART,
+
     PURCHASE_HISTORY,
 
     EXPORT_HISTORY,

@@ -160,13 +160,11 @@ public class ControlCenter extends JFrame implements Runnable {
                 }
             }
 
-            // TODO : Add these methods in SellerClient class:
-            /*if (e.getSource() == customerShoppingCartsButton) {
-                sellerClient.sendCustomerShoppingCarts();
-                ArrayList<Sale> customerShoppingCarts = sellerClient.receiveCustomerShoppingCarts();
-
+            if (e.getSource() == customerShoppingCartsButton) {
+                sellerClient.sendCustomerShoppingCarts(storeSelected);
+                ArrayList<ShoppingCart> customerShoppingCarts = sellerClient.receiveCustomerShoppingCarts();
                 viewCustomerShoppingCartsDialog(customerShoppingCarts);
-            }*/
+            }
         }
     };
     public ControlCenter(Socket socket, ObjectInputStream in, ObjectOutputStream out) throws IOException {
@@ -240,23 +238,22 @@ public class ControlCenter extends JFrame implements Runnable {
         // Import, Export, and Store Statistics buttons
         importButton = new JButton("Import CSV");
         exportButton = new JButton("Export to CSV");
-        customerShoppingCartsButton = new JButton("View Customer Shopping Carts");
+
 
         importButton.setBackground(buttonColor);
         exportButton.setBackground(buttonColor);
-        customerShoppingCartsButton.setBackground(buttonColor);
 
         importButton.addActionListener(actionListener);
 
         exportButton.addActionListener(actionListener);
+
+
 
         bottomPanel.add(importButton, gbc);
 
         gbc.gridx = 1;
         bottomPanel.add(exportButton, gbc);
 
-        gbc.gridx = 2;
-        bottomPanel.add(customerShoppingCartsButton, gbc);
 
         content.add(bottomPanel, BorderLayout.SOUTH);
     }
@@ -311,17 +308,21 @@ public class ControlCenter extends JFrame implements Runnable {
         viewSalesButton = new JButton("View Sales");
         viewStoreStatisticsButton = new JButton("View Store Statistics");
         editStoreButton = new JButton("Edit Store");
+        customerShoppingCartsButton = new JButton("View Customer Shopping Carts");
 
 
         viewProductsButton.setBackground(buttonColor);
         viewSalesButton.setBackground(buttonColor);
         viewStoreStatisticsButton.setBackground(buttonColor);
         editStoreButton.setBackground(buttonColor);
+        customerShoppingCartsButton.setBackground(buttonColor);
+
 
         viewProductsButton.addActionListener(actionListener);
         viewSalesButton.addActionListener(actionListener);
         viewStoreStatisticsButton.addActionListener(actionListener);
         editStoreButton.addActionListener(actionListener);
+        customerShoppingCartsButton.addActionListener(actionListener);
 
         content.add(viewProductsButton, gbc);
 
@@ -332,6 +333,8 @@ public class ControlCenter extends JFrame implements Runnable {
         content.add(viewStoreStatisticsButton, gbc);
         gbc.gridy = 3;
         content.add(editStoreButton, gbc);
+        gbc.gridy = 4;
+        content.add(customerShoppingCartsButton, gbc);
 
         storeOptionFrame.setSize(250, 250);
         storeOptionFrame.setLocationRelativeTo(null);
@@ -659,7 +662,7 @@ public class ControlCenter extends JFrame implements Runnable {
         }
     }
 
-    public void viewCustomerShoppingCartsDialog(ArrayList<Sale> sales) {
+    public void viewCustomerShoppingCartsDialog(ArrayList<ShoppingCart> sc) {
         JFrame jf = new JFrame("Customer Shopping Carts");
         Container content = jf.getContentPane();
         content.setLayout(new BorderLayout());
@@ -670,9 +673,8 @@ public class ControlCenter extends JFrame implements Runnable {
         String[] buyerColumnNames = {"Buyer Name", "Total Products"};
         ArrayList<Object[]> buyerData = new ArrayList<>();
 
-        for (Sale sale : sales) {
-            Buyer buyer = sale.getBuyerAccount();
-            Object[] rowData = {buyer.getUsername(), sale.getQuantityBought()};
+        for (int i = 0; i < sc.size(); i++) {
+            Object[] rowData = {"Buyer " + i, sc.get(i).getPurchases().size()};
             buyerData.add(rowData);
         }
 
@@ -691,9 +693,8 @@ public class ControlCenter extends JFrame implements Runnable {
         String[] productColumnNames = {"Candy Name", "Store Name", "Quantity", "Price"};
         ArrayList<Object[]> productData = new ArrayList<>();
 
-        for (Sale sale : sales) {
-            Buyer buyer = sale.getBuyerAccount();
-            for (Purchase purchase : buyer.getShoppingCart().getPurchases()) {
+        for (ShoppingCart scart : sc) {
+            for (Purchase purchase : scart.getPurchases()) {
                 Candy candy = purchase.getCandyBought();
                 Object[] rowData = {candy.getName(), candy.getStore(), purchase.getQuantityBought(), candy.getPrice()};
                 productData.add(rowData);

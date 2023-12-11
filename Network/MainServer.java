@@ -54,7 +54,7 @@ public class MainServer {
 
     public void initializeUsers() {
         users = new ArrayList<>();
-        users.add(new Buyer("jeff", "pass"));
+        users.add(new Seller("jeff", "pass"));
     }
 
     public void startServer() throws ClassNotFoundException {

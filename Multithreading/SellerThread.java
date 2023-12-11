@@ -1,3 +1,4 @@
+import java.lang.reflect.Array;
 import java.net.*;
 import java.io.*;
 import java.util.*;
@@ -154,8 +155,11 @@ public class SellerThread extends Seller implements Runnable {
                                 out.writeObject(Action.EDIT_CANDY_UNSUCCESSFUL);
                             }
                             out.flush();
-                        case VIEW_SHOPPING_CARTS:
-                            
+                        case SEND_SHOPPING_CART:
+                            Store store = (Store) entry.getValue();
+                            ArrayList<ShoppingCart> buyersShoppingCart = checkShoppingCart(store);
+                            out.writeObject(buyersShoppingCart);
+                            out.flush();
                     }
                 }
             }
@@ -164,6 +168,26 @@ public class SellerThread extends Seller implements Runnable {
         }
     }
 
+    public ArrayList<ShoppingCart> checkShoppingCart(Store store) {
+        ArrayList<Buyer> buyers = new ArrayList<>();
+        ArrayList<ShoppingCart> buyersWithShoppingCart = new ArrayList<>();
+
+        for (int i = 0; i < users.size(); i++) {
+            if (users.get(i) instanceof Buyer) {
+                buyers.add((Buyer) users.get(i));
+            }
+        }
+
+        for (int i = 0; i < buyers.size(); i++) {
+            for (int j = 0; j < buyers.get(i).getShoppingCart().getPurchases().size(); j++) {
+                if (buyers.get(i).getShoppingCart().getPurchases().get(j).
+                        getCandyBought().getStore().equals(store.getName())) {
+                    buyersWithShoppingCart.add(buyers.get(i).getShoppingCart());
+                }
+            }
+        }
+        return buyersWithShoppingCart;
+    }
 
     public void importCSV(String filename, Seller seller) throws IOException {
         //this.getStoreManager().importCSV(filename, seller);

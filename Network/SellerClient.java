@@ -55,6 +55,22 @@ public class SellerClient extends Seller {
         sendAction(Action.VIEW_SHOPPING_CARTS, new Object());
     }
 
+    public void sendCustomerShoppingCarts(Store store) {
+
+        sendAction(Action.SEND_SHOPPING_CART, store);
+    }
+
+    public ArrayList<ShoppingCart> receiveCustomerShoppingCarts() {
+        try {
+            ArrayList<ShoppingCart> customerShoppingCarts = (ArrayList<ShoppingCart>) in.readObject();
+            return customerShoppingCarts;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public void sendToGetCandyID() {
         sendAction(Action.GET_CANDY_ID, new Object());
     }
