@@ -27,57 +27,34 @@ public class PurchaseHistory implements Serializable {
         }
         return numOfProductsBought;
     }
-    public String addPurchase(Purchase purchase) {
+    public void addPurchase(Purchase purchase) {
         purchases.add(purchase);
-        return "Purchase added to history.";
     }
 
-    public String viewHistory() {
-        StringBuilder output = new StringBuilder();
-
-        if (purchases.isEmpty()) {
-            output.append("Your have no purchase history in this account.\n");
-        } else {
-            output.append("History of Purchases:\n");
-            for (Purchase purchase : purchases) {
-                String saleInfo = "Candy ID: " + purchase.getCandyBought().getCandyID() +
-                        ", Candy Name: " + purchase.getCandyBought().getName() +
-                        ", Quantity: " + purchase.getQuantityBought() + "\n";
-                output.append(saleInfo);
-            }
+    public void exportHistory(File f) throws IOException {
+        PrintWriter pw = new PrintWriter(new FileOutputStream(f));
+        for (int i = 0; i < purchases.size(); i++) {
+            pw.println(purchases.get(i).toString());
         }
-
-        return output.toString();
+        pw.close();
     }
 
+    public void writeObject(ObjectOutputStream out) throws IOException {
+        out.writeInt(purchases.size());
 
-    /**
-     * Write to new file that shows their entire purchase history
-     * Use the viewHistory function
-     */
-    public boolean exportHistoryToFile(String username) {
-        File f = new File(username + "PurchaseHistory.txt");
-        try {
-            PrintWriter pw = new PrintWriter(new FileOutputStream(f));
-            for (int i = 0; i < purchases.size(); i++) {
-                pw.println(purchases.get(i).toString());
-            }
-            pw.close();
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
+        for (Purchase purchase : purchases) {
+            out.writeUnshared(purchase);
         }
     }
 
-    public void exportHistory() {
-        File f = new File("purchaseHistory.txt");
-        try {
-            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(f));
-            oos.writeObject(purchases);
-            oos.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+    public void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        int shoppingCartSize = in.readInt();
+
+        purchases = new ArrayList<>(shoppingCartSize);
+
+        for (int i = 0; i < shoppingCartSize; i++) {
+            Purchase purchase = (Purchase) in.readUnshared();
+            purchases.add(purchase);
         }
     }
 }

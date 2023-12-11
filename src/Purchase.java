@@ -29,4 +29,9 @@ public class Purchase implements Serializable {
     public void setQuantityBought(int quantityBought) {
         this.quantityBought = quantityBought;
     }
+
+    public String toString() {
+        return "Candy ID: " + candyBought.getCandyID() + ", Store Name: " + candyBought.getStore() +
+                ", Candy Name: " + candyBought.getName() + ", Quantity: " + quantityBought;
+    }
 }

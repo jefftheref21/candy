@@ -83,19 +83,19 @@ public class BuyerClient extends Buyer {
         }
     }
 
-    public void sendHistory() {
-        sendAction(Action.PURCHASE_HISTORY, 0);
-    }
-
     //Sends to server the candy in which the user would like to remove from their shopping cart
     public void sendRemoveShoppingCart(Candy candy, int quantity) {
         Purchase purchase = new Purchase(candy, quantity);
         sendAction(Action.REMOVE_FROM_CART, purchase);
     }
 
+    public void sendHistory() {
+        sendAction(Action.PURCHASE_HISTORY, 0);
+    }
+
     public void receivePurchaseHistory() {
         try {
-            this.setPurchaseHistory((PurchaseHistory) in.readUnshared());
+            this.getPurchaseHistory().readObject(in);
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
