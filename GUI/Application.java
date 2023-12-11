@@ -8,14 +8,18 @@ public class Application implements Runnable {
 
     JFrame signUpDialog;
     JFrame loginDialog;
+    JFrame editUserDialog;
 
     JLabel userTypeLabel;
 
     JButton signUpButton;
     JButton loginButton;
+    JButton editUserButton;
 
     JTextField usernameTextField;
     JTextField passwordTextField;
+    JTextField newUsernameTextField;
+    JTextField newPasswordTextField;
 
     ActionListener actionListener = new ActionListener() {
         @Override
@@ -59,6 +63,19 @@ public class Application implements Runnable {
                     loginDialog.dispose();
                 } else if (client.getAction() == Action.INVALID_CREDENTIALS) {
                     Messages.showUnsuccessfulLoginDialog();
+                }
+            }
+            if (e.getSource() == editUserButton) {
+                User user = new User(usernameTextField.getText(), passwordTextField.getText());
+                client.sendEditUser(user, newUsernameTextField.getText(), newPasswordTextField.getText());
+                client.receiveAction();
+
+                if (client.getAction() == Action.VALID_CREDENTIALS_BUYER) {
+                    Messages.showEditUserSuccessful();
+                } else if (client.getAction() == Action.VALID_CREDENTIALS_SELLER) {
+                    Messages.showEditUserSuccessful();
+                } else if (client.getAction() == Action.INVALID_CREDENTIALS) {
+                    Messages.showEditUserUnsuccessful();
                 }
             }
         }
@@ -109,15 +126,17 @@ public class Application implements Runnable {
      * Dialog that makes user choose whether to sign up or login
      */
     public void showStartingDialog() {
-        String[] options = {"Sign Up", "Login"};
+        String[] options = {"Sign Up", "Login", "Edit User"};
         int signUpOrLogin = JOptionPane.showOptionDialog(null, "Select an option:",
-                "Sign Up or Login", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
+                "Sign Up, Login, or Edit", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
                 null, options, options[0]);
         if (signUpOrLogin == 0) {
             showUserTypeDialog();
             showSignUpDialog();
-        } else {
+        } else if (signUpOrLogin == 1) {
             showLoginDialog();
+        } else {
+            showEditUserDialog();
         }
     }
 
@@ -229,5 +248,63 @@ public class Application implements Runnable {
         loginDialog.setLocationRelativeTo(null);
         loginDialog.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         loginDialog.setVisible(true);
+    }
+
+    public void showEditUserDialog() {
+        editUserDialog = new JFrame("Edit User");
+        GridBagConstraints gbc = new GridBagConstraints(0,0, 2, 1, 0.5, 0,
+                GridBagConstraints.LINE_START, GridBagConstraints.NONE,
+                new Insets(20, 20, 20, 20), 0, 0);
+        Container content = editUserDialog.getContentPane();
+        content.setLayout(new GridBagLayout());
+
+        JLabel editUserLabel = new JLabel("Candy Marketplace Edit User");
+        content.add(editUserLabel, gbc);
+
+        JLabel usernameLabel = new JLabel("Username: ");
+        gbc.gridy = 1;
+        gbc.gridwidth = 1;
+        content.add(usernameLabel, gbc);
+        usernameTextField = new JTextField(8);
+        gbc.gridx = 1;
+        content.add(usernameTextField, gbc);
+
+        JLabel passwordLabel = new JLabel("Password: ");
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        content.add(passwordLabel, gbc);
+        passwordTextField = new JTextField(8);
+        gbc.gridx = 1;
+        content.add(passwordTextField, gbc);
+
+        JLabel newUsernameLabel = new JLabel("New Username: ");
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        content.add(newUsernameLabel, gbc);
+        newUsernameTextField = new JTextField(8);
+        gbc.gridx = 1;
+        content.add(newUsernameTextField, gbc);
+
+
+        JLabel newPasswordLabel = new JLabel("New Password: ");
+        gbc.gridx = 0;
+        gbc.gridy = 7;
+        content.add(newPasswordLabel, gbc);
+        newPasswordTextField = new JTextField(8);
+        gbc.gridx = 1;
+        content.add(newPasswordTextField, gbc);
+
+        editUserButton = new JButton("Edit User");
+        editUserButton.addActionListener(actionListener);
+
+        gbc.gridwidth = 2;
+        gbc.gridy = 8;
+
+        content.add(editUserButton, gbc);
+
+        editUserDialog.pack();
+        editUserDialog.setLocationRelativeTo(null);
+        editUserDialog.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        editUserDialog.setVisible(true);
     }
 }
