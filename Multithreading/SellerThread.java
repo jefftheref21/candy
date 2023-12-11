@@ -9,15 +9,14 @@ public class SellerThread extends Seller implements Runnable {
     private ObjectOutputStream out;
 
     private HashMap<Action, Object> action;
-    private CandyManager candyManager;
-
+    private StoreManager serverStoreManager;
     private boolean isRunning = true;
 
-    public SellerThread(Socket socket, ObjectInputStream in, ObjectOutputStream out, CandyManager cm) {
+    public SellerThread(Socket socket, ObjectInputStream in, ObjectOutputStream out, StoreManager storeManager) {
         this.socket = socket;
         this.out = out;
         this.in = in;
-        this.candyManager = cm;
+        serverStoreManager = storeManager;
     }
 
     public void run() {
@@ -40,7 +39,7 @@ public class SellerThread extends Seller implements Runnable {
                             int sortChoice = 1;
                             sortSellerStatistics(sortChoice, this);
                             try {
-                                out.writeObject(candyManager);
+                                out.writeObject(this.getStoreManager());
                                 out.flush();
                             } catch (IOException ie) {
                                 ie.printStackTrace();
@@ -98,7 +97,8 @@ public class SellerThread extends Seller implements Runnable {
                             break;
                         }
                         case TOTAL_PURCHASE_QUANTITIES: {
-                            ArrayList<Integer> quantities = candyManager.getTotalPurchaseQuantity(this.getStoreManager().getStores(), (Buyer) entry.getValue());
+                            ArrayList<Integer> quantities = new ArrayList<>();
+                            //candyManager.getTotalPurchaseQuantity(this.getStoreManager().getStores(), (Buyer) entry.getValue());
                             try {
                                 out.writeObject(quantities);
                                 out.flush();
@@ -145,21 +145,9 @@ public class SellerThread extends Seller implements Runnable {
         }
     }
 
-    public void buyInstantly(int id, int quantity, Buyer buyer) {
-        candyManager.buyInstantly(id, quantity, buyer);
-    }
-
-    public void buyShoppingCart(Buyer buyer) {
-        candyManager.buyShoppingCart(buyer);
-    }
-
-    public ArrayList<Candy> searchCandy(String keyWord) {
-        return candyManager.search(keyWord);
-    }
-
 
     public void importCSV(String filename, Seller seller) throws IOException {
-        candyManager.importCSV(filename, seller);
+        // storeManager.importCSV(filename, seller);
     }
 
     public void exportToCSV(String filename, Seller seller) throws IOException {
@@ -176,19 +164,17 @@ public class SellerThread extends Seller implements Runnable {
     }
 
     public String listSellerStatistics(Seller seller) {
-        return candyManager.listSellerStatistics(seller);
+        // return candyManager.listSellerStatistics(seller);
+        return "";
     }
 
     public String listSales(Seller seller) {
-        return candyManager.listSales(seller);
+        // return candyManager.listSales(seller);
+        return "";
     }
 
     public void sortSellerStatistics(int choice, Seller seller) {
-        candyManager.sortSellerStatistics(choice, seller);
-    }
-
-    public int getIndex(int id) {
-        return candyManager.getIndex(id);
+        // candyManager.sortSellerStatistics(choice, seller);
     }
 
     public void closeResources() {

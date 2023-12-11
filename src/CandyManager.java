@@ -7,18 +7,19 @@ import java.io.*;
  * @version Nov 13, 2023
  * @authors Pablo Garces, Nathan Park, Aadiv Reki, Jeffrey Wu, Jaden Ye
  */
-public class CandyManager {
-    // class doesn't need a constructor, because we're just interested in the static candies ArrayList.
-    public ArrayList<Candy> candies = new ArrayList<>();
+public class CandyManager implements Serializable {
+    public ArrayList<Candy> candies;
     public int prodCounter = 0;
-    public static Object obj = new Object();
+    public static transient Object obj;
     public CandyManager() {
         this.candies = new ArrayList<>();
         this.prodCounter = 0;
+        obj = new Object();
     }
     public CandyManager(ArrayList<Candy> candies, int prodCounter) {
         this.candies = candies;
         this.prodCounter = prodCounter;
+        obj = new Object();
     }
     public ArrayList<Candy> getCandies() {
         return candies;
@@ -181,37 +182,44 @@ public class CandyManager {
                 }
         return stores;
     }
-    public synchronized boolean buyInstantly(int id, int quantity, Buyer buyer) {
+    public void buyInstantly(int id, int quantity, Buyer buyer) {
+        synchronized (obj) {
             int index = getIndex(id);
-            int totalQuantity = candies.get(index).getTotalQuantity();
-            if (totalQuantity >= quantity) {
-                candies.get(index).setQuantity(totalQuantity - quantity);
-                candies.get(index).getStore().editCandy(id, candies.get(index), this);
-                System.out.println("Thank you for purchasing! Your total was $" + quantity *
-                        candies.get(index).getPrice() );
-                Sale sale = new Sale(candies.get(index), quantity, buyer);
-                candies.get(index).getStore().addSale(sale);
-                buyer.getPurchaseHistory().addPurchase(sale);
-                return true;
-            } else {
-                return false;
-            }
+            int totalQuantity = candies.get(index).getQuantity();
+            System.out.println(index + " " + totalQuantity);
+            candies.get(index).setQuantity(totalQuantity - quantity);
+            System.out.println(candies.get(index).getQuantity());
+            // candies.get(index).getStore().editCandy(id, candies.get(index), this);
+
+            Sale sale = new Sale(candies.get(index), quantity, buyer);
+            // candies.get(index).getStore().addSale(sale);
+            buyer.getPurchaseHistory().addPurchase(sale);
+        }
     }
-    public synchronized boolean buyShoppingCart(Buyer buyer) {
+    public boolean buyShoppingCart(Buyer buyer) {
+        synchronized (obj) {
             for (int i = 0; i < buyer.getShoppingCart().getPurchases().size(); i++) {
                 Purchase currPurchase = buyer.getShoppingCart().getPurchases().get(i);
-                boolean success = buyInstantly(currPurchase.getCandyBought().getCandyID(), currPurchase.getQuantityBought(), buyer);
-                if (!success) {
+                int index = getIndex(currPurchase.getCandyBought().getCandyID());
+                int totalQuantity = candies.get(index).getQuantity();
+
+                if (totalQuantity < currPurchase.getQuantityBought()) {
                     return false;
                 }
             }
-        return true;
+            for (int j = 0; j < buyer.getShoppingCart().getPurchases().size(); j++) {
+                Purchase currPurchase = buyer.getShoppingCart().getPurchases().get(j);
+                buyInstantly(currPurchase.getCandyBought().getCandyID(),
+                        currPurchase.getQuantityBought(), buyer);
+            }
+            return true;
+        }
     }
     public ArrayList<Candy> search(String keyWord) {
         ArrayList<Candy> result = new ArrayList<>();
         for (int i = 0; i < candies.size(); i++) {
             String name = candies.get(i).getName();
-            String store = candies.get(i).getStore().getName();
+            String store = candies.get(i).getStore();
             String description = candies.get(i).getDescription();
 
             if (name.contains(keyWord) || store.contains(keyWord) || description.contains(keyWord)) {
@@ -325,7 +333,7 @@ public class CandyManager {
             ArrayList<Store> stores = seller.getStoreManager().getStores();
             for (int i = 0; i < stores.size(); i++) {
                 if (stores.get(i).getName().equals(data[1])) {
-                    Candy currCandy = new Candy(data[0], stores.get(i), data[1], this.prodCounter,
+                    Candy currCandy = new Candy(data[0], stores.get(i).getName(), data[1], this.prodCounter,
                             Integer.parseInt(data[3]), Integer.parseInt(data[4]));
                     stores.get(i).addCandy(currCandy, this);
                     this.prodCounter++;
@@ -353,7 +361,7 @@ public class CandyManager {
                     Store currStore = currSeller.getStoreManager().getStores().get(k);
                     ArrayList<Candy> currCandies = new ArrayList<>();
                     for (int j = 0; j < this.candies.size(); j++) {
-                        if (this.candies.get(j).getStore().getName().equals(currStore.getName())) {
+                        if (this.candies.get(j).getStore().equals(currStore.getName())) {
                             currCandies.add(this.candies.get(j));
                         }
                     }

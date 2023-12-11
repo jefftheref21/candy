@@ -1,16 +1,16 @@
 public enum Action {
+    UPDATE_CANDY_MANAGER,
+
     BUYER,
     SELLER,
     LOGIN,
 
-    USERNAME,
-    PASSWORD,
     INVALID_CREDENTIALS,
     VALID_CREDENTIALS_BUYER,
     VALID_CREDENTIALS_SELLER,
 
     CANDY_PAGE,
-    BUY_ITEM, // for server
+    BUY_INSTANTLY, // for server
     INVALID_QUANTITY,
     ADD_TO_CART,
     BACK,
