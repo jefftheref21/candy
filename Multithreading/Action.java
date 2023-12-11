@@ -4,6 +4,7 @@ public enum Action {
     BUYER,
     SELLER,
     LOGIN,
+    EDIT_USER,
 
     INVALID_CREDENTIALS,
     VALID_CREDENTIALS_BUYER,
@@ -15,7 +16,6 @@ public enum Action {
     ADD_TO_CART,
     BACK,
 
-    SORT,
     SEARCH,
 
     SHOPPING_CART,
@@ -26,6 +26,12 @@ public enum Action {
     BUY_SUCCESSFUL,
     BUY_QUANTITY_EXCEEDS,
     BUY_QUANTITY_INVALID,
+
+    ADD_TO_CART_SUCCESSFUL,
+    ADD_TO_CART_EXCEEDS,
+    ADD_TO_CART_INVALID,
+
+    REMOVE_FROM_CART_SUCCESSFUL,
 
     PURCHASE_HISTORY,
 

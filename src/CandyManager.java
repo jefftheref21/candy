@@ -24,6 +24,10 @@ public class CandyManager implements Serializable {
     public ArrayList<Candy> getCandies() {
         return candies;
     }
+
+    public void setCandies(ArrayList<Candy> candies) {
+        this.candies = candies;
+    }
     // Buyer methods
     public String viewProductPage(int productID) {
         String productPage = "";
@@ -120,7 +124,7 @@ public class CandyManager implements Serializable {
             int j = i - 1;
 
             switch (choice) {
-                case 1 -> { // Least to greatest by price
+                case 0 -> { // Least to greatest by price
                     while (j >= 0 && this.candies.get(temp).getPrice() <
                             this.candies.get(j).getPrice()) {
                         Collections.swap(this.candies, temp, j);
@@ -128,7 +132,7 @@ public class CandyManager implements Serializable {
                         j--;
                     }
                 }
-                case 2 -> { // Greatest to least by price
+                case 1 -> { // Greatest to least by price
                     while (j >= 0 && this.candies.get(temp).getPrice() >
                             this.candies.get(j).getPrice()) {
                         Collections.swap(this.candies, temp, j);
@@ -136,14 +140,14 @@ public class CandyManager implements Serializable {
                         j--;
                     }
                 }
-                case 3 -> { // Least to greatest by quantity
+                case 2 -> { // Least to greatest by quantity
                     while (j >= 0 && this.candies.get(temp).getQuantity() < this.candies.get(j).getQuantity()) {
                         Collections.swap(this.candies, temp, j);
                         temp = j;
                         j--;
                     }
                 }
-                case 4 -> { // Greatest to least by quantity
+                case 3 -> { // Greatest to least by quantity
                     while (j >= 0 && this.candies.get(temp).getQuantity() > this.candies.get(j).getQuantity()) {
                         Collections.swap(this.candies, temp, j);
                         temp = j;
@@ -189,11 +193,8 @@ public class CandyManager implements Serializable {
             System.out.println(index + " " + totalQuantity);
             candies.get(index).setQuantity(totalQuantity - quantity);
             System.out.println(candies.get(index).getQuantity());
-            // candies.get(index).getStore().editCandy(id, candies.get(index), this);
 
-            Sale sale = new Sale(candies.get(index), quantity, buyer);
-            // candies.get(index).getStore().addSale(sale);
-            buyer.getPurchaseHistory().addPurchase(sale);
+            buyer.getPurchaseHistory().addPurchase(new Purchase(candies.get(index), quantity));
         }
     }
     public boolean buyShoppingCart(Buyer buyer) {
@@ -211,6 +212,7 @@ public class CandyManager implements Serializable {
                 Purchase currPurchase = buyer.getShoppingCart().getPurchases().get(j);
                 buyInstantly(currPurchase.getCandyBought().getCandyID(),
                         currPurchase.getQuantityBought(), buyer);
+                buyer.getPurchaseHistory().addPurchase(currPurchase);
             }
             return true;
         }
@@ -226,6 +228,8 @@ public class CandyManager implements Serializable {
                 result.add(candies.get(i));
             }
         }
+        System.out.println("please work oiwjfwwejoifjwe" + result.size());
+
         return result;
     }
     // Seller methods
@@ -344,43 +348,6 @@ public class CandyManager implements Serializable {
         br.close();
     }
     // User methods
-    public void writeToFile(User user) throws IOException, ClassNotFoundException {
-        File f = new File("Users.txt");
-        ArrayList<User> users = new ArrayList<>();
-        if (f.exists() && f.length() > 0) {
-            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(f));
-            users = (ArrayList<User>) ois.readObject();
-            ois.close();
-        }
-        boolean present = false;
-        for (int i = 0; i < users.size(); i++) {
-            User currUser = users.get(i);
-            if (currUser instanceof Seller) {
-                Seller currSeller = (Seller) currUser;
-                for (int k = 0; k < currSeller.getStoreManager().getStores().size(); k++) {
-                    Store currStore = currSeller.getStoreManager().getStores().get(k);
-                    ArrayList<Candy> currCandies = new ArrayList<>();
-                    for (int j = 0; j < this.candies.size(); j++) {
-                        if (this.candies.get(j).getStore().equals(currStore.getName())) {
-                            currCandies.add(this.candies.get(j));
-                        }
-                    }
-                    currSeller.getStoreManager().getStores().get(k).setCandies(currCandies);
-                }
-            }
-            if (currUser.getUsername().equals(user.getUsername()) && currUser.getPassword().equals(user.getPassword())) {
-                users.set(i, user);
-                present = true;
-            }
-        }
-        if (!present) {
-            users.add(user);
-        }
-        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(f, false));
-        oos.writeObject(users);
-        oos.flush();
-        oos.close();
-    }
 
     public int getIndex(int id) {
         for (int i = 0; i < candies.size(); i++) {
@@ -396,23 +363,16 @@ public class CandyManager implements Serializable {
 
         for (Candy candy : candies) {
             out.writeUnshared(candy);
-//            System.out.println("__________________");
-//            System.out.println(candy.getName());
-//            System.out.println(candy.getQuantity());
         }
     }
 
     public void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-
         int candiesSize = in.readInt();
 
         candies = new ArrayList<>(candiesSize);
 
         for (int i = 0; i < candiesSize; i++) {
             Candy candy = (Candy) in.readUnshared();
-//            System.out.println("__________________________");
-//            System.out.println(candy.getName());
-//            System.out.println(candy.getQuantity());
             candies.add(candy);
         }
     }

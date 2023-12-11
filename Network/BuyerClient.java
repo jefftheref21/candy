@@ -58,7 +58,7 @@ public class BuyerClient extends Buyer {
         Purchase purchase = new Purchase(candy, quantity);
         if (type.equals("BUY_INSTANTLY")) {
             sendAction(Action.BUY_INSTANTLY, purchase);
-        } else {
+        } else if (type.equals("ADD_TO_CART")) {
             sendAction(Action.ADD_TO_CART, purchase);
         }
     }
@@ -72,42 +72,35 @@ public class BuyerClient extends Buyer {
         sendAction(Action.SHOPPING_CART, 0);
     }
 
-    public void sendHistory() {
-        sendAction(Action.PURCHASE_HISTORY, 0);
+
+    public void receiveShoppingCart() {
+        try {
+            this.getShoppingCart().readObject(in);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     //Sends to server the candy in which the user would like to remove from their shopping cart
     public void sendRemoveShoppingCart(Candy candy, int quantity) {
-        sendAction(Action.REMOVE_FROM_CART, candy);
+        Purchase purchase = new Purchase(candy, quantity);
+        sendAction(Action.REMOVE_FROM_CART, purchase);
     }
 
-    //receives the arraylist of candies that the user searched from the server
-    public ArrayList<Candy> searchCandies(String search) {
-        return candyManager.search(search);
+    public void sendHistory() {
+        sendAction(Action.PURCHASE_HISTORY, 0);
     }
 
-    public ShoppingCart receiveShoppingCart() {
+    public void receivePurchaseHistory() {
         try {
-            ShoppingCart sc = (ShoppingCart) in.readUnshared();
-            return sc;
+            this.getPurchaseHistory().readObject(in);
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
-        return null;
-    }
-
-    public PurchaseHistory receivePurchaseHistory() {
-        try {
-            PurchaseHistory ph = (PurchaseHistory) in.readUnshared();
-            return ph;
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-        return null;
     }
 
     public void sendExportPurchaseHistory(String file) {
@@ -119,14 +112,8 @@ public class BuyerClient extends Buyer {
         sendAction(Action.SORT_PRODUCTS, decision);
     }
 
-    public void receiveSortCandies() {
-        try {
-            candyManager = (CandyManager) in.readUnshared();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+    public void receiveSortCandies(int index) {
+        this.candyManager.sortProducts(index);
     }
 
     public void receiveAction() {
@@ -150,6 +137,5 @@ public class BuyerClient extends Buyer {
             e.printStackTrace();
         }
     }
-
 
 }

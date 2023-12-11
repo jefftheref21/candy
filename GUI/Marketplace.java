@@ -18,6 +18,7 @@ public class Marketplace extends JFrame implements Runnable {
     BuyerClient buyerClient;
 
     JFrame candyPageFrame;
+    JFrame shoppingCartFrame;
     JPanel candyPanel;
 
     JButton sortButton;
@@ -38,7 +39,7 @@ public class Marketplace extends JFrame implements Runnable {
 
     JTextField searchTextField;
     JTextField quantityToBuyTextField;
-
+    
     Candy candySelected;
 
     ActionListener actionListener = new ActionListener() {
@@ -49,19 +50,64 @@ public class Marketplace extends JFrame implements Runnable {
                 System.out.println(sortComboBox.getSelectedIndex());
                 int sort = sortComboBox.getSelectedIndex();
 
-                buyerClient.sendSortDecision(sort);
-                buyerClient.receiveSortCandies();
-                // run();
+                buyerClient.receiveSortCandies(sort);
+                updateScreen();
             }
             if (e.getSource() == searchButton) {
                 // TODO
                 String searchWord = searchTextField.getText();
-                ArrayList<Candy> result = buyerClient.searchCandies(searchWord);
-                 if (result == null) {
-                     Messages.showSearchUnsuccesful();
-                 } else {
-                     displayCandyButtons(result);
-                 }
+                if (searchWord.equals("")) {
+
+                    buyerClient.sendCandyManager();
+                    buyerClient.receiveCandyManager();
+                    updateScreen();
+                    return;
+                }
+
+                ArrayList<Candy> result = buyerClient.getCandyManager().search(searchWord);
+
+                buyerClient.getCandyManager().setCandies(result);
+                if (result.isEmpty()) {
+                    Messages.showSearchUnsuccesful();
+                } else {
+                    updateScreen();
+                }
+            }
+
+            if (e.getSource() == buyShoppingCartButton) {
+                try {
+                    buyerClient.sendBuyShoppingCart();
+                } catch (NumberFormatException ex) {
+                    Messages.showNumberFormatError();
+                    return;
+                }
+
+                buyerClient.receiveAction();
+
+                buyerClient.sendCandyManager();
+                buyerClient.receiveCandyManager();
+
+                switch (buyerClient.getAction()) {
+                    case BUY_SUCCESSFUL:
+                        int quantityToBuy = Integer.parseInt(quantityToBuyTextField.getText());
+                        buyerClient.sendRemoveShoppingCart(candySelected, quantityToBuy);
+
+                        buyerClient.receiveAction();
+
+                        if (buyerClient.getAction() == Action.REMOVE_FROM_CART_SUCCESSFUL) {
+                            buyerClient.sendShoppingCart();
+                            buyerClient.receiveShoppingCart();
+                            shoppingCartFrame.dispose();
+                        }
+
+                        shoppingCartFrame.dispose();
+                        updateScreen();
+                        Messages.showSuccessfulPurchase();
+                        break;
+                    case BUY_QUANTITY_EXCEEDS:
+                        Messages.showQuantityExceededError();
+                        break;
+                }
             }
 
             if (e.getSource() == buyButton) {
@@ -75,12 +121,11 @@ public class Marketplace extends JFrame implements Runnable {
 
                 buyerClient.receiveAction();
 
+
                 switch (buyerClient.getAction()) {
                     case BUY_SUCCESSFUL: {
-                        buyerClient.sendCandyManager();
-                        buyerClient.receiveCandyManager();
-
-                        System.out.println("BUY SUCCESSFUL");
+                        buyerClient.sendShoppingCart();
+                        buyerClient.receiveShoppingCart();
 
                         candyPageFrame.dispose();
 
@@ -101,65 +146,63 @@ public class Marketplace extends JFrame implements Runnable {
 
             if (e.getSource() == addToCartButton) {
                 try {
-                    buyerClient.sendCandyProduct(candySelected, "ADD_TO_CART",
-                            Integer.parseInt(quantityToBuyTextField.getText()));
+                    int quantityToBuy = Integer.parseInt(quantityToBuyTextField.getText());
+                    buyerClient.sendCandyProduct(candySelected, "ADD_TO_CART", quantityToBuy);
                 } catch (NumberFormatException ex) {
                     Messages.showNumberFormatError();
                 }
+
                 buyerClient.receiveAction();
 
-                if (buyerClient.getAction() == Action.BUY_QUANTITY_EXCEEDS) {
-                    Messages.showQuantityExceededError();
-                } else if (buyerClient.getAction() == Action.ADD_TO_CART) {
-                    Messages.showAddToCartSuccessful();
+                switch(buyerClient.getAction()) {
+                    case ADD_TO_CART_SUCCESSFUL:
+                        buyerClient.sendShoppingCart();
+                        buyerClient.receiveShoppingCart();
+
+                        candyPageFrame.dispose();
+
+                        Messages.showAddToCartSuccessful();
+                        break;
+                    case ADD_TO_CART_EXCEEDS:
+                        Messages.showQuantityExceededError();
+                        break;
+                    case ADD_TO_CART_INVALID:
+                        Messages.showInvalidQuantityError();
+                        break;
                 }
             }
             if (e.getSource() == removeFromCartButton) {
                 buyerClient.sendRemoveShoppingCart(candySelected, Integer.parseInt(quantityToBuyTextField.getText()));
                 buyerClient.receiveAction();
 
-                if (buyerClient.getAction() == Action.REMOVE_FROM_CART) {
+                if (buyerClient.getAction() == Action.REMOVE_FROM_CART_SUCCESSFUL) {
+                    buyerClient.sendShoppingCart();
+                    buyerClient.receiveShoppingCart();
+                    shoppingCartFrame.dispose();
                     Messages.showRemoveToCartSuccessful();
                 }
             }
             if (e.getSource() == shoppingCartButton) {
-                // send to server that we need shopping cart
-                // servers sends back shopping cart
                 buyerClient.sendShoppingCart();
+                buyerClient.receiveShoppingCart();
 
-                ShoppingCart shoppingCart = buyerClient.receiveShoppingCart();
-
-                showShoppingCartDialog(shoppingCart);
-            }
-            if (e.getSource() == buyShoppingCartButton) {
-                buyerClient.sendBuyShoppingCart();
-                buyerClient.receiveAction();
-
-                switch (buyerClient.getAction()) {
-                    case BUY_SUCCESSFUL:
-                        Messages.showSuccessfulPurchase();
-                        break;
-                    case BUY_QUANTITY_EXCEEDS:
-                        Messages.showQuantityExceededError();
-                        break;
-                }
+                showShoppingCartDialog(buyerClient.getShoppingCart());
             }
             if (e.getSource() == historyButton) {
                 buyerClient.sendHistory();
+                buyerClient.receivePurchaseHistory();
 
-                PurchaseHistory purchaseHistory = buyerClient.receivePurchaseHistory();
-
-                showPurchaseHistoryDialog(purchaseHistory);
+                showPurchaseHistoryDialog(buyerClient.getPurchaseHistory());
             }
             if (e.getSource() == exportHistoryButton) {
                 String filePath = Messages.getExportPath();
-
                 buyerClient.sendExportPurchaseHistory(filePath);
+
                 buyerClient.receiveAction();
-                //boolean expSuccess = buyerClient.getPurchaseHistory().exportHistoryToFile(buyerClient.getUsername());
+
                 if (buyerClient.getAction() == Action.EXPORT_HISTORY_SUCCESSFUL) {
                     Messages.showExportHistorySuccessful();
-                } else {
+                } else if (buyerClient.getAction() == Action.EXPORT_HISTORY_UNSUCCESSFUL){
                     Messages.showExportHistoryUnsuccessful();
                 }
             }
@@ -175,8 +218,8 @@ public class Marketplace extends JFrame implements Runnable {
                 // TODO: Aadiv, add these to the table they will be displayed in
                 ArrayList<Store> storesByProducts = buyerClient.getCandyManager().sortStoreStatistics(stores, 0, buyerClient);
                 ArrayList<Store> storesByBuyer = buyerClient.getCandyManager().sortStoreStatistics(stores, 1, buyerClient);
-            }
 
+            }
         }
     };
 
@@ -434,13 +477,13 @@ public class Marketplace extends JFrame implements Runnable {
         candyPageFrame.setVisible(true);
     }
 
-    public void showShoppingCartDialog(ShoppingCart sc) {
-        JFrame jf = new JFrame("Shopping Cart");
+    public void showShoppingCartDialog(ShoppingCart shoppingCart) {
+        shoppingCartFrame = new JFrame("Shopping Cart");
         GridBagConstraints gbc = new GridBagConstraints(0, 0, 1, 1, 0, 0,
                 GridBagConstraints.LINE_START, GridBagConstraints.NONE,
                 new Insets(10, 10, 10, 10), 0, 0);
 
-        Container content = jf.getContentPane();
+        Container content = shoppingCartFrame.getContentPane();
         content.setLayout(new BorderLayout());
 
         JPanel titlePanel = new JPanel();
@@ -450,60 +493,55 @@ public class Marketplace extends JFrame implements Runnable {
 
         JPanel shoppingCartInfo = new JPanel();
         shoppingCartInfo.setBackground(outerColor);
-        shoppingCartInfo.setLayout(new GridBagLayout());
 
-        JLabel candyIDLabel = new JLabel("Candy ID");
-        JLabel storeNameLabel = new JLabel("Store");
-        JLabel candyNameLabel = new JLabel("Candy Name");
-        JLabel quantityLabel = new JLabel("Quantity");
+        String[] columnNames = {"Candy ID", "Store", "Candy Name", "Quantity Bought"};
 
-        shoppingCartInfo.add(candyIDLabel, gbc);
-        gbc.gridx = 1;
-        shoppingCartInfo.add(storeNameLabel, gbc);
-        gbc.gridx = 2;
-        shoppingCartInfo.add(candyNameLabel, gbc);
-        gbc.gridx = 3;
-        shoppingCartInfo.add(quantityLabel, gbc);
-
-        ShoppingCart shoppingCart = buyerClient.getShoppingCart();
-        shoppingCart = new ShoppingCart();
-        Candy candy1 = new Candy("Snickers", "Walmart", "Chocolate bar", 1, 50, 1.00);
-        Purchase purchase = new Purchase(candy1, 10);
-        shoppingCart.addItem(purchase);
-
+        Object[][] data = new Object[shoppingCart.getPurchases().size()][columnNames.length];
         for (int i = 0; i < shoppingCart.getPurchases().size(); i++) {
-            JLabel idLabel = new JLabel(shoppingCart.getPurchases().get(i).getCandyBought().getCandyID() + "");
-            JLabel storeLabel = new JLabel(shoppingCart.getPurchases().get(i).getCandyBought().getStore());
-            JLabel nameLabel = new JLabel(shoppingCart.getPurchases().get(i).getCandyBought().getName());
-            JLabel quantityBoughtLabel = new JLabel(shoppingCart.getPurchases().get(i).getQuantityBought() + "");
-            gbc.gridy = i + 1;
-            gbc.gridx = 0;
-            shoppingCartInfo.add(idLabel, gbc);
-            gbc.gridx = 1;
-            shoppingCartInfo.add(storeLabel, gbc);
-            gbc.gridx = 2;
-            shoppingCartInfo.add(nameLabel, gbc);
-            gbc.gridx = 3;
-            shoppingCartInfo.add(quantityBoughtLabel, gbc);
+            Candy currCandy = shoppingCart.getPurchases().get(i).getCandyBought();
+            data[i][0] = currCandy.getCandyID();  // Candy ID
+            data[i][1] = currCandy.getStore();  // Store name
+            data[i][2] = currCandy.getName();  // Candy name
+            data[i][3] = shoppingCart.getPurchases().get(i).getQuantityBought();  // Quantity bought
         }
+
+        JTable shoppingCartTable = new JTable(data, columnNames);
+        JScrollPane scrollPane = new JScrollPane(shoppingCartTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+        shoppingCartInfo.add(scrollPane);
+
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.setBackground(outerColor);
+        bottomPanel.setLayout(new GridBagLayout());
+
+        removeFromCartButton = new JButton("Remove from Cart");
+        removeFromCartButton.setBackground(buttonColor);
+        removeFromCartButton.addActionListener(actionListener);
 
         buyShoppingCartButton = new JButton("Buy All");
         buyShoppingCartButton.setBackground(buttonColor);
         buyShoppingCartButton.addActionListener(actionListener);
 
-        gbc.gridy++;
-        shoppingCartInfo.add(buyShoppingCartButton, gbc);
+        bottomPanel.add(removeFromCartButton, gbc);
 
-        jf.add(titlePanel, BorderLayout.NORTH);
-        jf.add(shoppingCartInfo, BorderLayout.CENTER);
+        gbc.gridx = 1;
+        bottomPanel.add(buyShoppingCartButton, gbc);
 
-        jf.setSize(400, 400);
-        jf.setLocationRelativeTo(null);
-        jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        jf.setVisible(true);
+        content.add(titlePanel, BorderLayout.NORTH);
+        content.add(shoppingCartInfo, BorderLayout.CENTER);
+        content.add(bottomPanel, BorderLayout.SOUTH);
+
+        shoppingCartFrame.add(titlePanel, BorderLayout.NORTH);
+        shoppingCartFrame.add(shoppingCartInfo, BorderLayout.CENTER);
+
+        shoppingCartFrame.pack();
+        shoppingCartFrame.setLocationRelativeTo(null);
+        shoppingCartFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        shoppingCartFrame.setVisible(true);
     }
 
-    public void showPurchaseHistoryDialog(PurchaseHistory ph) {
+    public void showPurchaseHistoryDialog(PurchaseHistory purchaseHistory) {
         JFrame jf = new JFrame("Purchase History");
         GridBagConstraints gbc = new GridBagConstraints(0, 0, 1, 1, 0, 0,
                 GridBagConstraints.LINE_START, GridBagConstraints.NONE,
@@ -514,47 +552,32 @@ public class Marketplace extends JFrame implements Runnable {
 
         JPanel titlePanel = new JPanel();
         titlePanel.setBackground(outerColor);
-
         JLabel purchaseHistoryLabel = new JLabel("Purchase History");
         titlePanel.add(purchaseHistoryLabel);
 
         JPanel purchaseHistoryInfo = new JPanel();
         purchaseHistoryInfo.setBackground(outerColor);
-        purchaseHistoryInfo.setLayout(new GridBagLayout());
 
-        JLabel candyIDLabel = new JLabel("Candy ID");
-        JLabel storeNameLabel = new JLabel("Store");
-        JLabel candyNameLabel = new JLabel("Candy Name");
-        JLabel quantityLabel = new JLabel("Quantity");
+        String[] columnNames = {"Candy ID", "Store", "Candy Name", "Quantity Bought"};
 
-        purchaseHistoryInfo.add(candyIDLabel, gbc);
-        gbc.gridx = 1;
-        purchaseHistoryInfo.add(storeNameLabel, gbc);
-        gbc.gridx = 2;
-        purchaseHistoryInfo.add(candyNameLabel, gbc);
-        gbc.gridx = 3;
-        purchaseHistoryInfo.add(quantityLabel, gbc);
-
-        PurchaseHistory purchaseHistory = buyerClient.getPurchaseHistory();
-
+        Object[][] data = new Object[purchaseHistory.getPurchases().size()][columnNames.length];
         for (int i = 0; i < purchaseHistory.getPurchases().size(); i++) {
-            JLabel idLabel = new JLabel(purchaseHistory.getPurchases().get(i).getCandyBought().getCandyID() + "");
-            JLabel storeLabel = new JLabel(purchaseHistory.getPurchases().get(i).getCandyBought().getStore());
-            JLabel nameLabel = new JLabel(purchaseHistory.getPurchases().get(i).getCandyBought().getName());
-            JLabel quantityBoughtLabel = new JLabel(purchaseHistory.getPurchases().get(i).getQuantityBought() + "");
-            gbc.gridy = i + 1;
-            gbc.gridx = 0;
-            purchaseHistoryInfo.add(idLabel, gbc);
-            gbc.gridx = 1;
-            purchaseHistoryInfo.add(storeLabel, gbc);
-            gbc.gridx = 2;
-            purchaseHistoryInfo.add(nameLabel, gbc);
-            gbc.gridx = 3;
-            purchaseHistoryInfo.add(quantityBoughtLabel, gbc);
+            Candy currCandy = purchaseHistory.getPurchases().get(i).getCandyBought();
+            data[i][0] = currCandy.getCandyID();  // Candy ID
+            data[i][1] = currCandy.getStore();  // Store name
+            data[i][2] = currCandy.getName();  // Candy name
+            data[i][3] = purchaseHistory.getPurchases().get(i).getQuantityBought();  // Quantity bought
         }
+
+        JTable historyTable = new JTable(data, columnNames);
+        JScrollPane scrollPane = new JScrollPane(historyTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+        purchaseHistoryInfo.add(scrollPane);
 
         JPanel exportPanel = new JPanel();
         exportPanel.setBackground(outerColor);
+
         exportHistoryButton = new JButton("Export Purchase History");
         exportHistoryButton.setBackground(buttonColor);
         exportHistoryButton.addActionListener(actionListener);
@@ -565,11 +588,9 @@ public class Marketplace extends JFrame implements Runnable {
         content.add(purchaseHistoryInfo, BorderLayout.CENTER);
         content.add(exportPanel, BorderLayout.SOUTH);
 
-        jf.setSize(400, 400);
+        jf.pack();;
         jf.setLocationRelativeTo(null);
         jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         jf.setVisible(true);
     }
-
-
 }

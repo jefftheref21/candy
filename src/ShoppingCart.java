@@ -1,3 +1,6 @@
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 // no read or write. Goes into the user files.
@@ -58,5 +61,24 @@ public class ShoppingCart implements Serializable {
             }
         }
         return output.toString();
+    }
+
+    public void writeObject(ObjectOutputStream out) throws IOException {
+        out.writeInt(purchases.size());
+
+        for (Purchase purchase : purchases) {
+            out.writeUnshared(purchase);
+        }
+    }
+
+    public void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        int shoppingCartSize = in.readInt();
+
+        purchases = new ArrayList<>(shoppingCartSize);
+
+        for (int i = 0; i < shoppingCartSize; i++) {
+            Purchase purchase = (Purchase) in.readUnshared();
+            purchases.add(purchase);
+        }
     }
 }
