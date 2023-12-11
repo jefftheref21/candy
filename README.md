@@ -1,41 +1,8 @@
 # CS-180-Project-5 - Candy Marketplace ( continued)
 
 ## How to run this program:
-
-This program can be run through the Main class. When a user runs the main class, they will be
-presented with a series of main method menus. The program will instruct the user to select
-options from the menu. Based on the selected option, the specific logic and operations will
-be performed by calling methods from the other classes in this project. If errors and exceptions
-are encountered, the program will display an error message and ask the user for input again.
-
-Like a lot of user applications, first the user is asked to either login or signup. If the user
-selects login, they will have to input their credentials, specifically their username and password.
-The program will check if a user exists that has these exact credentials. If such a user exists, the
-user is allowed to view the rest of the program (the rest of the program menus). If the credentials do
-not match any existing user, the user is asked to enter their credentials again. If a user selected signup
-instead, the program will first ask the user if they are a buyer or a seller. The program will then
-ask the user to enter a new username and password. Based on what the user enters, the program will
-create either a new buyer or new seller type user with these exact credentials.
-
-From here on out, the execution of the rest of the program is self-explanatory. Users see different
-menus based on whether they are a buyer or seller. Each menu option has a specific single-digit integer
-associated with it. Users can select a menu option by entering the specific integer. Any other input
-will be an error and the user will be asked to provide an input again.
-
-Buyers can view the marketplace and access specific product pages to view and purchase available candies
-from certain stores. Buyers are prompted to enter the displayed candyID in the marketplace when purchasing
-a candy. Buyers also have options to sort the marketplace, search for specific products/candies, view store
-statistics, add products to a personal shopping cart, and view a personal buyer history. Buyers can also
-exit the menu/program by selecting the last option (exit option) from the buyer menu.
-
-Users that are sellers will see a seller menu from which they can select options to view information
-or perform actions. Sellers have the option to create a store, allowing them to name their store, decide
-what candy they would like to sell, set specific candy descriptions, and set candy prices. Sellers also
-have options to edit one of their stores, delete one of their stores, and view sales from one of their
-stores. Sellers can also view customer statistics or exit and close the program.
-
-The program/application will keep running until the user prompts to exit the application.
-
+1. Run MainServer.java
+2. Run Application.java
 
 ## Student Submission List:
 1. Pablo Yague - Submitted Report on Brightspace.
@@ -101,7 +68,8 @@ The `Application` class serves as the entry point for the Candy Marketplace Appl
 ## Usage
 - Upon running the application, sellers are presented with a GUI where they can create stores, add and edit candies, view sales, and perform other store management tasks.
 - Interaction is facilitated through buttons, text fields, and dialogs, ensuring a user-friendly experience.
-### Marketplace.java:## Overview
+### Marketplace.java: 
+Overview
 `Marketplace.java` is a crucial part of the Candy Marketplace Application, delivering the graphical user interface (GUI) for buyers. This GUI empowers users to explore the candy marketplace, inspect products, and execute actions like purchasing candies, managing shopping carts, and reviewing purchase history.
 
 ## Features
