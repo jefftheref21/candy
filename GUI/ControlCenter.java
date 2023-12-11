@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ControlCenter extends JFrame implements Runnable {
     public static final Color buttonColor = new Color(235, 158, 52);
@@ -213,19 +215,11 @@ public class ControlCenter extends JFrame implements Runnable {
         });
         addCandyDisplayButton.setBackground(buttonColor);
 
-        JTextField searchTextField = new JTextField(8);
-        JButton searchButton = new JButton("Search");
 
         topPanel.add(createStoreDisplayButton, gbc);
 
         gbc.gridx = 1;
         topPanel.add(addCandyDisplayButton, gbc);
-
-        gbc.gridx = 2;
-        topPanel.add(searchTextField, gbc);
-
-        gbc.gridx = 3;
-        topPanel.add(searchButton, gbc);
 
         content.add(topPanel, BorderLayout.NORTH);
     }
@@ -321,7 +315,7 @@ public class ControlCenter extends JFrame implements Runnable {
         gbc.gridy = 2;
         content.add(viewStoreStatisticsButton, gbc);
 
-        storeOptionFrame.pack();
+        storeOptionFrame.setSize(250, 250);
         storeOptionFrame.setLocationRelativeTo(null);
         storeOptionFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         storeOptionFrame.setVisible(true);
@@ -361,7 +355,7 @@ public class ControlCenter extends JFrame implements Runnable {
         }
 
         candyContent.add(new JScrollPane(candyPanel));
-        candyFrame.pack();
+        candyFrame.setSize(350, 350);
         candyFrame.setLocationRelativeTo(null);
         candyFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         candyFrame.setVisible(true);
@@ -542,15 +536,33 @@ public class ControlCenter extends JFrame implements Runnable {
 
 
     public void viewSalesInformationDialog(Store store) {
-        JFrame jf = new JFrame("Sales Information");
-        // Add logic to display sales information for the store
-        JLabel salesLabel = new JLabel("Sales information for " + store.getName());
-        jf.add(salesLabel);
+        JFrame salesFrame = new JFrame("Sales Information for " + store.getName());
+        Container salesContent = salesFrame.getContentPane();
 
-        jf.setSize(300, 300);
-        jf.setLocationRelativeTo(null);
-        jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        jf.setVisible(true);
+        // Dummy data for sales
+        Sale sale1 = new Sale(new Candy("Chocolate Bar", store, "Delicious chocolate", 1, 50, 1.00), 5, new Buyer("John Doe", "password1"));
+        Sale sale2 = new Sale(new Candy("Sour Candy", store, "Tasty sour candy", 2, 25, 2.00), 3, new Buyer("Jane Doe", "password2"));
+        Sale[] sales = {sale1, sale2};
+
+        String[] columnNames = {"Customer Name", "Revenue"};
+
+        //2D array to hold sales data (temporary):
+        Object[][] data = new Object[sales.length][columnNames.length];
+        for (int i = 0; i < sales.length; i++) {
+            data[i][0] = sales[i].getBuyerAccount().getUsername();  // Customer name
+            data[i][1] = sales[i].getTotalRevenue();  // Total revenue
+        }
+
+        JTable salesTable = new JTable(data, columnNames);
+        JScrollPane scrollPane = new JScrollPane(salesTable);
+
+        salesContent.add(scrollPane);
+
+        // Set the size of the sales information dialog to a reasonable size
+        salesFrame.setSize(400, 300);
+        salesFrame.setLocationRelativeTo(null);
+        salesFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        salesFrame.setVisible(true);
     }
 
     public void showStoreStatisticsDialog() {
