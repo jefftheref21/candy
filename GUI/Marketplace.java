@@ -79,11 +79,10 @@ public class Marketplace extends JFrame implements Runnable {
 
                 switch (buyerClient.getAction()) {
                     case BUY_SUCCESSFUL: {
-//                        buyerClient.sendCandyManager();
-//                        buyerClient.receiveCandyManager();
+                        buyerClient.sendCandyManager();
+                        buyerClient.receiveCandyManager();
 
-                        buyerClient.getCandyManager().buyInstantly(candySelected.getCandyID(),
-                                Integer.parseInt(quantityToBuyTextField.getText()), buyerClient);
+                        System.out.println("BUY SUCCESSFUL");
 
                         candyPageFrame.dispose();
 

@@ -37,19 +37,13 @@ public class BuyerClient extends Buyer {
 
     public void sendCandyManager() {
         sendAction(Action.UPDATE_CANDY_MANAGER, this.candyManager);
+        System.out.println("Sent candy manager");
     }
 
     public void receiveCandyManager() {
         try {
-            candyManager = (CandyManager) in.readObject();
-            System.out.println("See the candy manager");
-
-            for (int i = 0; i < candyManager.candies.size(); i++) {
-                System.out.println(candyManager.candies.get(i).getName());
-                System.out.println(candyManager.candies.get(i).getQuantity());
-                System.out.println(candyManager.candies.get(i).getStore());
-                System.out.println(candyManager.candies.get(i).getPrice());
-            }
+            System.out.println(in);
+            candyManager.readObject(in);
 
         } catch (IOException e) {
             e.printStackTrace();

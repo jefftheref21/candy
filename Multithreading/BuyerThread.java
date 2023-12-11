@@ -33,14 +33,7 @@ public class BuyerThread extends Buyer implements Runnable {
                     switch (entry.getKey()) {
                         case UPDATE_CANDY_MANAGER: {
                             try {
-                                for (int i = 0; i < candyManager.candies.size(); i++) {
-                                    System.out.println(candyManager.candies.get(i).getName());
-                                    System.out.println(candyManager.candies.get(i).getQuantity());
-                                    System.out.println(candyManager.candies.get(i).getStore());
-                                    System.out.println(candyManager.candies.get(i).getPrice());
-                                }
-
-                                out.writeUnshared(candyManager);
+                                candyManager.writeObject(out);
                                 out.flush();
 
                             } catch (IOException ie) {
@@ -191,7 +184,7 @@ public class BuyerThread extends Buyer implements Runnable {
             throw new RuntimeException(e);
         }
     }
-    
+
     private void exportHistory(File file) throws IOException {
         try {
             PurchaseHistory ph = this.getPurchaseHistory();
