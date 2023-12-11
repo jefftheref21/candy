@@ -11,11 +11,11 @@ import java.util.*;
 public class Candy implements Serializable {
     private String name; // Same thing as name in this case
     private int candyID;
-    private Store store;
+    private String store;
     private String description;
     private double price;
     private int quantity;
-    public Candy(String name, Store store, String description, int candyID, int quantity, double price) {
+    public Candy(String name, String store, String description, int candyID, int quantity, double price) {
         this.name = name;
         this.store = store;
         this.description = description;
@@ -43,7 +43,7 @@ public class Candy implements Serializable {
      * getStore
      * @return Store of candy
      */
-    public Store getStore() {
+    public String getStore() {
         return store;
     }
 
@@ -82,7 +82,7 @@ public class Candy implements Serializable {
      * setStore
      * @param store - inputted store
      */
-    public void setStore(Store store) {
+    public void setStore(String store) {
         this.store = store;
     }
 
@@ -108,21 +108,11 @@ public class Candy implements Serializable {
     public void setPrice(double price) {
         this.price = price;
     }
-    public int getTotalQuantity(){
-        int newCandyQuantity = 0;
-        for(int i = 0; i < store.getSales().size(); i++) {
-            Sale sale = store.getSales().get(i);
-            if(sale.getCandyBought().getCandyID() == candyID) {
-                newCandyQuantity += sale.getQuantityBought();
-            }
-        }
-        return newCandyQuantity;
-    }
 
     public String toString() {
-        return String.format("Candy<%s_%s_%s_%s_%s_%s>", name, store.getName(), description, candyID,quantity,  price);
+        return String.format("Candy<%s_%s_%s_%s_%s_%s>", name, store, description, candyID,quantity,  price);
     }
     public String toCSV() {
-        return String.format("%s,%s,%s,%s,%s", name, store.getName(), description, quantity, price);
+        return String.format("%s,%s,%s,%s,%s", name, store, description, quantity, price);
     }
 }

@@ -109,18 +109,4 @@ public class Store implements Serializable {
         }
         return totalNum;
     }
-    // just for debugging purposes
-    @Override
-    public String toString() {
-        StringBuilder str = new StringBuilder();
-        if (candies.size() > 0) {
-            str.append(Integer.toString(candies.get(0).getQuantity()));
-            for (int i = 1; i < candies.size(); i++) {
-                str.append("," + Integer.toString(candies.get(i).getQuantity()));
-            }
-        } else {
-            str.append("NC");
-        }
-        return str.toString();
-    }
 }

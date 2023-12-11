@@ -12,17 +12,41 @@ public class MainServer {
     private ObjectOutputStream out;
     private ServerSocket serverSocket;
     private CandyManager candyManager;
+
+    private StoreManager storeManager;
     private Action action;
 
     private ArrayList<User> users;
 
-    public MainServer(CandyManager candyManager) {
+    public MainServer(CandyManager candyManager, StoreManager storeManager) {
         this.candyManager = candyManager;
+        this.storeManager = storeManager;
     }
 
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         // CandyManager candyManager = readFile("filename.txt");
-        MainServer server = new MainServer(new CandyManager());
+        Candy candy1 = new Candy("Snickers", "Walmart", "Chocolate bar", 1, 50, 1.00);
+        Candy candy2 = new Candy("Twix", "Walmart", "Chocolate bar",2, 25, 2.00);
+        Candy candy3 = new Candy("M&Ms", "Walmart", "Chocolate bar", 3, 100, 3.00);
+        Candy candy4 = new Candy("Kit Kat", "Walmart", "Chocolate bar", 4, 75, 4.00);
+        Candy candy5 = new Candy("Sour Patch Kids", "Walmart", "Sour candy", 5, 50, 1.00);
+        Candy candy6 = new Candy("Sour Skittles", "Walmart", "Sour candy", 6, 25, 2.00);
+        ArrayList<Candy> candies = new ArrayList<>();
+        candies.add(candy1);
+        candies.add(candy2);
+        candies.add(candy3);
+        candies.add(candy4);
+        candies.add(candy5);
+        candies.add(candy6);
+        CandyManager candyManager = new CandyManager(candies, 7);
+
+        Store store1 = new Store("Walmart", candies, new ArrayList<>());
+        ArrayList<Store> stores = new ArrayList<>();
+        stores.add(store1);
+
+        StoreManager storeManager = new StoreManager(stores);
+
+        MainServer server = new MainServer(candyManager, storeManager);
         server.initializeUsers();
         server.startServer(); // start the server
         // writeFile("filename.txt", candyManager);
@@ -45,7 +69,7 @@ public class MainServer {
 
             while (true) {
                 Socket socket = serverSocket.accept();
-                new UserThread(socket, candyManager, users);
+                new UserThread(socket, candyManager, storeManager, users);
             }
         } catch (IOException e) {
             System.out.println("IO Exception:" + e);
@@ -59,7 +83,7 @@ public class MainServer {
         CandyManager candyManager = new CandyManager();
         FileInputStream fi = new FileInputStream(new File(filename));
         ObjectInputStream ois = new ObjectInputStream(fi);
-        candyManager.candies = (ArrayList<Candy>) ois.readObject();
+        candyManager.candies = (ArrayList<Candy>) ois.readUnshared();
 //        ois.close();
         return candyManager;
     }
