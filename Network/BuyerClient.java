@@ -14,9 +14,12 @@ public class BuyerClient extends Buyer {
 
     private CandyManager candyManager;
 
-    public BuyerClient(Socket socket, Marketplace marketplace) throws IOException {
+    public BuyerClient(Socket socket, ObjectInputStream in, ObjectOutputStream out, Marketplace marketplace) {
         this.socket = socket;
+        this.out = out;
+        this.in = in;
         this.marketplace = marketplace;
+
         Candy candy1 = new Candy("Snickers", new Store("Walmart"), "Chocolate bar", 1, 50, 1.00);
         Candy candy2 = new Candy("Twix", new Store("Walmart"), "Chocolate bar",2, 25, 2.00);
         Candy candy3 = new Candy("M&Ms", new Store("Walmart"), "Chocolate bar", 3, 100, 3.00);
@@ -31,13 +34,6 @@ public class BuyerClient extends Buyer {
         candies.add(candy5);
         candies.add(candy6);
         candyManager = new CandyManager(candies, 7);
-
-        try {
-            out = new ObjectOutputStream(socket.getOutputStream());
-            in = new ObjectInputStream(socket.getInputStream());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     public Action getAction() {
@@ -79,26 +75,28 @@ public class BuyerClient extends Buyer {
         sendAction(Action.BUY_SHOPPING_CART, this);
     }
 
+    public void sendShoppingCart() {
+        sendAction(Action.SHOPPING_CART, 0);
+    }
+
+    public void sendHistory() {
+        sendAction(Action.PURCHASE_HISTORY, 0);
+    }
+
     //Sends to server the candy in which the user would like to remove from their shopping cart
-    public void sendRemoveShoppingCart(Candy candy) {
+    public void sendRemoveShoppingCart(Candy candy, int quantity) {
         sendAction(Action.REMOVE_FROM_CART, candy);
     }
 
-    //Sends to server the users search text
-    public void sendSearchResults(String text) {
-        try {
-            out.writeUTF(text);
-            out.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    //receives the arraylist of candies that the user searched from the server
+    public ArrayList<Candy> searchCandies(String search) {
+        return candyManager.search(search);
     }
 
-    //receives the arraylist of candies that the user searched from the server
-    public ArrayList<Candy> receiveSearchCandies() {
+    public ShoppingCart receiveShoppingCart() {
         try {
-            ArrayList<Candy> searchCandy = (ArrayList<Candy>) in.readObject();
-            return searchCandy;
+            ShoppingCart sc = (ShoppingCart) in.readObject();
+            return sc;
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
@@ -107,19 +105,30 @@ public class BuyerClient extends Buyer {
         return null;
     }
 
+    public PurchaseHistory receivePurchaseHistory() {
+        try {
+            PurchaseHistory ph = (PurchaseHistory) in.readObject();
+            return ph;
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
+
+    public void sendExportPurchaseHistory(String file) {
+        sendAction(Action.EXPORT_HISTORY, file);
+    }
+
     //Sends to server the users decision in which they would like to sort the marketplace
     public void sendSortDecision(int decision) {
         sendAction(Action.SORT_PRODUCTS, decision);
     }
 
-    public void sendSearchDecision(String searchWord) {
-        sendAction(Action.SEARCH, searchWord);
-    }
-
     public void receiveSortCandies() {
         try {
-            CandyManager cm = (CandyManager) in.readObject();
-            setCandyManager(cm);
+            candyManager = (CandyManager) in.readObject();
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
@@ -140,10 +149,13 @@ public class BuyerClient extends Buyer {
         try {
             HashMap<Action, Object> map = new HashMap<>();
             map.put(action, object);
+            System.out.println("hashmap " + map);
             out.writeObject(map);
             out.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+
 }

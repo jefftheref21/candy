@@ -58,7 +58,6 @@ public class UserThread extends User implements Runnable {
         } catch (Exception e) {
             handleException(e);
         }
-        closeResources();
     }
 
 
@@ -76,12 +75,12 @@ public class UserThread extends User implements Runnable {
         if (user instanceof Buyer) {
             out.writeObject(Action.VALID_CREDENTIALS_BUYER);
             out.flush();
-            buyerThread = new Thread(new BuyerThread(socket, cm));
+            buyerThread = new Thread(new BuyerThread(socket, in, out, cm));
             buyerThread.start();
         } else {
             out.writeObject(Action.VALID_CREDENTIALS_SELLER);
             out.flush();
-            sellerThread = new Thread(new SellerThread(socket, cm));
+            sellerThread = new Thread(new SellerThread(socket, in, out, cm));
             sellerThread.start();
         }
         isRunning = false;
@@ -94,12 +93,12 @@ public class UserThread extends User implements Runnable {
                 if (u instanceof Buyer) {
                     out.writeObject(Action.VALID_CREDENTIALS_BUYER);
                     out.flush();
-                    buyerThread = new Thread(new BuyerThread(socket, cm));
+                    buyerThread = new Thread(new BuyerThread(socket, in, out, cm));
                     buyerThread.start();
                 } else {
                     out.writeObject(Action.VALID_CREDENTIALS_SELLER);
                     out.flush();
-                    sellerThread = new Thread(new SellerThread(socket, cm));
+                    sellerThread = new Thread(new SellerThread(socket, in, out, cm));
                     sellerThread.start();
                 }
                 isRunning = false;

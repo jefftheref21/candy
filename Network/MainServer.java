@@ -8,8 +8,11 @@ public class MainServer {
     private static LinkedHashMap<String, UserThread> userInfo = new LinkedHashMap<String, UserThread>();
 
     // TCP Components
+    private ObjectInputStream in;
+    private ObjectOutputStream out;
     private ServerSocket serverSocket;
     private CandyManager candyManager;
+    private Action action;
 
     private ArrayList<User> users;
 
@@ -27,7 +30,7 @@ public class MainServer {
 
     public void initializeUsers() {
         users = new ArrayList<>();
-        users.add(new Seller("jeff", "pass"));
+        users.add(new Buyer("jeff", "pass"));
     }
 
     public void startServer() throws ClassNotFoundException {

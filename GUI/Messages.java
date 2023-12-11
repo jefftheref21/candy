@@ -31,6 +31,16 @@ public class Messages {
 
     // CONTROLCENTER MESSAGES
 
+    public static void showSuccessfulCreateStoreDialog() {
+        JOptionPane.showMessageDialog(null, "Store created successfully!",
+                "Create Store Confirmation", JOptionPane.PLAIN_MESSAGE);
+    }
+
+    public static void showUnsuccessfulCreateStoreDialog() {
+        JOptionPane.showMessageDialog(null, "Store creation failed!",
+                "Create Store Failed", JOptionPane.ERROR_MESSAGE);
+    }
+
     public static void showSuccessfulAddCandyDialog() {
         JOptionPane.showMessageDialog(null, "Candy added successfully!",
                 "Add Candy Confirmation", JOptionPane.PLAIN_MESSAGE);
@@ -99,6 +109,10 @@ public class Messages {
         JOptionPane.showMessageDialog(null, "Thank you for your purchase",
                 "Success", JOptionPane.INFORMATION_MESSAGE);
     }
+    public static void showSearchUnsuccesful() {
+        JOptionPane.showMessageDialog(null, "No candy found for such keyword. Please try another one.",
+                "Error", JOptionPane.ERROR_MESSAGE);
+    }
 
     public static void showNumberFormatError() {
         JOptionPane.showMessageDialog(null, "Please enter a valid number",
@@ -118,5 +132,15 @@ public class Messages {
     public static void showExportHistoryUnsuccessful() {
         JOptionPane.showMessageDialog(null, "Purchase history export unsuccessful",
                 "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+    public static void showAddToCartSuccessful() {
+        JOptionPane.showMessageDialog(null, "Added to Shopping Cart Successful",
+                "Success", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    public static void showRemoveToCartSuccessful() {
+        JOptionPane.showMessageDialog(null, "Removed to Shopping Cart Successful",
+                "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 }
