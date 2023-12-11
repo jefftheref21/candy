@@ -88,27 +88,9 @@ public class BuyerClient extends Buyer {
         sendAction(Action.REMOVE_FROM_CART, candy);
     }
 
-    //Sends to server the users search text
-    public void sendSearchResults(String text) {
-        try {
-            out.writeUTF(text);
-            out.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     //receives the arraylist of candies that the user searched from the server
-    public ArrayList<Candy> receiveSearchCandies() {
-        try {
-            ArrayList<Candy> searchCandy = (ArrayList<Candy>) in.readObject();
-            return searchCandy;
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-        return null;
+    public ArrayList<Candy> searchCandies(String search) {
+        return candyManager.search(search);
     }
 
     public ShoppingCart receiveShoppingCart() {
@@ -142,10 +124,6 @@ public class BuyerClient extends Buyer {
     //Sends to server the users decision in which they would like to sort the marketplace
     public void sendSortDecision(int decision) {
         sendAction(Action.SORT_PRODUCTS, decision);
-    }
-
-    public void sendSearchDecision(String searchWord) {
-        sendAction(Action.SEARCH, searchWord);
     }
 
     public void receiveSortCandies() {

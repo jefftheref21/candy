@@ -161,8 +161,9 @@ public class ControlCenter extends JFrame implements Runnable {
             }
 
             if (e.getSource() == customerShoppingCartsButton) {
-                // sellerClient.sendCustomerShoppingCarts();
+                //sellerClient.sendCustomerShoppingCarts(;
             }
+            //if (e.getSource() == editStore)
         }
     };
     public ControlCenter(Socket socket, ObjectInputStream in, ObjectOutputStream out) throws IOException {

@@ -41,7 +41,7 @@ public class CandyManager {
         productPage += "Product Description: " + productDescription + "\n";
         return productPage;
     }
-    public void sortStoreStatistics(ArrayList<Store> stores, int choice, Buyer buyer) {
+    public ArrayList<Store> sortStoreStatistics(ArrayList<Store> stores, int choice, Buyer buyer) {
         for (int i = 1; i < stores.size(); i++) {
             int temp = i;
             int j = i - 1;
@@ -98,6 +98,7 @@ public class CandyManager {
                 }
             }
         }
+        return stores;
     }
     public ArrayList<Integer> getTotalPurchaseQuantity(ArrayList<Store> stores, Buyer buyer){
         ArrayList<Integer> purchaseQuantities = new ArrayList<>();
@@ -151,33 +152,34 @@ public class CandyManager {
             }
         }
     }
-    public String viewStoreStatistics(ArrayList<Store> stores, ArrayList<User> users) {
-        StringBuilder output = new StringBuilder();
-        System.out.println("Show up!");
-        for (Store store : stores) {
-
-            String storeName = "Store Name: " + store.getName() + "\n";
-            output.append(storeName);
-            int numOfProductsBought = 0;
-            for (User user : users) {
-                if (user instanceof Buyer buyer) {
-                    for (Sale sale : store.getSalesByBuyer(buyer)) {
-                        numOfProductsBought += sale.getQuantityBought();
+    public ArrayList<Store> viewStoreStatistics(ArrayList<Store> stores, Buyer buyer, int choice) {
+        // 0 = sort by quantity sold. 1 = sort by num of products sold to buyer
+            for (int i = 0; i < stores.size(); i++) {
+                Store currStore = stores.get(i);
+                for (int j = i + 1; j < stores.size(); j++) {
+                    switch (choice) {
+                        case 0:
+                            if (stores.get(j).getNumberOfProductsSold() > currStore.getNumberOfProductsSold()) {
+                                stores.set(i, stores.get(j));
+                            }
+                            break;
+                        case 1:
+                            int currStoreSales = 0;
+                            int loopingStoreSales = 0;
+                            for (Sale sale : currStore.getSalesByBuyer(buyer)) {
+                                currStoreSales += sale.getQuantityBought();
+                            }
+                            for (Sale sale : stores.get(j).getSalesByBuyer(buyer)) {
+                                loopingStoreSales += sale.getQuantityBought();
+                            }
+                            if (loopingStoreSales > currStoreSales) {
+                                stores.set(i, stores.get(j));
+                            }
+                            break;
+                        }
                     }
                 }
-                if (user instanceof Seller seller) {
-                    if (seller.getStoreManager().getStores().contains(store)) {
-                        String sellerName = "Seller Name: " + seller.getUsername() + "\n";
-                        output.append(sellerName);
-                    }
-                }
-            }
-            String storeInfo =  "Number of products sold: " + store.getNumberOfProductsSold() + "\n" +
-                    "Number of products sold to this buyer: " + numOfProductsBought + "\n";
-            output.append(storeInfo);
-        }
-
-        return output.toString();
+        return stores;
     }
     public synchronized boolean buyInstantly(int id, int quantity, Buyer buyer) {
             int index = getIndex(id);
@@ -205,29 +207,18 @@ public class CandyManager {
             }
         return true;
     }
-    public String search(String keyWord) {
-        String result = "";
-
+    public ArrayList<Candy> search(String keyWord) {
+        ArrayList<Candy> result = new ArrayList<>();
         for (int i = 0; i < candies.size(); i++) {
             String name = candies.get(i).getName();
             String store = candies.get(i).getStore().getName();
             String description = candies.get(i).getDescription();
 
             if (name.contains(keyWord) || store.contains(keyWord) || description.contains(keyWord)) {
-                result += "Product ID: " + candies.get(i).getCandyID() + ", Product Name: " +
-                        candies.get(i).getName() + ", Store: " +
-                        candies.get(i).getStore().getName() + ", Price: " +
-                        candies.get(i).getPrice() + "\n";
-
+                result.add(candies.get(i));
             }
         }
-
-        if (!result.isEmpty()) {
-            return result;
-        } else {
-            result = "No candies found!";
-            return result;
-        }
+        return result;
     }
     // Seller methods
     public String listSellerStatistics(Seller seller) {
@@ -343,18 +334,6 @@ public class CandyManager {
             line = br.readLine();
         }
         br.close();
-    }
-    public void exportToCSV(String filename, Seller seller) throws IOException {
-        File f = new File(filename);
-        PrintWriter pw = new PrintWriter(new FileOutputStream(f));
-        for (int i = 0; i < seller.getStoreManager().getStores().size(); i++) {
-            Store currStore = seller.getStoreManager().getStores().get(i);
-            for (int j = 0; j < currStore.getCandies().size(); j++) {
-                Candy currCandy = currStore.getCandies().get(j);
-                pw.println(currCandy.toCSV());
-            }
-        }
-        pw.close();
     }
     // User methods
     public void writeToFile(User user) throws IOException, ClassNotFoundException {

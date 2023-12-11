@@ -109,6 +109,10 @@ public class Messages {
         JOptionPane.showMessageDialog(null, "Thank you for your purchase",
                 "Success", JOptionPane.INFORMATION_MESSAGE);
     }
+    public static void showSearchUnsuccesful() {
+        JOptionPane.showMessageDialog(null, "No candy found for such keyword. Please try another one.",
+                "Error", JOptionPane.ERROR_MESSAGE);
+    }
 
     public static void showNumberFormatError() {
         JOptionPane.showMessageDialog(null, "Please enter a valid number",

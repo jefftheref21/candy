@@ -107,6 +107,36 @@ public class SellerThread extends Seller implements Runnable {
                             }
                             break;
                         }
+                        case CREATE_STORE:
+                            try {
+                                this.getStoreManager().addStore((Store) entry.getValue());
+                                out.writeObject(Action.CREATE_STORE_SUCCESSFUL);
+                                out.flush();
+                            } catch (Exception e) {
+                                out.writeObject(Action.CREATE_STORE_UNSUCCESSFUL);
+                                out.flush();
+                            }
+                            break;
+                        case EDIT_STORE:
+                            try {
+                                Store updated = (Store) entry.getValue();
+                                boolean found = false;
+                                for (int i = 0; i < this.getStoreManager().getStores().size(); i++) {
+                                    if (this.getStoreManager().getStores().get(i).getName().equals(updated.getName())) {
+                                        this.getStoreManager().getStores().set(i, updated);
+                                        out.writeObject(Action.EDIT_STORE_SUCCESSFUL);
+                                    }
+                                }
+                                if (!found) {
+                                    out.writeObject(Action.EDIT_STORE_UNSUCCESSFUL);
+                                }
+                            } catch (Exception e) {
+                                out.writeObject(Action.EDIT_STORE_UNSUCCESSFUL);
+                            }
+                            out.flush();
+                            break;
+                        case VIEW_SHOPPING_CARTS:
+
                     }
                 }
             }
@@ -123,7 +153,7 @@ public class SellerThread extends Seller implements Runnable {
         candyManager.buyShoppingCart(buyer);
     }
 
-    public String search(String keyWord) {
+    public ArrayList<Candy> searchCandy(String keyWord) {
         return candyManager.search(keyWord);
     }
 
@@ -133,7 +163,16 @@ public class SellerThread extends Seller implements Runnable {
     }
 
     public void exportToCSV(String filename, Seller seller) throws IOException {
-        candyManager.exportToCSV(filename, seller);
+        File f = new File(filename);
+        PrintWriter pw = new PrintWriter(new FileOutputStream(f));
+        for (int i = 0; i < seller.getStoreManager().getStores().size(); i++) {
+            Store currStore = seller.getStoreManager().getStores().get(i);
+            for (int j = 0; j < currStore.getCandies().size(); j++) {
+                Candy currCandy = currStore.getCandies().get(j);
+                pw.println(currCandy.toCSV());
+            }
+        }
+        pw.close();
     }
 
     public String listSellerStatistics(Seller seller) {

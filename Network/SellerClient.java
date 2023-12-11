@@ -43,26 +43,20 @@ public class SellerClient extends Seller {
         sendAction(Action.CREATE_STORE, store);
     }
 
-    public void sendEditStore(String storeName, Candy candy, int quantity) {
-        try {
-            out.writeObject(candy);
-            out.flush();
-            out.writeUTF(storeName);
-            out.flush();
-            out.write(quantity);
-            out.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
+    public void sendEditStore(String storeName, Candy candy) {
+        for (Store store : this.getStoreManager().getStores()) {
+            if (store.getName().equals(storeName)) {
+                store.addCandy(candy, candyManager);
+                sendAction(Action.EDIT_STORE, store);
+            }
         }
+    }
+    public void sendShoppingCartRequest() {
+        sendAction(Action.VIEW_SHOPPING_CARTS, new Object());
     }
 
     public void sendToGetCandyID() {
-        try {
-            out.writeObject(Action.GET_CANDY_ID);
-            out.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        sendAction(Action.GET_CANDY_ID, new Object());
     }
 
     public int receiveCandyID() {

@@ -53,7 +53,12 @@ public class Marketplace extends JFrame implements Runnable {
             if (e.getSource() == searchButton) {
                 // TODO
                 String searchWord = searchTextField.getText();
-                buyerClient.sendSearchDecision(searchWord);
+                ArrayList<Candy> result = buyerClient.searchCandies(searchWord);
+                 if (result == null) {
+                     Messages.showSearchUnsuccesful();
+                 } else {
+                     displayCandyButtons(result, getContentPane());
+                 }
             }
 
             if (e.getSource() == buyButton) {
@@ -145,9 +150,17 @@ public class Marketplace extends JFrame implements Runnable {
                 }
             }
             if (e.getSource() == viewStatisticsButton) {
-                // TODO Must have data sent from server
-
-                //buyerClient.
+                ArrayList<Store> stores = new ArrayList<>();
+                ArrayList<String> storeNames = new ArrayList<>();
+                for (Candy candy : buyerClient.getCandyManager().candies) {
+                    if (!storeNames.contains(candy.getStore().getName())) {
+                        stores.add(candy.getStore());
+                        storeNames.add(candy.getStore().getName());
+                    }
+                }
+                // TODO: Aadiv, add these to the table they will be displayed in
+                ArrayList<Store> storesByProducts = buyerClient.getCandyManager().sortStoreStatistics(stores, 0, buyerClient);
+                ArrayList<Store> storesByBuyer = buyerClient.getCandyManager().sortStoreStatistics(stores, 1, buyerClient);
             }
 
         }
