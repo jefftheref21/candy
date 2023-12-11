@@ -20,8 +20,6 @@ public class Marketplace extends JFrame implements Runnable {
     JFrame candyPageFrame;
     JPanel candyPanel;
 
-    ArrayList<JButton> candyButtons;
-
     JButton sortButton;
     JComboBox sortComboBox;
     String[] sortOptions = {"Price - Least to Greatest", "Price - Greatest to Least",
@@ -62,7 +60,7 @@ public class Marketplace extends JFrame implements Runnable {
                  if (result == null) {
                      Messages.showSearchUnsuccesful();
                  } else {
-                     displayCandyButtons(result, getContentPane());
+                     displayCandyButtons(result);
                  }
             }
 
@@ -86,8 +84,8 @@ public class Marketplace extends JFrame implements Runnable {
 
                         candyPageFrame.dispose();
 
-                        Messages.showSuccessfulPurchase();
                         updateScreen();
+                        Messages.showSuccessfulPurchase();
 
                         break;
                     }
@@ -184,7 +182,6 @@ public class Marketplace extends JFrame implements Runnable {
 
     public Marketplace(Socket socket, ObjectInputStream in, ObjectOutputStream out) throws IOException {
         buyerClient = new BuyerClient(socket, in, out,this);
-        candyButtons = new ArrayList<>();
     }
 
     public void run() {
@@ -203,7 +200,9 @@ public class Marketplace extends JFrame implements Runnable {
 
         displayTopPanel(content);
 
-        displayCandyButtons(buyerClient.getCandyManager().candies, content);
+        candyPanel = displayCandyButtons(buyerClient.getCandyManager().candies);
+
+        content.add(candyPanel, BorderLayout.CENTER);
 
         displaySidePanel(content);
 
@@ -214,12 +213,12 @@ public class Marketplace extends JFrame implements Runnable {
     }
 
     public void updateScreen() {
-        for (int i = 0; i < candyButtons.size(); i++) {
-            candyButtons.get(i).setText("<html>" + buyerClient.getCandyManager().candies.get(i).getStore() +
-                    "<br>" + buyerClient.getCandyManager().candies.get(i).getName() + "<br>$"
-                    + buyerClient.getCandyManager().candies.get(i).getPrice() + "<br>"
-                    + buyerClient.getCandyManager().candies.get(i).getQuantity() + "</html>");
-        }
+        getContentPane().remove(candyPanel);
+
+        candyPanel = displayCandyButtons(buyerClient.getCandyManager().candies);
+
+        getContentPane().add(candyPanel, BorderLayout.CENTER);
+        getContentPane().revalidate();
     }
 
 
@@ -325,15 +324,19 @@ public class Marketplace extends JFrame implements Runnable {
      * When clicked on, the user will be taken to the product page, where they can buy, add to their
      * shopping cart, or go back
      * @param candies - all the candies *WILL BE CHANGED TO CANDYMANAGER
-     * @param content - To add to the larger frame
      */
-    public void displayCandyButtons(ArrayList<Candy> candies, Container content) {
-        candyPanel = new JPanel();
+    public JPanel displayCandyButtons(ArrayList<Candy> candies) {
+        JPanel candyPanel = new JPanel();
         candyPanel.setLayout(new GridBagLayout());
         candyPanel.setBackground(backgroundColor);
+        int skipped = 0;
 
         for (int i = 0; i < candies.size(); i++) { // Change candies to CandyManager later on
             Candy currCandy = candies.get(i);
+            if (currCandy.getQuantity() == 0) {
+                skipped++;
+                continue;
+            }
             JButton currButton = new JButton(new AbstractAction() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -350,14 +353,12 @@ public class Marketplace extends JFrame implements Runnable {
             currButton.setText("<html>" + buttonText.replaceAll("\\n", "<br>") + "</html>");
             System.out.println(currCandy.getName());
 
-            candyPanel.add(currButton, new GridBagConstraints(i % 4, i / 4, 1, 1,
+            candyPanel.add(currButton, new GridBagConstraints((i - skipped) % 4, (i - skipped) / 4, 1, 1,
                     0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
                     new Insets(10, 10, 10, 10), 5, 5));
-
-            candyButtons.add(currButton);
-
-            content.add(candyPanel, BorderLayout.CENTER);
         }
+
+        return candyPanel;
     }
 
     /**
