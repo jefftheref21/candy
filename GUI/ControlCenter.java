@@ -76,7 +76,7 @@ public class ControlCenter extends JFrame implements Runnable {
                 double price = Double.parseDouble(priceTextField.getText());
                 int quantity = Integer.parseInt(quantityTextField.getText());
 
-                Candy newCandy = new Candy(name, new Store(storeName), description, candyID, quantity, price);
+                Candy newCandy = new Candy(name, storeName, description, candyID, quantity, price);
 
                 sellerClient.sendAddCandy(newCandy);
             }
@@ -324,8 +324,10 @@ public class ControlCenter extends JFrame implements Runnable {
 
     public void displayCandyButtons(Store store) {
         // Dummy data for candies
-        Candy candy1 = new Candy("Chocolate Bar", store, "Delicious chocolate", 1, 50, 1.00);
-        Candy candy2 = new Candy("Sour Candy", store, "Tasty sour candy", 2, 25, 2.00);
+        Candy candy1 = new Candy("Chocolate Bar", store.getName(), "Delicious chocolate",
+                1, 50, 1.00);
+        Candy candy2 = new Candy("Sour Candy", store.getName(), "Tasty sour candy",
+                2, 25, 2.00);
         Candy[] candies = {candy1, candy2};
 
         JFrame candyFrame = new JFrame("Candies in " + store.getName());
@@ -541,8 +543,10 @@ public class ControlCenter extends JFrame implements Runnable {
         Container salesContent = salesFrame.getContentPane();
 
         // Dummy data for sales
-        Sale sale1 = new Sale(new Candy("Chocolate Bar", store, "Delicious chocolate", 1, 50, 1.00), 5, new Buyer("John Doe", "password1"));
-        Sale sale2 = new Sale(new Candy("Sour Candy", store, "Tasty sour candy", 2, 25, 2.00), 3, new Buyer("Jane Doe", "password2"));
+        Sale sale1 = new Sale(new Candy("Chocolate Bar", store.getName(), "Delicious chocolate",
+                1, 50, 1.00), 5, new Buyer("John Doe", "password1"));
+        Sale sale2 = new Sale(new Candy("Sour Candy", store.getName(), "Tasty sour candy",
+                2, 25, 2.00), 3, new Buyer("Jane Doe", "password2"));
         Sale[] sales = {sale1, sale2};
 
         String[] columnNames = {"Customer Name", "Revenue"};

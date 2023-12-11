@@ -12,33 +12,47 @@ public class BuyerThread extends Buyer implements Runnable {
     private HashMap<Action, Object> action;
 
     private CandyManager candyManager;
-    private ArrayList<Store> stores;
+    private StoreManager storeManager;
 
     private boolean isRunning = true;
 
-    public BuyerThread(Socket socket, ObjectInputStream in, ObjectOutputStream out, CandyManager candyManager) {
+    public BuyerThread(Socket socket, ObjectInputStream in, ObjectOutputStream out, CandyManager candyManager,
+                       StoreManager storeManager) {
         this.socket = socket;
         this.out = out;
         this.in = in;
-
         this.candyManager = candyManager; // Initialize CandyManager
-
-        for (Candy candy : candyManager.candies) {
-            stores.add(candy.getStore());
-        }
+        this.storeManager = storeManager; // Initialize StoreManager
     }
 
     public void run() {
         try {
             while (isRunning) {
-                action = (HashMap<Action, Object>) in.readObject();
+                action = (HashMap<Action, Object>) in.readUnshared();
                 for (Map.Entry<Action, Object> entry : action.entrySet()) {
                     switch (entry.getKey()) {
+                        case UPDATE_CANDY_MANAGER: {
+                            try {
+                                for (int i = 0; i < candyManager.candies.size(); i++) {
+                                    System.out.println(candyManager.candies.get(i).getName());
+                                    System.out.println(candyManager.candies.get(i).getQuantity());
+                                    System.out.println(candyManager.candies.get(i).getStore());
+                                    System.out.println(candyManager.candies.get(i).getPrice());
+                                }
+
+                                out.writeUnshared(candyManager);
+                                out.flush();
+
+                            } catch (IOException ie) {
+                                ie.printStackTrace();
+                            }
+                            break;
+                        }
                         case VIEW_PRODUCT_PAGE: {
                             // get stuff from client
                             String productPage = candyManager.viewProductPage((Integer) entry.getValue());
                             try {
-                                out.writeObject(productPage);
+                                out.writeUnshared(productPage);
                                 out.flush();
                             } catch (IOException ie) {
                                 ie.printStackTrace();
@@ -47,9 +61,9 @@ public class BuyerThread extends Buyer implements Runnable {
                         }
                         case SORT_STORE_STATS: {
                             // get stuff from client
-                            candyManager.sortStoreStatistics(stores, (Integer) entry.getValue(), this);
+                            candyManager.sortStoreStatistics(storeManager.getStores(), (Integer) entry.getValue(), this);
                             try {
-                                out.writeObject(candyManager);
+                                out.writeUnshared(candyManager);
                                 out.flush();
                             } catch (IOException ie) {
                                 ie.printStackTrace();
@@ -60,10 +74,44 @@ public class BuyerThread extends Buyer implements Runnable {
                             // get stuff from client
                             candyManager.sortProducts((Integer) entry.getValue());
                             try {
-                                out.writeObject(candyManager.candies);
+                                out.writeUnshared(candyManager.candies);
                                 out.flush();
                             } catch (IOException ie) {
                                 ie.printStackTrace();
+                            }
+                            break;
+                        }
+                        case BUY_INSTANTLY: {
+                            Purchase purchase = (Purchase) entry.getValue();
+                            if (purchase.getQuantityBought() < 0) {
+                                try {
+                                    out.writeUnshared(Action.BUY_QUANTITY_INVALID);
+                                    out.flush();
+                                    break;
+                                } catch (IOException ie) {
+                                    ie.printStackTrace();
+                                }
+                            }
+
+                            int index = candyManager.getIndex(purchase.getCandyBought().getCandyID());
+                            int totalQuantity = candyManager.candies.get(index).getQuantity();
+
+
+                            if (totalQuantity >= purchase.getQuantityBought()) {
+                                candyManager.buyInstantly(purchase.getCandyBought().getCandyID(),
+                                        purchase.getQuantityBought(), this);
+
+                                try {
+                                    out.writeUnshared(Action.BUY_SUCCESSFUL);
+                                } catch (IOException ie) {
+                                    ie.printStackTrace();
+                                }
+                            } else {
+                                try {
+                                    out.writeUnshared(Action.BUY_QUANTITY_EXCEEDS);
+                                } catch (IOException ie) {
+                                    ie.printStackTrace();
+                                }
                             }
                             break;
                         }
@@ -71,9 +119,9 @@ public class BuyerThread extends Buyer implements Runnable {
                             boolean successful = candyManager.buyShoppingCart(this);
                             try {
                                 if (successful) {
-                                    out.writeObject(Action.BUY_SUCCESSFUL);
+                                    out.writeUnshared(Action.BUY_SUCCESSFUL);
                                 } else {
-                                    out.writeObject(Action.BUY_QUANTITY_EXCEEDS);
+                                    out.writeUnshared(Action.BUY_QUANTITY_EXCEEDS);
                                 }
                                 out.flush();
                             } catch (IOException ie) {
@@ -102,7 +150,7 @@ public class BuyerThread extends Buyer implements Runnable {
                         }
                         case SHOPPING_CART: {
                             try {
-                                out.writeObject(this.getShoppingCart());
+                                out.writeUnshared(this.getShoppingCart());
                                 out.flush();
                             } catch (IOException e) {
                                 e.printStackTrace();
@@ -111,7 +159,7 @@ public class BuyerThread extends Buyer implements Runnable {
                         }
                         case PURCHASE_HISTORY: {
                             try {
-                                out.writeObject(this.getPurchaseHistory());
+                                out.writeUnshared(this.getPurchaseHistory());
                                 out.flush();
                             } catch (IOException e) {
                                 e.printStackTrace();
@@ -127,9 +175,14 @@ public class BuyerThread extends Buyer implements Runnable {
                             }
                             break;
                         }
+                        default: {
+                            System.out.println("Invalid action");
+                            break;
+                        }
                     }
                 }
             }
+            closeResources();
         } catch (SocketException se) {
             closeResources();
         } catch (IOException e) {
@@ -148,10 +201,10 @@ public class BuyerThread extends Buyer implements Runnable {
                 pw.println(ph.getPurchases().get(i));
             }
 
-            out.writeObject(Action.EXPORT_HISTORY_SUCCESSFUL);
+            out.writeUnshared(Action.EXPORT_HISTORY_SUCCESSFUL);
             out.flush();
         } catch (IOException e) {
-            out.writeObject(Action.EXPORT_HISTORY_UNSUCCESSFUL);
+            out.writeUnshared(Action.EXPORT_HISTORY_UNSUCCESSFUL);
             out.flush();
             e.printStackTrace();
         }
@@ -161,14 +214,14 @@ public class BuyerThread extends Buyer implements Runnable {
     }
     private void addToCart(Candy candy, int quantity) throws IOException {
         if (quantity > candy.getQuantity()) {
-            out.writeObject(Action.BUY_QUANTITY_EXCEEDS);
+            out.writeUnshared(Action.BUY_QUANTITY_EXCEEDS);
             out.flush();
             return;
         }
 
         Purchase purchase = new Purchase(candy, quantity);
         this.addToShoppingCart(purchase);
-        out.writeObject(Action.ADD_TO_CART);
+        out.writeUnshared(Action.ADD_TO_CART);
         out.flush();
     }
     private void removeFromCart(Candy candy, int quantity) throws IOException {
@@ -180,7 +233,7 @@ public class BuyerThread extends Buyer implements Runnable {
                 break;
             }
         }
-        out.writeObject(Action.REMOVE_FROM_CART);
+        out.writeUnshared(Action.REMOVE_FROM_CART);
         out.flush();
     }
 

@@ -37,17 +37,6 @@ public class ShoppingCart implements Serializable {
     }
 
 
-    public ArrayList<Purchase> findStores(Store store) {
-        ArrayList<Purchase> purchasesInCarts = new ArrayList<>();
-        for (Purchase purchase : purchases) {
-            Store candyStore = purchase.getCandyBought().getStore();
-            if (store.equals(candyStore)) {
-                purchasesInCarts.add(purchase);
-            }
-        }
-        return purchasesInCarts;
-    }
-
     /**
      * From the shopping cart stored with in the buyer object
      *

@@ -31,9 +31,4 @@ public class Seller extends User {
     public void setStoreManager(StoreManager storeManager) {
         this.storeManager = storeManager;
     }
-    //Fields: Sale<> and StoreManager(Store<>(
-    @Override
-    public String toString() {
-        return super.toString() + "&" + storeManager.toString();
-    }
 }
