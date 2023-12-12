@@ -187,9 +187,10 @@ public class ControlCenter extends JFrame implements Runnable {
         displayBottomPanel(mainContent);
 
         ArrayList<Store> stores = new ArrayList<>();
-        stores.add(new Store("Store 1"));
-        stores.add(new Store("Store 2"));
-        stores.add(new Store("Store 3"));
+        stores.add(new Store("Walmart"));
+        stores.add(new Store("Target"));
+        stores.add(new Store("Walgreens"));
+        stores.add(new Store("CVS"));
         displayStoreButtons(stores, mainContent);
 
         setSize(650, 450);
@@ -257,13 +258,10 @@ public class ControlCenter extends JFrame implements Runnable {
 
         exportButton.addActionListener(actionListener);
 
-
-
         bottomPanel.add(importButton, gbc);
 
         gbc.gridx = 1;
         bottomPanel.add(exportButton, gbc);
-
 
         content.add(bottomPanel, BorderLayout.SOUTH);
     }
@@ -279,10 +277,10 @@ public class ControlCenter extends JFrame implements Runnable {
         for (int i = 0; i < stores.size(); i++) {
             Store currentStore = stores.get(i);
 
-            Candy candy1 = new Candy("Chocolate Bar", currentStore.getName(), "Delicious chocolate",
-                    1, 50, 1.00);
-            Candy candy2 = new Candy("Sour Candy", currentStore.getName(), "Tasty sour candy",
-                    2, 25, 2.00);
+            Candy candy1 = new Candy("Twix", currentStore.getName(), "Delicious chocolate",
+                    2, 10, 2.00);
+            Candy candy2 = new Candy("Kitkat", currentStore.getName(), "Tasty sour candy",
+                    4, 75, 4.00);
             currentStore.addCandy(candy1, new CandyManager());
             currentStore.addCandy(candy2, new CandyManager());
 
