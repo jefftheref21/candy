@@ -5,7 +5,7 @@
 2. Run Application.java
 
 ## Student Submission List:
-1. Pablo Yague - Submitted Report on Brightspace.
+1. Jaden Ye - Submitted Report on Brightspace.
 2. Pablo Yague - Submitted Vocareum workspace.
 
 ## Class Description List:
