@@ -66,10 +66,13 @@ public class Store implements Serializable {
     public ArrayList<Buyer> getBuyers() {
         ArrayList<Buyer> buyers = new ArrayList<>();
         for (int i = 0; i < sales.size(); i++) {
-            buyers.add(sales.get(i).getBuyerAccount());
+            if (!buyers.contains(sales.get(i).getBuyerAccount())) {
+                buyers.add(sales.get(i).getBuyerAccount());
+            }
         }
         return buyers;
     }
+
     public ArrayList<Sale> getSalesByBuyer(Buyer buyer) {
         ArrayList<Sale> sales = new ArrayList<>();
         for (Sale sale: this.sales) {
@@ -79,6 +82,17 @@ public class Store implements Serializable {
         }
         return sales;
     }
+
+    public int getNumberProductsBought(Buyer buyer) {
+        int totalNum = 0;
+        for (int i = 0; i < sales.size(); i++) {
+            if (sales.get(i).getBuyerAccount().equals(buyer)) {
+                totalNum += sales.get(i).getQuantityBought();
+            }
+        }
+        return totalNum;
+    }
+
     public void deleteCandy(int candyID, CandyManager cm) {
         int index = cm.getIndex(candyID);
         if (index != -1) {
