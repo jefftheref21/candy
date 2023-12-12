@@ -14,6 +14,8 @@ public class ControlCenter extends JFrame implements Runnable {
     public static final Color backgroundColor = new Color(235, 83, 52);
 
     SellerClient sellerClient;
+    JPanel storePanel;
+    Container mainContent;
 
     JButton viewProductsButton;
     JButton viewSalesButton;
@@ -70,6 +72,7 @@ public class ControlCenter extends JFrame implements Runnable {
                 } else if (sellerClient.getAction() == Action.CREATE_STORE_UNSUCCESSFUL) {
                     Messages.showUnsuccessfulCreateStoreDialog();
                 }
+                updateScreen();
             }
             if (e.getSource() == addCandyButton) {
                 sellerClient.sendToGetCandyID();
@@ -118,9 +121,9 @@ public class ControlCenter extends JFrame implements Runnable {
 
                 sellerClient.receiveAction();
 
-                if (sellerClient.getAction() == Action.EDIT_CANDY_SUCCESSFUL) {
+                if (sellerClient.getAction() == Action.EDIT_CANDY_UNSUCCESSFUL) {
                     Messages.showSuccessfulEditCandyDialog();
-                } else if (sellerClient.getAction() == Action.EDIT_CANDY_UNSUCCESSFUL) {
+                } else if (sellerClient.getAction() == Action.EDIT_CANDY_SUCCESSFUL) {
                     Messages.showUnsuccessfulEditCandyDialog();
                 }
             }
@@ -176,15 +179,18 @@ public class ControlCenter extends JFrame implements Runnable {
     }
 
     public void run() {
-        Container content = getContentPane();
-        content.setLayout(new BorderLayout());
+        mainContent = getContentPane();
+        mainContent.setLayout(new BorderLayout());
 
-        displayTopPanel(content);
+        displayTopPanel(mainContent);
 
-        displayBottomPanel(content);
+        displayBottomPanel(mainContent);
 
-        Store[] stores = {new Store("Store1"), new Store("Store2"), new Store("Store3")};
-        displayStoreButtons(stores, content);
+        ArrayList<Store> stores = new ArrayList<>();
+        stores.add(new Store("Store 1"));
+        stores.add(new Store("Store 2"));
+        stores.add(new Store("Store 3"));
+        displayStoreButtons(stores, mainContent);
 
         setSize(650, 450);
         setLocationRelativeTo(null);
@@ -262,40 +268,41 @@ public class ControlCenter extends JFrame implements Runnable {
         content.add(bottomPanel, BorderLayout.SOUTH);
     }
 
-    public void displayStoreButtons(Store[] stores, Container content) {
-        JPanel storePanel = new JPanel();
+    public JPanel displayStoreButtons(ArrayList<Store> stores, Container content) {
+        if (storePanel == null) {
+            storePanel = new JPanel();
+        }
         storePanel.setLayout(new GridBagLayout());
         storePanel.setBackground(backgroundColor);
         content.add(new JScrollPane(storePanel), BorderLayout.CENTER);
 
-        for (int i = 0; i < stores.length; i++) {
-            Store currStore = stores[i];
+        for (int i = 0; i < stores.size(); i++) {
+            Store currentStore = stores.get(i);
 
-            Candy candy1 = new Candy("Chocolate Bar", currStore.getName(), "Delicious chocolate",
+            Candy candy1 = new Candy("Chocolate Bar", currentStore.getName(), "Delicious chocolate",
                     1, 50, 1.00);
-            Candy candy2 = new Candy("Sour Candy", currStore.getName(), "Tasty sour candy",
+            Candy candy2 = new Candy("Sour Candy", currentStore.getName(), "Tasty sour candy",
                     2, 25, 2.00);
-            currStore.addCandy(candy1, new CandyManager());
-            currStore.addCandy(candy2, new CandyManager());
-
-            GridBagConstraints gbc = new GridBagConstraints(i % 4, i / 4, 1, 1,
-                    0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                    new Insets(10, 10, 10, 10), 5, 5);
+            currentStore.addCandy(candy1, new CandyManager());
+            currentStore.addCandy(candy2, new CandyManager());
 
             JButton storeButton = new JButton(new AbstractAction() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    storeSelected = currStore;
-                    showStoreOptionDialog(currStore);
+                    storeSelected = currentStore;
+                    showStoreOptionDialog(currentStore);
                 }
             });
 
             storeButton.setBackground(buttonColor);
             storeButton.setPreferredSize(new Dimension(100, 100));
             storeButton.setHorizontalAlignment(SwingConstants.CENTER);
-            storeButton.setText(currStore.getName());
-            storePanel.add(storeButton, gbc);
+            storeButton.setText(currentStore.getName());
+            storePanel.add(storeButton, new GridBagConstraints(i % 4, i / 4, 1, 1,
+                    0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                    new Insets(10, 10, 10, 10), 5, 5));
         }
+        return storePanel;
     }
 
     public void showStoreOptionDialog(Store store) {
@@ -727,5 +734,12 @@ public class ControlCenter extends JFrame implements Runnable {
         jf.setLocationRelativeTo(null);
         jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         jf.setVisible(true);
+    }
+    public void updateScreen() {
+        getContentPane().remove(storePanel);
+        storePanel = displayStoreButtons(sellerClient.getStoreManager().getStores(), mainContent);
+
+        getContentPane().add(storePanel, BorderLayout.CENTER);
+        getContentPane().revalidate();
     }
 }

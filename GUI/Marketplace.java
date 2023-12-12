@@ -403,7 +403,7 @@ public class Marketplace extends JFrame implements Runnable {
         candyPanel.setBackground(backgroundColor);
         int skipped = 0;
 
-        for (int i = 0; i < candies.size(); i++) { // Change candies to CandyManager later on
+        for (int i = 0; i < candies.size(); i++) {
             Candy currCandy = candies.get(i);
             if (currCandy.getQuantity() == 0) {
                 skipped++;

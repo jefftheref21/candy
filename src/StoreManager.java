@@ -1,4 +1,4 @@
-import java.io.Serializable;
+import java.io.*;
 import java.util.ArrayList;
 import java.io.*;
 
@@ -29,6 +29,20 @@ public class StoreManager implements Serializable {
 
     public void removeStore(Store store) {
         stores.remove(store);
+    }
+    public void writeToFile(String filename) throws IOException {
+        FileOutputStream fos = new FileOutputStream(filename);
+        ObjectOutputStream oos = new ObjectOutputStream(fos);
+        oos.writeObject(this);
+        oos.flush();
+        oos.close();
+    }
+    public StoreManager readFromFile(String filename) throws IOException, ClassNotFoundException {
+        FileInputStream fis = new FileInputStream(filename);
+        ObjectInputStream ois = new ObjectInputStream(fis);
+        ois.close();
+        StoreManager sm = (StoreManager) ois.readObject();
+        return sm;
     }
 
     public Store getStore(String storeName) {

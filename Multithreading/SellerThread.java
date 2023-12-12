@@ -148,13 +148,14 @@ public class SellerThread extends Seller implements Runnable {
                                 if (currStore.getName().equals(edCandy.getStore())) {
                                     currStore.editCandy(edCandy.getCandyID(), edCandy, cm);
                                     out.writeObject(Action.EDIT_CANDY_SUCCESSFUL);
+                                    out.flush();
                                     edited = true;
                                 }
                             }
                             if (!edited) {
                                 out.writeObject(Action.EDIT_CANDY_UNSUCCESSFUL);
+                                out.flush();
                             }
-                            out.flush();
                         case SEND_SHOPPING_CART:
                             Store store = (Store) entry.getValue();
                             ArrayList<ShoppingCart> buyersShoppingCart = checkShoppingCart(store);

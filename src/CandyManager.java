@@ -28,6 +28,9 @@ public class CandyManager implements Serializable {
     public void setCandies(ArrayList<Candy> candies) {
         this.candies = candies;
     }
+    public void setProdCounter(int prodCounter) {
+        this.prodCounter = prodCounter;
+    }
     // Buyer methods
     public String viewProductPage(int productID) {
         String productPage = "";
