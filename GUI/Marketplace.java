@@ -92,8 +92,7 @@ public class Marketplace extends JFrame implements Runnable {
 
                 switch (buyerClient.getAction()) {
                     case BUY_SUCCESSFUL:
-                        int quantityToBuy = Integer.parseInt(quantityToBuyTextField.getText());
-                        buyerClient.sendRemoveShoppingCart(candySelected, quantityToBuy);
+                        buyerClient.sendRemoveShoppingCart(candySelected, candySelected.getQuantity());
 
                         buyerClient.receiveAction();
 
@@ -123,6 +122,9 @@ public class Marketplace extends JFrame implements Runnable {
                 }
 
                 buyerClient.receiveAction();
+
+                buyerClient.sendCandyManager();
+                buyerClient.receiveCandyManager();
 
                 switch (buyerClient.getAction()) {
                     case BUY_SUCCESSFUL: {
