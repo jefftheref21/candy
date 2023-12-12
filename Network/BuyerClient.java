@@ -14,6 +14,7 @@ public class BuyerClient extends Buyer {
     private Action action;
 
     private CandyManager candyManager;
+    private StoreManager storeManager;
 
     public BuyerClient(Socket socket, ObjectInputStream in, ObjectOutputStream out, Marketplace marketplace) {
         this.socket = socket;
@@ -21,6 +22,7 @@ public class BuyerClient extends Buyer {
         this.in = in;
         this.marketplace = marketplace;
         candyManager = new CandyManager();
+        storeManager = new StoreManager();
     }
 
     public Action getAction() {
@@ -29,6 +31,10 @@ public class BuyerClient extends Buyer {
 
     public CandyManager getCandyManager() {
         return candyManager;
+    }
+
+    public StoreManager getStoreManager() {
+        return storeManager;
     }
 
     public void setCandyManager(CandyManager candyManager) {
@@ -72,7 +78,6 @@ public class BuyerClient extends Buyer {
         sendAction(Action.SHOPPING_CART, 0);
     }
 
-
     public void receiveShoppingCart() {
         try {
             this.getShoppingCart().readObject(in);
@@ -107,13 +112,30 @@ public class BuyerClient extends Buyer {
         sendAction(Action.EXPORT_HISTORY, file);
     }
 
-    //Sends to server the users decision in which they would like to sort the marketplace
-    public void sendSortDecision(int decision) {
-        sendAction(Action.SORT_PRODUCTS, decision);
-    }
-
     public void receiveSortCandies(int index) {
         this.candyManager.sortProducts(index);
+    }
+
+    public void sendStoreManager() {
+        sendAction(Action.UPDATE_STORE_MANAGER, 0);
+    }
+
+    public void receiveStoreManager() {
+        try {
+            storeManager.readObject(in);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void sendSortProductStats(int choice) {
+        sendAction(Action.SORT_STORE_PRODUCTS_STATS, choice);
+    }
+
+    public void sendSortBuyerStats(int choice) {
+        sendAction(Action.SORT_BUYER_PRODUCTS_STATS, choice);
     }
 
     public void receiveAction() {

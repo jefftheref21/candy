@@ -1,5 +1,6 @@
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.io.*;
 
 /**
  * Store Manager to handle all the stores
@@ -40,9 +41,39 @@ public class StoreManager implements Serializable {
         return store;
     }
 
+    public ArrayList<Store> getStoresByBuyer(Buyer buyer) {
+        ArrayList<Store> storesByBuyer = new ArrayList<>();
+        for (int i = 0; i < stores.size(); i++) {
+            Store store = stores.get(i);
+            if (store.getBuyers().contains(buyer) && !storesByBuyer.contains(store)) {
+                storesByBuyer.add(store);
+            }
+        }
+        return storesByBuyer;
+    }
+
     public void buyInstantly(Candy candy, int quantityBought, Buyer buyer) {
         Sale sale = new Sale(candy, quantityBought, buyer);
         Store store = getStore(candy.getStore());
         store.addSale(sale);
+    }
+
+    public void writeObject(ObjectOutputStream out) throws IOException {
+        out.writeInt(stores.size());
+
+        for (Store store : stores) {
+            out.writeUnshared(store);
+        }
+    }
+
+    public void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        int storesSize = in.readInt();
+
+        stores = new ArrayList<>(storesSize);
+
+        for (int i = 0; i < storesSize; i++) {
+            Store store = (Store) in.readUnshared();
+            stores.add(store);
+        }
     }
 }

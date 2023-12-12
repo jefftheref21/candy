@@ -36,9 +36,13 @@ public class Marketplace extends JFrame implements Runnable {
     JButton historyButton;
     JButton exportHistoryButton;
     JButton viewStatisticsButton;
+    JButton sortStoreProductsButton;
+    JButton sortBuyerProductsButton;
 
     JTextField searchTextField;
     JTextField quantityToBuyTextField;
+    JTextField sortStoreProductsTextField;
+    JTextField sortBuyerProductsTextField;
     
     Candy candySelected;
 
@@ -54,9 +58,8 @@ public class Marketplace extends JFrame implements Runnable {
                 updateScreen();
             }
             if (e.getSource() == searchButton) {
-                // TODO
                 String searchWord = searchTextField.getText();
-                if (searchWord.equals("")) {
+                if (searchWord.isEmpty()) {
 
                     buyerClient.sendCandyManager();
                     buyerClient.receiveCandyManager();
@@ -121,7 +124,6 @@ public class Marketplace extends JFrame implements Runnable {
 
                 buyerClient.receiveAction();
 
-
                 switch (buyerClient.getAction()) {
                     case BUY_SUCCESSFUL: {
                         buyerClient.sendShoppingCart();
@@ -171,6 +173,7 @@ public class Marketplace extends JFrame implements Runnable {
                         break;
                 }
             }
+
             if (e.getSource() == removeFromCartButton) {
                 buyerClient.sendRemoveShoppingCart(candySelected, Integer.parseInt(quantityToBuyTextField.getText()));
                 buyerClient.receiveAction();
@@ -182,18 +185,21 @@ public class Marketplace extends JFrame implements Runnable {
                     Messages.showRemoveToCartSuccessful();
                 }
             }
+
             if (e.getSource() == shoppingCartButton) {
                 buyerClient.sendShoppingCart();
                 buyerClient.receiveShoppingCart();
 
                 showShoppingCartDialog(buyerClient.getShoppingCart());
             }
+
             if (e.getSource() == historyButton) {
                 buyerClient.sendHistory();
                 buyerClient.receivePurchaseHistory();
 
                 showPurchaseHistoryDialog(buyerClient.getPurchaseHistory());
             }
+
             if (e.getSource() == exportHistoryButton) {
                 String filePath = Messages.getExportPath();
                 buyerClient.sendExportPurchaseHistory(filePath);
@@ -206,19 +212,40 @@ public class Marketplace extends JFrame implements Runnable {
                     Messages.showExportHistoryUnsuccessful();
                 }
             }
-            if (e.getSource() == viewStatisticsButton) {
-                ArrayList<Store> stores = new ArrayList<>();
-                ArrayList<String> storeNames = new ArrayList<>();
-                for (Candy candy : buyerClient.getCandyManager().candies) {
-                    if (!storeNames.contains(candy.getStore())) {
-                        // stores.add(candy.getStore());
-                        storeNames.add(candy.getStore());
-                    }
-                }
-                // TODO: Aadiv, add these to the table they will be displayed in
-                ArrayList<Store> storesByProducts = buyerClient.getCandyManager().sortStoreStatistics(stores, 0, buyerClient);
-                ArrayList<Store> storesByBuyer = buyerClient.getCandyManager().sortStoreStatistics(stores, 1, buyerClient);
 
+            if (e.getSource() == viewStatisticsButton) {
+                buyerClient.sendStoreManager();
+                buyerClient.receiveStoreManager();
+
+                ArrayList<Store> storesByProducts = buyerClient.getStoreManager().getStores();
+
+                ArrayList<Store> storesByBuyer = buyerClient.getStoreManager().getStoresByBuyer(buyerClient);
+
+                showStoreStatisticsDialog(storesByProducts, storesByBuyer);
+            }
+
+            if (e.getSource() == sortStoreProductsButton) {
+                int choice = Integer.parseInt(sortStoreProductsTextField.getText());
+                buyerClient.sendSortProductStats(choice);
+                buyerClient.receiveStoreManager();
+
+                ArrayList<Store> storesByProducts = buyerClient.getStoreManager().getStores();
+
+                ArrayList<Store> storesByBuyer = buyerClient.getStoreManager().getStoresByBuyer(buyerClient);
+
+                showStoreStatisticsDialog(storesByProducts, storesByBuyer);
+            }
+
+            if (e.getSource() == sortBuyerProductsButton) {
+                int choice = Integer.parseInt(sortBuyerProductsTextField.getText());
+                buyerClient.sendSortBuyerStats(choice);
+                buyerClient.receiveStoreManager();
+
+                ArrayList<Store> storesByProducts = buyerClient.getStoreManager().getStores();
+
+                ArrayList<Store> storesByBuyer = buyerClient.getStoreManager().getStoresByBuyer(buyerClient);
+
+                showStoreStatisticsDialog(storesByProducts, storesByBuyer);
             }
         }
     };
@@ -587,6 +614,106 @@ public class Marketplace extends JFrame implements Runnable {
         content.add(titlePanel, BorderLayout.NORTH);
         content.add(purchaseHistoryInfo, BorderLayout.CENTER);
         content.add(exportPanel, BorderLayout.SOUTH);
+
+        jf.pack();;
+        jf.setLocationRelativeTo(null);
+        jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        jf.setVisible(true);
+    }
+
+    public void showStoreStatisticsDialog(ArrayList<Store> storesByProducts, ArrayList<Store> storesByBuyer) {
+        JFrame jf = new JFrame("Store Statistics");
+        GridBagConstraints gbc = new GridBagConstraints(0, 0, 1, 1, 0, 0,
+                GridBagConstraints.LINE_START, GridBagConstraints.NONE,
+                new Insets(10, 10, 10, 10), 0, 0);
+
+        Container content = jf.getContentPane();
+        content.setLayout(new BorderLayout());
+
+        JPanel titlePanel = new JPanel();
+        titlePanel.setBackground(outerColor);
+        JLabel storeStatisticsLabel = new JLabel("Store Statistics");
+        titlePanel.add(storeStatisticsLabel);
+
+        JPanel storeStatisticsPanel = new JPanel();
+        storeStatisticsPanel.setLayout(new FlowLayout());
+
+        JPanel storeProductsPanel = new JPanel();
+        storeProductsPanel.setBackground(outerColor);
+        storeProductsPanel.setLayout(new BorderLayout());
+
+        JLabel statisticsInfo = new JLabel("Stores - Products Sold");
+        storeProductsPanel.add(statisticsInfo, BorderLayout.NORTH);
+
+        String[] storeProducts = {"Store Name", "Number of Products Sold"};
+        Object[][] storeProductsData = new Object[storesByProducts.size()][storeProducts.length];
+
+        for (int i = 0; i < storesByProducts.size(); i++) {
+            Store store = storesByProducts.get(i);
+            storeProductsData[i][0] = store.getName();  // Store name
+            storeProductsData[i][1] = store.getNumberOfProductsSold();  // Number of products sold
+        }
+
+        JTable storeProductsTable = new JTable(storeProductsData, storeProducts);
+        JScrollPane storeScrollPane = new JScrollPane(storeProductsTable);
+
+        storeProductsPanel.add(storeScrollPane, BorderLayout.CENTER);
+
+        JPanel leftBottomPanel = new JPanel();
+        leftBottomPanel.setLayout(new FlowLayout());
+
+        sortStoreProductsTextField = new JTextField(8);
+
+        sortStoreProductsButton = new JButton("Sort");
+        sortStoreProductsButton.setBackground(buttonColor);
+        sortStoreProductsButton.addActionListener(actionListener);
+
+        leftBottomPanel.add(sortStoreProductsTextField);
+        leftBottomPanel.add(sortStoreProductsButton);
+
+        storeProductsPanel.add(leftBottomPanel, BorderLayout.SOUTH);
+
+        storeStatisticsPanel.add(storeProductsPanel);
+
+        JPanel storeBuyersPanel = new JPanel();
+        storeBuyersPanel.setBackground(outerColor);
+        storeBuyersPanel.setLayout(new BorderLayout());
+
+        JLabel storeBuyersLabel = new JLabel("Stores - Buyer Products");
+        storeBuyersPanel.add(storeBuyersLabel, BorderLayout.NORTH);
+
+        String[] buyerProducts = {"Store Name", "Products Purchased by You"};
+        Object[][] buyerProductsData = new Object[storesByBuyer.size()][buyerProducts.length];
+
+        for (int i = 0; i < storesByBuyer.size(); i++) {
+            Store store = storesByBuyer.get(i);
+            buyerProductsData[i][0] = store.getName();
+            buyerProductsData[i][1] = store.getNumberProductsBought(buyerClient);
+        }
+
+        JTable buyerProductsTable = new JTable(buyerProductsData, buyerProducts);
+        JScrollPane buyerScrollPane = new JScrollPane(buyerProductsTable);
+
+        storeBuyersPanel.add(buyerScrollPane, BorderLayout.CENTER);
+
+        JPanel rightBottomPanel = new JPanel();
+        rightBottomPanel.setLayout(new FlowLayout());
+
+        sortBuyerProductsTextField = new JTextField(8);
+
+        sortBuyerProductsButton = new JButton("Sort");
+        sortBuyerProductsButton.setBackground(buttonColor);
+        sortBuyerProductsButton.addActionListener(actionListener);
+
+        rightBottomPanel.add(sortBuyerProductsTextField);
+        rightBottomPanel.add(sortBuyerProductsButton);
+
+        storeBuyersPanel.add(rightBottomPanel, BorderLayout.SOUTH);
+
+        storeStatisticsPanel.add(storeBuyersPanel);
+
+        content.add(titlePanel, BorderLayout.NORTH);
+        content.add(storeStatisticsPanel, BorderLayout.CENTER);
 
         jf.pack();;
         jf.setLocationRelativeTo(null);

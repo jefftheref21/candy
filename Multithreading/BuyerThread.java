@@ -41,28 +41,6 @@ public class BuyerThread extends Buyer implements Runnable {
                             }
                             break;
                         }
-                        case VIEW_PRODUCT_PAGE: {
-                            // get stuff from client
-                            String productPage = candyManager.viewProductPage((Integer) entry.getValue());
-                            try {
-                                out.writeUnshared(productPage);
-                                out.flush();
-                            } catch (IOException ie) {
-                                ie.printStackTrace();
-                            }
-                            break;
-                        }
-                        case SORT_STORE_STATS: {
-                            // get stuff from client
-                            candyManager.sortStoreStatistics(storeManager.getStores(), (Integer) entry.getValue(), this);
-                            try {
-                                out.writeUnshared(candyManager);
-                                out.flush();
-                            } catch (IOException ie) {
-                                ie.printStackTrace();
-                            }
-                            break;
-                        }
                         case BUY_INSTANTLY: {
                             Purchase purchase = (Purchase) entry.getValue();
                             if (purchase.getQuantityBought() < 0) {
@@ -153,6 +131,33 @@ public class BuyerThread extends Buyer implements Runnable {
                                 exportHistory(f);
                             } catch (IOException e) {
                                 e.printStackTrace();
+                            }
+                            break;
+                        }
+                        case UPDATE_STORE_MANAGER:
+                            try {
+                                storeManager.writeObject(out);
+                                out.flush();
+                            } catch (IOException ie) {
+                                ie.printStackTrace();
+                            }
+                            break;
+                        case SORT_BUYER_PRODUCTS_STATS: {
+                            int choice = (int) entry.getValue();
+                            try {
+                                out.writeUnshared(candyManager);
+                                out.flush();
+                            } catch (IOException ie) {
+                                ie.printStackTrace();
+                            }
+                            break;
+                        }
+                        case SORT_STORE_PRODUCTS_STATS: {
+                            try {
+                                out.writeUnshared(candyManager);
+                                out.flush();
+                            } catch (IOException ie) {
+                                ie.printStackTrace();
                             }
                             break;
                         }
