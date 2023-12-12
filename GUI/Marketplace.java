@@ -427,7 +427,7 @@ public class Marketplace extends JFrame implements Runnable {
 
             candyPanel.add(currButton, new GridBagConstraints((i - skipped) % 4, (i - skipped) / 4, 1, 1,
                     0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                    new Insets(10, 10, 10, 10), 5, 5));
+                    new Insets(10, 10, 10, 10), 0, 0));
         }
 
         return candyPanel;

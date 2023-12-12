@@ -87,7 +87,7 @@ public class UserThread extends User implements Runnable {
         if (user instanceof Buyer) {
             out.writeUnshared(Action.VALID_CREDENTIALS_BUYER);
             out.flush();
-            buyerThread = new Thread(new BuyerThread(socket, in, out, cm, sm));
+            buyerThread = new Thread(new BuyerThread(socket, in, out, cm, sm, users));
             buyerThread.start();
             try {
                 buyerThread.join();
@@ -97,7 +97,7 @@ public class UserThread extends User implements Runnable {
         } else {
             out.writeUnshared(Action.VALID_CREDENTIALS_SELLER);
             out.flush();
-            sellerThread = new Thread(new SellerThread(socket, in, out, sm, users, cm));
+            sellerThread = new Thread(new SellerThread(socket, in, out, cm, sm, users));
             sellerThread.start();
             try {
                 sellerThread.join();
@@ -115,7 +115,7 @@ public class UserThread extends User implements Runnable {
                 if (u instanceof Buyer) {
                     out.writeUnshared(Action.VALID_CREDENTIALS_BUYER);
                     out.flush();
-                    buyerThread = new Thread(new BuyerThread(socket, in, out, cm, sm));
+                    buyerThread = new Thread(new BuyerThread(socket, in, out, cm, sm, users));
                     buyerThread.start();
                     try {
                         buyerThread.join();
@@ -125,7 +125,7 @@ public class UserThread extends User implements Runnable {
                 } else {
                     out.writeUnshared(Action.VALID_CREDENTIALS_SELLER);
                     out.flush();
-                    sellerThread = new Thread(new SellerThread(socket, in, out, sm, users, cm));
+                    sellerThread = new Thread(new SellerThread(socket, in, out, cm, sm, users));
                     sellerThread.start();
                     try {
                         sellerThread.join();

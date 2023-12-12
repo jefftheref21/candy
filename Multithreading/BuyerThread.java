@@ -13,16 +13,18 @@ public class BuyerThread extends Buyer implements Runnable {
 
     private CandyManager candyManager;
     private StoreManager storeManager;
+    private ArrayList<User> users;
 
     private boolean isRunning = true;
 
     public BuyerThread(Socket socket, ObjectInputStream in, ObjectOutputStream out, CandyManager candyManager,
-                       StoreManager storeManager) {
+                       StoreManager storeManager, ArrayList<User> users) {
         this.socket = socket;
         this.out = out;
         this.in = in;
         this.candyManager = candyManager; // Initialize CandyManager
         this.storeManager = storeManager; // Initialize StoreManager
+        this.users = users; // Initialize Users
     }
 
     public void run() {
@@ -145,7 +147,7 @@ public class BuyerThread extends Buyer implements Runnable {
                         case SORT_BUYER_PRODUCTS_STATS: {
                             int choice = (int) entry.getValue();
                             try {
-                                out.writeUnshared(candyManager);
+                                out.writeUnshared(storeManager);
                                 out.flush();
                             } catch (IOException ie) {
                                 ie.printStackTrace();
@@ -154,7 +156,7 @@ public class BuyerThread extends Buyer implements Runnable {
                         }
                         case SORT_STORE_PRODUCTS_STATS: {
                             try {
-                                out.writeUnshared(candyManager);
+                                out.writeUnshared(storeManager);
                                 out.flush();
                             } catch (IOException ie) {
                                 ie.printStackTrace();

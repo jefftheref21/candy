@@ -10,18 +10,19 @@ public class SellerThread extends Seller implements Runnable {
     private ObjectOutputStream out;
 
     private HashMap<Action, Object> action;
-    private StoreManager serverStoreManager;
     private boolean isRunning = true;
-    private ArrayList<User> users;
     private CandyManager cm;
+    private StoreManager sm;
+    private ArrayList<User> users;
 
-    public SellerThread(Socket socket, ObjectInputStream in, ObjectOutputStream out, StoreManager storeManager, ArrayList<User> users, CandyManager cm) {
+    public SellerThread(Socket socket, ObjectInputStream in, ObjectOutputStream out, CandyManager candyManager,
+                        StoreManager storeManager, ArrayList<User> users) {
         this.socket = socket;
         this.out = out;
         this.in = in;
-        this.serverStoreManager = storeManager;
+        this.cm = candyManager;
+        this.sm = storeManager;
         this.users = users;
-        this.cm = cm;
     }
 
     public void run() {
